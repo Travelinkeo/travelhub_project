@@ -1,5 +1,6 @@
 import logging
 
+from django.apps import apps
 from django.db.models import Sum
 from django.utils import timezone
 
@@ -81,17 +82,19 @@ def _actualizar_puntuacion(agencia, usuario):
     punt.save()
 
 
+def _get_model(app_label, model_name):
+    return apps.get_model(app_label, model_name)
+
+
 def _count_ventas(agencia, usuario):
     """_count_ventas."""
-    from apps.bookings.models import Venta
-
+    Venta = _get_model("bookings", "Venta")
     return Venta.objects.filter(creado_por=usuario, agencia=agencia).count()
 
 
 def _count_ventas_hoy(agencia, usuario):
     """_count_ventas_hoy."""
-    from apps.bookings.models import Venta
-
+    Venta = _get_model("bookings", "Venta")
     return Venta.objects.filter(
         creado_por=usuario,
         agencia=agencia,
@@ -101,35 +104,31 @@ def _count_ventas_hoy(agencia, usuario):
 
 def _count_boletos(agencia, usuario):
     """_count_boletos."""
-    from apps.bookings.models import BoletoImportado
-
+    BoletoImportado = _get_model("bookings", "BoletoImportado")
     return BoletoImportado.objects.filter(importado_por=usuario, agencia=agencia).count()
 
 
 def _count_clientes(agencia, usuario):
     """_count_clientes."""
-    from apps.crm.models import Cliente
-
+    Cliente = _get_model("crm", "Cliente")
     return Cliente.objects.filter(creado_por=usuario, agencia=agencia).count()
 
 
 def _count_articulos(agencia, usuario):
     """_count_articulos."""
-    from apps.cms.models import Articulo
-
+    Articulo = _get_model("cms", "Articulo")
     return Articulo.objects.filter(creado_por=usuario, agencia=agencia).count()
 
 
 def _count_pagos_confirmados(agencia, usuario):
     """_count_pagos_confirmados."""
-    from apps.bookings.models import PagoVenta
-
+    PagoVenta = _get_model("bookings", "PagoVenta")
     return PagoVenta.objects.filter(creado_por=usuario, agencia=agencia, confirmado=True).count()
 
 
 def _count_integraciones(agencia, usuario):
     """_count_integraciones."""
-    from core.models.webhook import Webhook
+    from core.models import Webhook
 
     return Webhook.objects.filter(agencia=agencia).count()
 

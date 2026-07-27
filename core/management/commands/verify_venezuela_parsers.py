@@ -6,8 +6,8 @@ from email import policy
 from django.core.management.base import BaseCommand
 from pypdf import PdfReader
 
+from apps.automation.parsers.legacy.web_receipt_parser import WebReceiptParser
 from apps.automation.parsers.ticket_parser import generate_ticket
-from apps.automation.parsers.web_receipt_parser import WebReceiptParser
 
 # Ensure project root is in path
 sys.path.append(r"c:\Users\ARMANDO\travelhub_project")

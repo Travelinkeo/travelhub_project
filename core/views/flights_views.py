@@ -51,20 +51,22 @@ class FlightSearchView(LoginRequiredMixin, View):
         airline_filter = request.POST.get("airline_filter", "")
 
         # Utilizar FliFlightService para disponibilidad REAL
-        from apps.common.services.fli_service import FliFlightService
+        try:
+            from apps.common.services.fli_service import FliFlightService
 
-        service = FliFlightService()
-
-        # Obtener resultados
-        raw_results = service.buscar_vuelos(
-            origin,
-            destination,
-            date,
-            return_date=return_date if trip_type == "ROUND_TRIP" else None,
-            multi_segments=multi_segments if trip_type == "MULTI_CITY" else None,
-            stops=stops,
-            airline_filter=airline_filter,
-        )
+            service = FliFlightService()
+            raw_results = service.buscar_vuelos(
+                origin,
+                destination,
+                date,
+                return_date=return_date if trip_type == "ROUND_TRIP" else None,
+                multi_segments=multi_segments if trip_type == "MULTI_CITY" else None,
+                stops=stops,
+                airline_filter=airline_filter,
+            )
+        except ImportError:
+            logger.warning("FliFlightService no disponible (paquete fli no instalado)")
+            raw_results = []
 
         results = []
         error = None

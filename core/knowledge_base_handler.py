@@ -5,7 +5,11 @@ import logging
 from django.utils import timezone
 from django.utils.text import slugify
 
-from .models.cms import ArticuloBlog, PaginaCMS
+try:
+    from .models.cms import ArticuloBlog, PaginaCMS
+except ImportError:
+    ArticuloBlog = None
+    PaginaCMS = None
 
 logger = logging.getLogger(__name__)
 

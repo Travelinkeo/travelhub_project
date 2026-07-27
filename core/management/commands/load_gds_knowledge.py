@@ -1,7 +1,10 @@
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
-from core.models.wiki import WikiArticulo
+try:
+    from core.models.wiki import WikiArticulo
+except ImportError:
+    WikiArticulo = None
 
 
 class Command(BaseCommand):

@@ -1503,8 +1503,8 @@ def send_telegram_to_client_task(
 @shared_task(queue="notifications", max_retries=3, default_retry_delay=30, time_limit=60)
 def notify_cliente_confirmacion_venta_task(venta_id):
     """Envía confirmación de venta al cliente por Telegram."""
+    from apps.bookings.models.venta import Venta
     from apps.communications.services.telegram_unified import notify_cliente_confirmacion_venta
-    from apps.sales.models import Venta
 
     try:
         venta = Venta.objects.select_related("cliente").get(pk=venta_id)
@@ -1517,8 +1517,8 @@ def notify_cliente_confirmacion_venta_task(venta_id):
 @shared_task(queue="notifications", max_retries=3, default_retry_delay=30, time_limit=60)
 def notify_cliente_recordatorio_pago_task(venta_id):
     """Envía recordatorio de pago al cliente por Telegram."""
+    from apps.bookings.models.venta import Venta
     from apps.communications.services.telegram_unified import notify_cliente_recordatorio_pago
-    from apps.sales.models import Venta
 
     try:
         venta = Venta.objects.select_related("cliente").get(pk=venta_id)

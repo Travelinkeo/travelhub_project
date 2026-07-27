@@ -10,10 +10,10 @@ media/
 static/collected/
 staticfiles/
 
-# Env — NUNCA commitear archivos con secretos reales
-.env
-.env.local
-.env.*.local
+# 🔴 ENV — NUNCA JAMÁS COMMITEAR ARCHIVOS CON SECRETOS REALES 🔴
+# Regla única: cualquier archivo .env* (excepto .env.example que es template público)
+.env*
+!.env.example
 venv/
 .venv/
 ENV/
@@ -65,8 +65,10 @@ temp/
 *.json
 !fixtures/*.json
 
-# Security & Environment (STRICT)
-.env*
+# Amazon Q memory bank (contiene documentación interna con secretos históricos)
+.amazonq/
+
+# Secrets / config local
 *.local
 secrets.json
 

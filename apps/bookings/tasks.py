@@ -438,7 +438,7 @@ def check_upcoming_flights():
 
     from apps.bookings.models import BoletoImportado
     from apps.common.utils.celery_utils import safe_delay
-    from apps.communications.services.telegram_notification_service import (
+    from apps.communications.services.telegram_unified import (
         TelegramNotificationService,
     )
     from core.middleware import agency_context

@@ -561,8 +561,8 @@ def create_quote_from_gds_api(request):
     """
     from django.utils import timezone
 
+    from apps.cotizaciones.models import Cotizacion, ItemCotizacion
     from apps.crm.models import Cliente
-    from core.models.cotizaciones import Cotizacion, ItemCotizacion
 
     try:
         flights_data = request.data.get("structured_data", [])

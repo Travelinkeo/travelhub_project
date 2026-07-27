@@ -577,6 +577,14 @@ class AgenciaConfiguracion(models.Model):
         verbose_name = "Agencia - Configuración"
         verbose_name_plural = "Agencias - Configuraciones"
 
+    def save(self, *args, **kwargs):
+        """Autogestiona fecha_fin_trial para trials de 14 días."""
+        if not self.fecha_fin_trial:
+            from datetime import timedelta
+
+            self.fecha_fin_trial = timezone.now().date() + timedelta(days=14)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         """__str__."""
         return f"Config: {self.agencia.nombre}"

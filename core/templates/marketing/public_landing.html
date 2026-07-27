@@ -7,7 +7,7 @@
     <title>TravelHub — Pega un ticket, todo lo demás se hace solo</title>
     <meta name="description" content="Pega un ticket de KIU, Sabre o Amadeus y en segundos tienes la venta, la factura VEN-NIF y el WhatsApp del cliente. SaaS multi-tenant para agencias de viajes LATAM.">
     <meta property="og:title" content="TravelHub — Pega un ticket, todo lo demás se hace solo">
-    <meta property="og:description" content="Parsing IA de boletos, facturación VEN-NIF, CRM con WhatsApp Bot. Pruébalo gratis 30 días.">
+    <meta property="og:description" content="Parsing IA de boletos, facturación VEN-NIF, CRM con WhatsApp Bot. Pruébalo gratis 14 días.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     <meta property="og:image" content="{% static 'images_pwa/pwa-512x512.png' %}">
@@ -46,28 +46,34 @@
 <body>
     {% if not show_pricing_only %}
 
-    <!-- Trial Banner -->
-    <div class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-emerald-900/80 to-blue-900/80 backdrop-blur-md border-b border-emerald-800/30 text-center py-2 text-xs text-emerald-200 tracking-wide">
-        🎯 30 días gratis · Sin tarjeta de crédito · Configuración en 5 minutos
-    </div>
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50">
+        <!-- Trial Banner -->
+        <div x-data="{ open: true }" x-show="open" class="bg-gradient-to-r from-emerald-900/90 to-blue-900/90 backdrop-blur-md border-b border-emerald-800/30 text-center py-2 px-8 text-xs text-emerald-200 tracking-wide font-medium relative flex items-center justify-center">
+            <span>🎯 14 días gratis · Sin tarjeta de crédito · Configuración en 5 minutos</span>
+            <button @click="open = false" aria-label="Cerrar aviso" class="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-300 hover:text-white px-2 py-0.5 text-xs font-bold rounded hover:bg-emerald-800/50 transition">
+                ✕
+            </button>
+        </div>
 
-    <!-- Nav -->
-    <header class="fixed top-7 left-0 right-0 z-40 bg-slate-900/80 backdrop-blur-lg border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-2">
-                <img src="{% static 'images/Logo TravelHub.png' %}" alt="TravelHub" class="h-10 w-auto">
-            </a>
-            <nav class="hidden md:flex items-center gap-6 text-sm text-slate-300">
-                <a href="#demo" class="hover:text-white transition">Demo rápida</a>
-                <a href="/demo/" class="hover:text-white transition">Agendar demo</a>
-                <a href="#use-cases" class="hover:text-white transition">Casos de uso</a>
-                <a href="#features" class="hover:text-white transition">Funcionalidades</a>
-                <a href="/pricing/" class="hover:text-white transition">Precios</a>
-                <a href="/blog/" class="hover:text-white transition">Blog</a>
-            </nav>
-            <div class="flex items-center gap-3">
-                <a href="/accounts/login/" class="text-sm text-slate-300 hover:text-white transition">Iniciar sesión</a>
-                <a href="/onboarding/" class="btn-primary text-sm px-5 py-2.5">Probar gratis 30 días →</a>
+        <!-- Nav -->
+        <div class="bg-slate-900/90 backdrop-blur-lg border-b border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <a href="/" class="flex items-center gap-2">
+                    <img src="{% static 'images/Logo TravelHub.png' %}" alt="TravelHub" class="h-10 w-auto">
+                </a>
+                <nav class="hidden md:flex items-center gap-6 text-sm text-slate-300">
+                    <a href="#demo" class="hover:text-white transition">Demo rápida</a>
+                    <a href="/demo/" class="hover:text-white transition">Agendar demo</a>
+                    <a href="#use-cases" class="hover:text-white transition">Casos de uso</a>
+                    <a href="#features" class="hover:text-white transition">Funcionalidades</a>
+                    <a href="/pricing/" class="hover:text-white transition">Precios</a>
+                    <a href="/blog/" class="hover:text-white transition">Blog</a>
+                </nav>
+                <div class="flex items-center gap-3">
+                    <a href="/accounts/login/" class="text-sm text-slate-300 hover:text-white transition">Iniciar sesión</a>
+                    <a href="/onboarding/" class="btn-primary text-sm px-5 py-2.5">Probar gratis 14 días →</a>
+                </div>
             </div>
         </div>
     </header>
@@ -90,7 +96,7 @@
             </p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a href="#demo" class="btn-primary text-lg px-8 py-4">Ver demo en vivo →</a>
-                <a href="/onboarding/" class="btn-secondary text-lg px-8 py-4">Probar gratis 30 días</a>
+                <a href="/onboarding/" class="btn-secondary text-lg px-8 py-4">Probar gratis 14 días</a>
             </div>
             <p class="mt-4 text-sm text-slate-600">Sin tarjeta de crédito · Configuración en 5 minutos · Cancela cuando quieras</p>
         </div>
@@ -222,7 +228,7 @@
             </div>
             <div class="text-center mt-10">
                 <a href="/onboarding/" class="btn-primary text-lg px-8 py-4">Prueba TravelHub gratis →</a>
-                <p class="mt-3 text-sm text-slate-500">Sin tarjeta de crédito · 30 días de prueba · Cancela cuando quieras</p>
+                <p class="mt-3 text-sm text-slate-500">Sin tarjeta de crédito · 14 días de prueba · Cancela cuando quieras</p>
             </div>
         </div>
     </section>
@@ -357,7 +363,7 @@
                 <a href="/onboarding/" class="btn-primary text-lg px-10 py-4">Comenzar prueba gratuita →</a>
                 <a href="/demo/" class="btn-secondary text-lg px-10 py-4">Agendar demo personalizada</a>
             </div>
-            <p class="mt-4 text-sm text-slate-600">Sin compromiso · 30 días gratis · Soporte incluido · Cancela cuando quieras</p>
+            <p class="mt-4 text-sm text-slate-600">Sin compromiso · 14 días gratis · Soporte incluido · Cancela cuando quieras</p>
         </div>
     </section>
 

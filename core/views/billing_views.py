@@ -55,7 +55,7 @@ STRIPE_AVAILABLE = _setup_stripe()
 # Configuración de planes y precios
 PLAN_CONFIG = {
     "FREE": {
-        "name": "Gratuito (Trial 30 días)",
+        "name": "Gratuito (Trial 14 días)",
         "price": 0,
         "stripe_price_id": None,
         "usuarios": 1,

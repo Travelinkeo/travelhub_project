@@ -710,7 +710,7 @@ class Command(BaseCommand):
                 )
                 return
 
-            from apps.sales.models import Venta
+            from apps.bookings.models.venta import Venta
 
             ventas = await sync_to_async(list)(
                 Venta.objects.filter(cliente=cliente, activa=True)

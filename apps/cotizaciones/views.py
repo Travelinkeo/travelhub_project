@@ -403,7 +403,7 @@ class MagicQuoterView(LoginRequiredMixin, TemplateView):
         lead_id = self.request.GET.get("lead_id")
         if lead_id:
             try:
-                from apps.crm.models_lead import OportunidadViaje
+                from apps.crm.models import OportunidadViaje
 
                 context["lead"] = OportunidadViaje.objects.filter(pk=lead_id).first()
             except ImportError:
@@ -723,7 +723,7 @@ class MagicQuoterSaveView(SaaSMixin, LoginRequiredMixin, View):
 
             lead = None
             if lead_id:
-                from apps.crm.models_lead import OportunidadViaje
+                from apps.crm.models import OportunidadViaje
 
                 lead = OportunidadViaje.objects.filter(id=lead_id).first()
 

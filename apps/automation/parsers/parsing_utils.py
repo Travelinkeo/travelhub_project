@@ -9,6 +9,7 @@ from datetime import timedelta
 from decimal import Decimal
 from typing import Any
 
+from apps.automation.parsers.normalization import GDS_MONTH_EN, GDS_SHORT_TO_NUM
 from apps.common.utils import clean_currency
 
 logger = logging.getLogger(__name__)
@@ -94,25 +95,10 @@ def _formatear_fecha_dd_mm_yyyy(fecha_str: str | None) -> str:
             y = f"20{y}"
         return f"{int(d):02d}-{int(m):02d}-{y}"
 
-    # 4. Mapeo de meses de 3 letras en español e inglés
-    month_to_num = {
-        "jan": "01",
-        "ene": "01",
-        "feb": "02",
-        "mar": "03",
-        "apr": "04",
-        "abr": "04",
-        "may": "05",
-        "jun": "06",
-        "jul": "07",
-        "aug": "08",
-        "ago": "08",
-        "sep": "09",
-        "oct": "10",
-        "nov": "11",
-        "dec": "12",
-        "dic": "12",
-    }
+    # P2-005: Mapas derivados de constantes centralizadas en normalization.py
+    month_to_num = {k.lower(): f"{v:02d}" for k, v in GDS_SHORT_TO_NUM.items()}
+    # Incluir también las abreviaciones de 3 letras inglesas por su nombre completo
+    month_to_num.update({k.lower(): f"{v:02d}" for k, v in GDS_SHORT_TO_NUM.items() if len(k) == 3})
 
     # Manejar formatos como "13 Aug 25", "13 aug 2025", "13aug25", "13aug2025"
     m_word = re.match(r"^(\d{1,2})\s*([a-z]{3})\s*(\d{2,4})$", cleaned)
@@ -127,20 +113,7 @@ def _formatear_fecha_dd_mm_yyyy(fecha_str: str | None) -> str:
             return f"{d:02d}-{m}-{y}"
 
     # Fallback usando strptime con limpieza a inglés
-    month_map = {
-        "ene": "Jan",
-        "feb": "Feb",
-        "mar": "Mar",
-        "abr": "Apr",
-        "may": "May",
-        "jun": "Jun",
-        "jul": "Jul",
-        "ago": "Aug",
-        "sep": "Sep",
-        "oct": "Oct",
-        "nov": "Nov",
-        "dic": "Dec",
-    }
+    month_map = {k.lower(): v.title() for k, v in GDS_MONTH_EN.items()}
     cleaned_date = cleaned
     for es, en in month_map.items():
         cleaned_date = cleaned_date.replace(es, en)

@@ -24,15 +24,8 @@ class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
 
     id_boleto_importado = models.AutoField(primary_key=True, verbose_name=_("ID Boleto Importado"))
 
-    @property
-    def id(self):
-        """Alias para compatibilidad con interfaces genéricas del ORM y serializadores"""
-        return self.id_boleto_importado
-
-    @id.setter
-    def id(self, value):
-        """id."""
-        self.id_boleto_importado = value
+    # ⚠️ P2-007: NO usar @property id — rompe filter(id=...) con FieldError.
+    # Usar pk o id_boleto_importado explícitamente en queries ORM.
 
     archivo_boleto = models.FileField(
         _("Archivo del Boleto (.pdf, .txt, .eml)"),

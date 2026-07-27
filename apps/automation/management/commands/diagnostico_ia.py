@@ -45,12 +45,7 @@ class Command(BaseCommand):
         )
         self.stdout.write(f" - Log de Parseo: {boleto.log_parseo or 'Sin logs registrados.'}")
 
-        # 🩹 MONKEY PATCH: Inyectamos dinámicamente el atributo 'id' por si el parser lo necesita
-        if not hasattr(boleto, "id"):
-            boleto.id = boleto.pk
-        self.stdout.write(
-            f" - ID (Monkey Patch Check): {getattr(boleto, 'id', 'Falta atributo id')}"
-        )
+        self.stdout.write(f" - ID (PK): {boleto.pk}")
 
         # 3. Execute the safety rewind (rebobinado)
         if boleto.archivo_boleto:

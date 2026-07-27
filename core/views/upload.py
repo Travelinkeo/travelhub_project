@@ -73,10 +73,6 @@ class UploadBoletoView(View):
             # Recargamos el boleto fresco
             boleto = BoletoImportado.objects.get(pk=boleto_temp.pk)
 
-            # 🩹 MONKEY PATCH
-            if not hasattr(boleto, "id"):
-                boleto.id = boleto.pk
-
             # ⏪ REBOBINADO DEL ARCHIVO (LA VERDADERA MAGIA)
             # Esto obliga al cursor a volver al Byte 0 para que la IA no lea un archivo "vacío"
             if boleto.archivo_boleto and hasattr(boleto.archivo_boleto, "seek"):
@@ -135,9 +131,6 @@ class ReviewBoletoView(View):
             return HttpResponse("Acceso Denegado", status=403)
 
         force = request.GET.get("force") == "1"
-
-        if not hasattr(boleto, "id"):
-            boleto.id = boleto.pk
 
         # 🚀 RE EXTRAER SÍNCRONO MANUAL
         if force:
@@ -242,9 +235,6 @@ class ReviewBoletoView(View):
             agencia = getattr(request, "agencia", None)
             if not request.user.is_superuser and boleto.agencia != agencia:
                 return HttpResponse("Acceso Denegado", status=403)
-
-            if not hasattr(boleto, "id"):
-                boleto.id = boleto.pk
 
             form_data = StudioFormData.from_post(request.POST)
             resultado = TicketReviewService().apply_and_reprocess(
@@ -360,7 +350,10 @@ class BoletoPdfStatusView(View):
                     boleto.archivo_pdf_generado.name
                 )
             except Exception:
-                logger.debug("Storage.exists() falló para %s, asumiendo accesible", boleto.archivo_pdf_generado.name)
+                logger.debug(
+                    "Storage.exists() falló para %s, asumiendo accesible",
+                    boleto.archivo_pdf_generado.name,
+                )
                 pdf_accessible = bool(boleto.archivo_pdf_generado.name)
 
             if pdf_accessible:
@@ -434,7 +427,10 @@ class BoletoPdfStatusView(View):
                         boleto.archivo_pdf_generado.name
                     )
                 except Exception:
-                    logger.debug("Storage.exists() falló (2) para %s, asumiendo accesible", boleto.archivo_pdf_generado.name)
+                    logger.debug(
+                        "Storage.exists() falló (2) para %s, asumiendo accesible",
+                        boleto.archivo_pdf_generado.name,
+                    )
                     pdf_accessible = bool(boleto.archivo_pdf_generado.name)
 
                 if pdf_accessible:

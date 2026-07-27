@@ -179,7 +179,7 @@ def notify_boleto_importado(boleto):
     dispatch_webhook_event(
         "boleto.importado",
         {
-            "boleto_id": boleto.id,
+            "boleto_id": boleto.pk,
             "aerolinea": getattr(boleto, "aerolinea_codigo", None),
             "pasajero": getattr(boleto, "pasajero_nombre", None),
             "ruta": getattr(boleto, "ruta_completa", None),

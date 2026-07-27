@@ -316,8 +316,21 @@ AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None
 
 if USE_R2:
+    _r2_storage_opts = {
+        "default_acl": "private",
+    }
+    if AWS_S3_CUSTOM_DOMAIN:
+        _r2_storage_opts["custom_domain"] = AWS_S3_CUSTOM_DOMAIN
+        _r2_storage_opts["querystring_auth"] = False
+    else:
+        _r2_storage_opts["querystring_auth"] = True
+        _r2_storage_opts["querystring_expire"] = 60 * 60 * 24 * 7  # 7 días
+
     STORAGES = {
-        "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": _r2_storage_opts,
+        },
         "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
     }
     MEDIA_URL = (

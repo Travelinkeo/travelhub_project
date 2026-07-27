@@ -22,6 +22,8 @@ import dj_database_url
 import environ
 from django.utils.translation import gettext_lazy as _
 
+from core.utils.redis_utils import build_redis_url
+
 # Importar la configuración de Unfold admin (tema visual)
 from ..settings_unfold import UNFOLD  # noqa: F401
 
@@ -601,24 +603,17 @@ _redis_evolution_host = os.getenv("REDIS_EVOLUTION_HOST", _default_redis_host or
 _redis_evolution_port = os.getenv("REDIS_EVOLUTION_PORT", _default_redis_port or "6379")
 
 
-def _build_redis_url(host, port, password=None, db_num=0):
-    """Build Redis URL with optional password authentication."""
-    if password:
-        return f"redis://:{password}@{host}:{port}/{db_num}"
-    return f"redis://{host}:{port}/{db_num}"
-
-
 # ---------------------------------------------------------------------------
 # Celery
 # ---------------------------------------------------------------------------
 
 CELERY_BROKER_URL = os.getenv(
     "CELERY_BROKER_URL",
-    _build_redis_url(_redis_celery_host, _redis_celery_port, _redis_celery_password, 0),
+    build_redis_url(_redis_celery_host, _redis_celery_port, _redis_celery_password, 0),
 )
 CELERY_RESULT_BACKEND = os.getenv(
     "CELERY_RESULT_BACKEND",
-    _build_redis_url(_redis_celery_host, _redis_celery_port, _redis_celery_password, 0),
+    build_redis_url(_redis_celery_host, _redis_celery_port, _redis_celery_password, 0),
 )
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
@@ -659,11 +654,11 @@ except ImportError:
 
 _cache_url = os.getenv(
     "REDIS_CACHE_URL",
-    _build_redis_url(_redis_cache_host, _redis_cache_port, _redis_cache_password, 0),
+    build_redis_url(_redis_cache_host, _redis_cache_port, _redis_cache_password, 0),
 )
 _session_url = os.getenv(
     "REDIS_SESSIONS_URL",
-    _build_redis_url(_redis_cache_host, _redis_cache_port, _redis_cache_password, 1),
+    build_redis_url(_redis_cache_host, _redis_cache_port, _redis_cache_password, 1),
 )
 
 if "redis://" in _cache_url:

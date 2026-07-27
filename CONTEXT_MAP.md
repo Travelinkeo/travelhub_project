@@ -1,7 +1,7 @@
 # CONTEXT_MAP.md — Mapa Cerebral de TravelHub
 
 > **Ultima verificacion contra codigo real:** 2026-07-26
-> **Rama/commit revisado:** `hardening/operational-risks` @ `7bd8fae6`
+> **Rama/commit revisado:** `hardening/operational-risks` @ `d35a1bfc`
 > **Verificado por:** IA (Antigravity) — lectura directa de archivos en sesion activa
 
 ---
@@ -630,24 +630,24 @@ Con ATOMIC_REQUESTS = True, estas variables tienen el mismo ciclo de vida que la
 
 ## 10. BUGS Y LIMITACIONES CONOCIDAS
 
-> Deuda tecnica reconocida. No estan en trabajo activo.
-> Ver TECH_DEBT_REMEDIATION.md para detalles completos y codigo de correccion.
+> Deuda técnica reconocida. No estan en trabajo activo.
+> Ver TECH_DEBT_REMEDIATION.md para inventario completo.
 
-### P0 -- Seguridad (critico)
+### P0 — Seguridad (critico) — ✅ TODOS RESUELTOS
 
-| ID | Descripcion | Archivo | Linea |
-|----|------------|---------|-------|
-| P0-002 | IDOR en BoletoRetryParseAPIView: BoletoImportado.objects.get(pk=pk) sin assert de tenant | apps/bookings/views/boleto_views.py | ~159 |
-| P0-003 | IDOR en VentaDoubleInvoiceAPIView: Venta.objects.get(pk=pk) sin assert de tenant | apps/bookings/views/boleto_views.py | ~349 |
-| P0-005 | Webhook Stripe: No confirmado que TODOS los endpoints validan firma con construct_event() | webhook views | -- |
-| P0-006 | Information Disclosure: return Response({"error": str(e)}) expone paths en 500 | apps/bookings/views/boleto_views.py | ~126 |
+| ID | Descripcion | Estado |
+|----|------------|--------|
+| P0-002 | IDOR en BoletoRetryParseAPIView | ✅ RESUELTO — `get_object_tenant_or_404()` en boleto_views.py:165 |
+| P0-003 | IDOR en VentaDoubleInvoiceAPIView | ✅ RESUELTO — `get_object_tenant_or_404()` en boleto_views.py:365 |
+| P0-005 | Webhook Stripe sin firma | ✅ RESUELTO — `stripe.Webhook.construct_event()` en views_webhooks.py:159 |
+| P0-006 | Information Disclosure str(e) | ✅ RESUELTO — todos reemplazados con error_id + logger.exception |
 
-### P1 -- Estabilidad
+### P1 — Estabilidad — ✅ TODOS RESUELTOS
 
-| ID | Descripcion | Archivo |
-|----|------------|---------|
-| P1-001 | Doble signal post_save en BoletoImportado -> doble parseo, double billing Gemini API | core/signals.py lineas 33 y 56 |
-| P1-002 | django.setup() explicito en celery.py -> crash en tests si pytest-django ya lo configuro | travelhub/celery.py |
+| ID | Descripcion | Estado |
+|----|------------|--------|
+| P1-001 | Doble signal post_save | ✅ RESUELTO — un solo receiver verificado |
+| P1-002 | django.setup() en celery.py | ✅ RESUELTO — no existe llamada explicita |
 
 ### Limitaciones de parseo de boletos
 
@@ -665,13 +665,36 @@ Con ATOMIC_REQUESTS = True, estas variables tienen el mismo ciclo de vida que la
 | ID | Descripcion | Estado |
 |----|------------|--------|
 | P0-004 | system_context() sin limite de tiempo | OK -- max_seconds=60.0 en middleware.py:69 |
-| P1-003 | CONN_MAX_AGE incompatible con PgBouncer transaction mode | OK -- USE_PGBOUNCER env var en base.py:225 |
-| P2-006 | Re-evaluacion de sys.argv en cada query del ORM | OK -- constantes _IS_PYTEST, _IS_MANAGEMENT_COMMAND en base.py:10-16 |
-| Barra bloqueante UI | Problema de interactividad en barra de navegacion | EN PROGRESO (conv. b61c38ba) |
+| P1-003 | CONN_MAX_AGE incompatible con PgBouncer | OK -- USE_PGBOUNCER env var en base.py |
+| P2-006 | Re-evaluacion de sys.argv en cada query | OK -- constantes _IS_PYTEST, _IS_MANAGEMENT_COMMAND |
+| P0-002 | IDOR BoletoRetryParseAPIView | OK -- get_object_tenant_or_404() |
+| P0-003 | IDOR VentaDoubleInvoiceAPIView | OK -- get_object_tenant_or_404() |
+| P0-005 | Stripe webhook firma | OK -- construct_event() validado |
+| P0-006 | Traceback en 500 | OK -- error_id pattern |
+| P1-001 | Doble signal BoletoImportado | OK -- un solo receiver |
+| P1-002 | django.setup() en celery.py | OK -- no existe |
+| P1-004 | Cache TTL agencia | OK -- 30s + signal invalidacion |
+| P1-005 | locale.setlocale global | OK -- safe_setlocale en core/locale_patch.py |
+| P1-006 | Truncacion silenciosa | OK -- log + flag |
+| P1-007 | WhatsApp sync en signals | OK -- .delay() |
+| P2-001 | Comentario placeholder | OK -- no existe |
+| P2-003 | flights SDK sin uso | OK -- eliminado de requirements |
+| P2-005 | GDS months duplicado | OK -- centralizado |
+| P2-007 | @property id | OK -- eliminado |
+| P2-008 | Tests en raiz | OK -- movidos a scratch_scripts/ |
+| P2-009 | _build_redis_url en settings | OK -- movido a core/utils/redis_utils.py |
+| P2-011 | Nested atomic en Venta.save() | OK -- select_for_update() |
+| P3-001 | Boletos QUE nunca reintentados | OK -- retry_queued_boletos_task existe |
+| P3-004 | log_parseo sin limite | OK -- truncado a 4000 chars en save() |
+| Contabilidad IA | AsientoContableSchema refactorizado | OK -- Resuelto |
 | Parser Amadeus | Implementacion real del parser Amadeus | PENDIENTE |
-| Stripe webhook audit | Verificar y reforzar validacion de firma en todos los endpoints | PENDIENTE |
-| IDOR boleto views | P0-002 y P0-003: agregar get_object_tenant_or_404 | PENDIENTE |
-| Contabilidad IA | AsientoContableSchema refactorizado (commit 7bd8fae6) | OK -- Resuelto |
+| P3-002 | Endpoint polling estado parseo | PENDIENTE |
+| P3-003 | Alerta cuota Gemini por agencia | PENDIENTE |
+| P4-001 | Metricas precision parser | PENDIENTE |
+| P4-002 | God Object urls.py | PENDIENTE |
+| P4-003 | Versionado datos_parseados | PENDIENTE |
+| P4-004 | NotificationRouter unificado | PENDIENTE |
+| P4-005 | CI/CD check documentacion | PENDIENTE |
 
 ---
 

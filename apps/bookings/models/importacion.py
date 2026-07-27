@@ -18,6 +18,8 @@ from core.api import (
 
 logger = logging.getLogger(__name__)
 
+MAX_LOG_LENGTH = 4000
+
 
 class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
     """BoletoImportado."""
@@ -301,6 +303,14 @@ class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
     def id_boleto(self, value):
         """id_boleto."""
         self.id_boleto_importado = value
+
+    def save(self, *args, **kwargs):
+        if self.log_parseo and len(self.log_parseo) > MAX_LOG_LENGTH:
+            logger.warning(
+                f"Truncando log_parseo de {len(self.log_parseo)} a {MAX_LOG_LENGTH} chars para BoletoImportado {self.pk}"
+            )
+            self.log_parseo = self.log_parseo[-MAX_LOG_LENGTH:]
+        super().save(*args, **kwargs)
 
     @property
     def fecha_emision(self):

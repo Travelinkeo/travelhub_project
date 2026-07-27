@@ -317,9 +317,13 @@ class BoletoMassActionAPIView(InternalAPIAuthMixin, APIView):
 
         except Cliente.DoesNotExist:
             return Response({"error": "Cliente no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            logger.exception("Error crítico en BoletoMassActionAPIView")
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception:
+            error_id = uuid.uuid4().hex[:8].upper()
+            logger.exception(f"[{error_id}] Error crítico en BoletoMassActionAPIView")
+            return Response(
+                {"error": f"Error interno. Referencia: TH-{error_id}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 @extend_schema(
@@ -422,8 +426,10 @@ class BoletoAuditAPIView(InternalAPIAuthMixin, APIView):
         try:
             auditoria = audit_service.audit_ticket_data(ticket_data)
             return Response(auditoria, status=200)
-        except Exception as e:
-            return Response({"error": str(e)}, status=500)
+        except Exception:
+            error_id = uuid.uuid4().hex[:8].upper()
+            logger.exception(f"[{error_id}] Error en BoletoAuditarAPIView")
+            return Response({"error": f"Error interno. Referencia: TH-{error_id}"}, status=500)
 
 
 @extend_schema(

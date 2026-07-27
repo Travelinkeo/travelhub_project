@@ -156,7 +156,7 @@ services:
       - .env.local
     volumes:
       - static_volume:/app/staticfiles
-      - ./media:/app/media
+      - media_volume:/app/media
       - ./apps:/app/apps
       - ./core:/app/core
       - ./boletos_importados:/app/boletos_importados

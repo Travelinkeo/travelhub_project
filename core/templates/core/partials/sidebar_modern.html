@@ -1,9 +1,9 @@
 {% load i18n %}
 <aside
-    class="fixed inset-y-0 left-0 z-50 bg-surface-1 border-r border-border-color flex flex-col transform transition-all duration-300 ease-in-out md:relative md:translate-x-0"
+    class="fixed inset-y-0 left-0 z-[60] bg-surface-1 border-r border-border-color flex flex-col overflow-hidden transform transition-all duration-300 ease-in-out md:relative md:z-30 md:translate-x-0"
     :class="[
-        mobileMenuOpen ? 'translate-x-0 w-60' : '-translate-x-full md:translate-x-0',
-        sidebarOpen ? 'w-60' : 'w-[64px]'
+        mobileMenuOpen ? 'translate-x-0 w-[85vw] max-w-[320px] md:w-60' : '-translate-x-full md:translate-x-0',
+        sidebarOpen ? 'md:w-60' : 'md:w-[64px]'
     ]">
 
     <!-- Header del Sidebar (Tenant Logo) -->
@@ -37,7 +37,7 @@
                     TH
                 </div>
             {% endif %}
-            <div x-show="sidebarOpen" x-transition class="overflow-hidden">
+            <div x-show="sidebarOpen || mobileMenuOpen" x-transition class="overflow-hidden">
                 <p class="text-sm font-black text-text-main leading-none truncate">{{ current_agency.nombre|default:"TravelHub" }}</p>
                 <p class="text-[10px] text-text-muted mt-0.5">Gestión ERP</p>
             </div>
@@ -47,7 +47,7 @@
             class="hidden md:flex w-7 h-7 rounded-lg text-text-muted hover:text-text-main hover:bg-surface-2 items-center justify-center transition-all bg-surface-1 border border-border-color absolute -right-3.5 top-4 shadow-sm z-10">
             <span class="material-symbols-outlined text-[16px]" x-text="sidebarOpen ? 'chevron_left' : 'chevron_right'"></span>
         </button>
-        <button @click="mobileMenuOpen = false" class="md:hidden text-text-muted hover:text-text-main">
+        <button @click="mobileMenuOpen = false" class="md:hidden w-8 h-8 rounded-lg bg-surface-2 border border-border-color flex items-center justify-center text-text-muted hover:text-text-main transition-colors shrink-0">
             <span class="material-symbols-outlined text-[20px]">close</span>
         </button>
     </div>
@@ -122,7 +122,7 @@
     <!-- ──────────────────────────────────────────────────────── -->
 
     <!-- Navegación Controlada por Roles -->
-    <nav class="flex-1 overflow-y-auto py-3 px-2">
+    <nav class="flex-1 overflow-y-auto min-h-0 py-3 px-2">
 
         <!-- VISIBLE PARA TODOS -->
         <a href="{% url 'core:modern_dashboard' %}"

@@ -1,6 +1,6 @@
 <script nonce="{{ request.csp_nonce }}">
 (function () {
-    var EXPECTED_VERSION = 'travelhub-v6';
+    var EXPECTED_VERSION = 'travelhub-v8';
     if (localStorage.getItem('pwa_sw_version') !== EXPECTED_VERSION) {
         if ('caches' in window) {
             caches.keys().then(function(names) {

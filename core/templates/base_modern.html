@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}TravelHub Pro{% endblock %}</title>
 
-    <link rel="stylesheet" href="{% static 'core/css/tailwind-built.css' %}">
-    <link rel="stylesheet" href="{% static 'core/css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/tailwind-built.css' %}?v=8">
+    <link rel="stylesheet" href="{% static 'core/css/responsive.css' %}?v=8">
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/htmx_v2.js' %}"></script>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/alpine.min.js' %}" defer></script>
 
@@ -82,7 +82,7 @@
     {% endif %}
 
     <div x-show="mobileMenuOpen" x-transition.opacity @click="mobileMenuOpen = false"
-         class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden" x-cloak></div>
+         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[55] md:hidden" x-cloak></div>
 
     {% include "core/partials/sidebar_modern.html" %}
 

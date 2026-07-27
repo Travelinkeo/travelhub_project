@@ -1,29 +1,102 @@
 /* ───────────────────────────────────────────────
    TravelHub Responsive Overrides (Mobile-first)
+   v3 — 2026-07-27 — Fix sidebar scroll + formularios + PWA cache bust
    ─────────────────────────────────────────────── */
 
-/* ── LAYOUT: body scroll natural en mobile ── */
+/* ══════════════════════════════════════════════════════
+   SECCIÓN 1: LAYOUT BASE EN MOBILE
+   ══════════════════════════════════════════════════════ */
+
 @media (max-width: 767px) {
+  /* El body en mobile: scroll natural para el contenido principal */
   body {
     height: auto !important;
-    min-height: 100vh !important;
-    overflow: visible !important;
+    min-height: 100svh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
   }
 
   main {
     overflow: visible !important;
+    min-height: calc(100svh - 48px);
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   #main-content {
     overflow-y: visible !important;
-  }
-
-  nav.flex-1.overflow-y-auto {
-    overflow-y: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    box-sizing: border-box !important;
   }
 }
 
-/* ── TABLAS → CARDS EN MOBILE ── */
+/* ══════════════════════════════════════════════════════
+   SECCIÓN 2: SIDEBAR MOBILE — CORRECCIÓN CRÍTICA DE SCROLL
+   El bug raíz: el override de nav overflow-y rompía el scroll
+   del sidebar. La solución requiere:
+     1. aside con max-h fijado y overflow-hidden
+     2. nav con min-h-0 (quirk de flex) + overflow-y-auto explícito
+   ══════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  /* El aside (drawer) ocupa exactamente la pantalla, no más */
+  aside {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    max-height: 100svh !important;
+    height: 100svh !important;
+    overflow: hidden !important;          /* Contiene el flex interno */
+    z-index: 50 !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.35) !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /*
+   * CORRECCIÓN PRINCIPAL:
+   * El nav DEBE hacer scroll. min-h-0 es obligatorio en flexbox
+   * para que flex-1 + overflow-y-auto funcionen juntos.
+   * Sin min-h-0, el elemento flex ignora el overflow y se expande.
+   */
+  aside > nav {
+    flex: 1 1 0% !important;             /* flex-grow: 1, flex-basis: 0 */
+    min-height: 0 !important;            /* CRÍTICO: permite que overflow funcione */
+    overflow-y: auto !important;         /* scroll interno del nav */
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Scrollbar discreto en el nav del sidebar */
+  aside > nav::-webkit-scrollbar {
+    width: 4px;
+  }
+  aside > nav::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  aside > nav::-webkit-scrollbar-thumb {
+    background: var(--border-color, #374151);
+    border-radius: 2px;
+  }
+
+  /* El header y footer del sidebar nunca deben encoger */
+  aside > div:first-child,
+  aside > div:last-child,
+  aside > div.shrink-0 {
+    flex-shrink: 0 !important;
+    min-height: unset !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   SECCIÓN 3: TABLAS → CARDS EN MOBILE
+   ══════════════════════════════════════════════════════ */
+
 @media (max-width: 767px) {
   .table-responsive {
     border: 0 !important;
@@ -75,13 +148,14 @@
     white-space: nowrap !important;
   }
 
-  .table-responsive td:has(> .amount),
-  .table-responsive td[class*="amount"] {
-    text-align: left !important;
+  .table-responsive td .status-badge,
+  .table-responsive td .badge {
+    display: inline-flex !important;
+    margin-left: 0 !important;
   }
 }
 
-/* ── TABLAS CON SCROLL HORIZONTAL (fallback) ── */
+/* ── TABLAS SIN CLASE: scroll horizontal (fallback) ── */
 @media (max-width: 767px) {
   table:not(.table-responsive) {
     display: block !important;
@@ -91,129 +165,158 @@
   }
 }
 
-/* ── BOTONES MÁS PEQUEÑOS EN MOBILE ── */
+/* ══════════════════════════════════════════════════════
+   SECCIÓN 4: FORMULARIOS — CORRECCIÓN DE GRIDS E INPUTS
+   Garantiza que ningún campo se reduzca horizontalmente ni
+   parezca un contenedor vertical estrecho.
+   ══════════════════════════════════════════════════════ */
+
 @media (max-width: 767px) {
-  .btn-primary,
-  .btn-secondary,
-  .btn-danger {
-    height: 34px !important;
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-    font-size: 12px !important;
-    border-radius: 8px !important;
+  /* 1. Todos los grids de formularios se fuerzan a 1 columna en móvil */
+  form .grid,
+  .card-base .grid,
+  main .grid:not(.grid-cols-2-mobile) {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
   }
 
-  .btn-primary,
-  .btn-secondary,
-  .btn-danger {
-    gap: 0.375rem !important;
-  }
-}
-
-/* ── TOAST CONTAINER: full width en mobile ── */
-@media (max-width: 767px) {
-  #magic-toast-container {
-    width: calc(100% - 1.5rem) !important;
-    right: 0.75rem !important;
-    top: 4.5rem !important;
-    max-height: 60vh !important;
-  }
-}
-
-/* ── HEADER: menos padding en mobile ── */
-@media (max-width: 767px) {
-  header {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
+  /* 2. Todos los flex horizontales con múltiples campos se apilan verticalmente */
+  form .flex:not(.flex-row-force):not(.flex-row-mobile),
+  .card-base .flex:not(.flex-row-force):not(.flex-row-mobile),
+  main form div.flex:not(.flex-row-force):not(.flex-row-mobile) {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
   }
 
-  header h2 {
-    font-size: 1rem !important;
+  /* Anular anchos porcentuales fijos en móvil */
+  [class*="w-1/2"], [class*="w-1/3"], [class*="w-2/3"], [class*="w-1/4"], [class*="w-3/4"], [class*="lg:w-"] {
+    width: 100% !important;
+    max-width: 100% !important;
   }
-}
 
-/* ── SIDEBAR HAMBURGUESA: mejor posicion ── */
-@media (max-width: 767px) {
-  button[x-data] .material-symbols-outlined.text-\[24px\] {
-    font-size: 28px !important;
+  /* Anular min-width que exceda el viewport */
+  [class*="min-w-"]:not(.min-w-0):not(.min-w-full) {
+    min-width: 0 !important;
   }
-}
 
-/* ── INPUTS Y FORMULARIOS: más compactos en mobile ── */
-@media (max-width: 767px) {
+  /* Labels e Inputs: ocupan el 100% del ancho del contenedor */
+  form label,
+  form .form-group,
+  .card-base label {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Todos los controles de formulario ocupan el 100% del ancho */
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="date"],
+  input[type="time"],
+  input[type="password"],
+  input[type="search"],
+  input[type="url"],
+  input[type="file"],
+  select,
+  textarea,
   .input-base {
-    height: 36px !important;
-    font-size: 14px !important;
-    padding-left: 12px !important;
-    padding-right: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    font-size: 16px !important; /* Evita zoom automático en iOS */
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
   }
 
-  textarea.input-base {
+  textarea {
+    min-height: 90px !important;
     height: auto !important;
   }
+
+  /* Botones de acción al final de formularios: apilados verticalmente */
+  form .flex.justify-end,
+  form .flex.items-center.justify-end,
+  form div:has(> button[type="submit"]) {
+    flex-direction: column-reverse !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+  }
+
+  form .flex.justify-end > button,
+  form .flex.justify-end > a,
+  form div:has(> button[type="submit"]) > button,
+  form div:has(> button[type="submit"]) > a {
+    width: 100% !important;
+    min-height: 48px !important;
+    justify-content: center !important;
+  }
 }
 
-/* ── AUMENTAR ZONA TÁCTIL EN LINKS PEQUEÑOS ── */
+/* ══════════════════════════════════════════════════════
+   SECCIÓN 5: BOTONES Y ZONAS TÁCTILES
+   ══════════════════════════════════════════════════════ */
+
 @media (max-width: 767px) {
+  /* Mínimo 44px de altura táctil (Apple HIG) */
   a, button {
     min-height: 36px !important;
   }
-}
 
-/* ── PREVENIR ZOOM EN INPUTS (iOS) ── */
-@media (max-width: 767px) {
-  input, select, textarea {
-    font-size: 16px !important;
+  aside nav a,
+  aside nav button {
+    min-height: 40px !important;
   }
-}
 
-/* ── RESPONSIVE STACK: apilar elementos horizontalmente ── */
-@media (max-width: 767px) {
-  .flex-row-responsive {
-    flex-direction: column !important;
-  }
-}
-
-/* ── CARDS: menos padding en mobile ── */
-@media (max-width: 767px) {
-  .card-base {
-    padding: 1rem !important;
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger {
+    height: auto !important;
+    min-height: 44px !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
     border-radius: 10px !important;
-  }
-}
-
-/* ── MEJORAR LEGIBILIDAD DE TABLAS CON CARDS ── */
-@media (max-width: 767px) {
-  .table-responsive td .status-badge,
-  .table-responsive td .badge {
+    gap: 0.375rem !important;
     display: inline-flex !important;
-    margin-left: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
   }
 }
 
-/* ── HEADER: sólido en mobile (sin vidrio flotante) ── */
+/* ══════════════════════════════════════════════════════
+   SECCIÓN 6: HEADER SUPERIOR
+   ══════════════════════════════════════════════════════ */
+
 @media (max-width: 767px) {
   header {
     background: var(--surface-1) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
   }
 
   header h2 {
     font-size: 0.9rem !important;
     line-height: 1.2 !important;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   header p.text-\[11px\] {
     font-size: 9px !important;
     letter-spacing: 0.05em !important;
     margin-top: 1px !important;
-  }
-
-  /* BCV más compacto */
-  header .gap-3 > .border-r {
-    margin-right: 0.375rem !important;
-    padding-right: 0.375rem !important;
   }
 
   header .w-9.h-9 {
@@ -226,137 +329,41 @@
   }
 }
 
-/* ── DASHBOARD BUTTONS: iconos sin solapamiento ── */
-@media (max-width: 767px) {
-  .grid a[class*="rounded-xl"],
-  .grid label[class*="rounded-xl"] {
-    padding-top: 0.75rem !important;
-    padding-bottom: 0.75rem !important;
-  }
-
-  .grid a[class*="rounded-xl"] .absolute,
-  .grid label[class*="rounded-xl"] .absolute {
-    position: relative !important;
-    top: auto !important;
-    right: auto !important;
-    display: inline-flex !important;
-    margin-bottom: 0.375rem !important;
-    width: 2rem !important;
-    height: 2rem !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
-  .grid a[class*="rounded-xl"] h3,
-  .grid label[class*="rounded-xl"] h3 {
-    font-size: 0.9rem !important;
-    margin-top: 0 !important;
-    padding-right: 0 !important;
-  }
-
-  .grid a[class*="rounded-xl"] p,
-  .grid label[class*="rounded-xl"] p {
-    font-size: 10px !important;
-  }
-}
-
-/* ── OCULTAR SUBTÍTULO EN MOBILE (opción forzada) ── */
 @media (max-width: 479px) {
   header p.text-\[11px\] {
     display: none !important;
   }
 }
 
-/* ── SCROLLBAR THIN: para tabs y navegación horizontal ── */
-.scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-color) transparent;
-}
-.scrollbar-thin::-webkit-scrollbar {
-  height: 4px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 2px;
-}
+/* ══════════════════════════════════════════════════════
+   SECCIÓN 7: TOAST Y NOTIFICACIONES
+   ══════════════════════════════════════════════════════ */
 
-/* ── NO-SCROLLBAR: ocultar scrollbar completamente ── */
-.no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-/* ── BOTTOM TAB BAR: mejor spacing y activo ── */
 @media (max-width: 767px) {
+  #magic-toast-container {
+    width: calc(100% - 1.5rem) !important;
+    right: 0.75rem !important;
+    left: 0.75rem !important;
+    top: 4.5rem !important;
+    max-height: 60vh !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   SECCIÓN 8: BOTTOM TAB BAR
+   ══════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  #main-content {
+    padding-bottom: 4.5rem !important;
+  }
+
   .fixed.bottom-0 a.text-primary .material-symbols-outlined,
   .fixed.bottom-0 a[class*="text-primary"] .material-symbols-outlined {
     transform: scale(1.1);
   }
 }
 
-/* ── KPI GRID: 2 columnas en mobile ── */
-@media (max-width: 767px) {
-  .grid-cols-2.md\:grid-cols-4 {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-}
-
-/* ── TABS NAVIGATION: scroll hint en mobile ── */
-@media (max-width: 767px) {
-  .overflow-x-auto {
-    -webkit-overflow-scrolling: touch !important;
-    scroll-behavior: smooth !important;
-  }
-
-  /* Padding más compacto para tab items en mobile */
-  .overflow-x-auto a {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-    font-size: 9px !important;
-  }
-}
-
-/* ── PAGE TITLE: truncar en mobile si es largo ── */
-@media (max-width: 767px) {
-  header h2 {
-    max-width: 160px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-/* ── GRID DE BOTONES RÁPIDOS: 2 columnas en mobile ── */
-@media (max-width: 767px) {
-  .grid.grid-cols-2,
-  .grid-cols-3.md\:grid-cols-6,
-  .grid-cols-4.md\:grid-cols-8 {
-    gap: 0.5rem !important;
-  }
-}
-
-/* ── CONTENT PADDING: ajustar para bottom tab bar ── */
-@media (max-width: 767px) {
-  #main-content {
-    padding-bottom: 4.5rem !important;
-  }
-}
-
-/* ── SIDEBAR MOBILE: overlay z-index y transición ── */
-@media (max-width: 767px) {
-  aside {
-    z-index: 50 !important;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.3) !important;
-  }
-}
-
-/* ── SAFE AREA BOTTOM: iPhone notch ── */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
@@ -367,11 +374,53 @@
   }
 }
 
-/* ── MOBILE: reducir padding general del contenido ── */
+/* ══════════════════════════════════════════════════════
+   SECCIÓN 9: CARDS Y CONTENEDORES
+   ══════════════════════════════════════════════════════ */
+
 @media (max-width: 767px) {
+  .grid-cols-2.md\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .card-base {
+    padding: 1rem !important;
+    border-radius: 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
   .p-6.md\:p-8,
   .p-3.sm\:p-4 {
     padding-left: 0.75rem !important;
     padding-right: 0.75rem !important;
   }
+}
+
+/* ══════════════════════════════════════════════════════
+   SECCIÓN 10: UTILITIES
+   ══════════════════════════════════════════════════════ */
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

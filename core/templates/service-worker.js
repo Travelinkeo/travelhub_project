@@ -2,7 +2,7 @@
 // Estrategias: Network First para HTML, Cache First para assets, Stale-While-Revalidate para HTMX
 // Push notifications, Background Sync, offline indicator
 
-const CACHE_NAME = 'travelhub-v6';
+const CACHE_NAME = 'travelhub-v8';
 const STATIC_ASSETS = [
   '/offline/',
   '/static/core/css/tailwind-built.css',

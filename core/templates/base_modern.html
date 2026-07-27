@@ -62,6 +62,7 @@
 </head>
 
 <body class="bg-surface-base text-text-main font-sans selection:bg-primary/30 antialiased h-screen flex overflow-hidden"
+    x-effect="document.body.classList.toggle('mobile-menu-open', mobileMenuOpen)"
     x-data="{
         sidebarOpen: true,
         mobileMenuOpen: false,

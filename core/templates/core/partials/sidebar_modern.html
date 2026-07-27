@@ -144,7 +144,7 @@
 
         <!-- CATEGORÍA: OPERACIONES (VISIBLE PARA TODOS) -->
         <button @click="openCategories.operaciones = !openCategories.operaciones"
-            x-show="sidebarOpen" x-transition
+            x-show="sidebarOpen || mobileMenuOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
             <span>{% trans "Operaciones" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
@@ -152,7 +152,7 @@
         </button>
         <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
-        <div x-show="!sidebarOpen || openCategories.operaciones" x-transition class="space-y-1">
+        <div x-show="(!sidebarOpen && !mobileMenuOpen) || openCategories.operaciones" x-transition class="space-y-1">
         <a href="{% url 'bookings:venta_list' %}"
             class="nav-item {% if 'ventas' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
@@ -208,7 +208,7 @@
 
         <!-- CATEGORÍA: CRM (VISIBLE PARA TODOS) -->
         <button @click="openCategories.crm = !openCategories.crm"
-            x-show="sidebarOpen" x-transition
+            x-show="sidebarOpen || mobileMenuOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
             <span>{% trans "CRM" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
@@ -216,7 +216,7 @@
         </button>
         <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
-        <div x-show="!sidebarOpen || openCategories.crm" x-transition class="space-y-1">
+        <div x-show="(!sidebarOpen && !mobileMenuOpen) || openCategories.crm" x-transition class="space-y-1">
         <a href="{% url 'crm:cliente_list' %}"
             class="nav-item {% if 'crm/clientes' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
@@ -251,7 +251,7 @@
         {% if user_agency_role in 'admin,gerente,contador' %}
 
         <button @click="openCategories.finanzas = !openCategories.finanzas"
-            x-show="sidebarOpen" x-transition
+            x-show="sidebarOpen || mobileMenuOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
             <span>{% trans "Finanzas" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
@@ -259,7 +259,7 @@
         </button>
         <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
-        <div x-show="!sidebarOpen || openCategories.finanzas" x-transition class="space-y-1">
+        <div x-show="(!sidebarOpen && !mobileMenuOpen) || openCategories.finanzas" x-transition class="space-y-1">
         <a href="{% url 'finance:facturacion_dashboard' %}"
             class="nav-item {% if 'facturacion' in request.path or 'invoices' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
@@ -290,7 +290,7 @@
         </div>
 
         <button @click="openCategories.contabilidad = !openCategories.contabilidad"
-            x-show="sidebarOpen" x-transition
+            x-show="sidebarOpen || mobileMenuOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
             <span>{% trans "Contabilidad" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
@@ -298,7 +298,7 @@
         </button>
         <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
-        <div x-show="!sidebarOpen || openCategories.contabilidad" x-transition class="space-y-1">
+        <div x-show="(!sidebarOpen && !mobileMenuOpen) || openCategories.contabilidad" x-transition class="space-y-1">
         <a href="{% url 'contabilidad:libro_diario' %}"
             class="nav-item {% if 'libro_diario' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
@@ -332,7 +332,7 @@
         <!-- CATEGORÍA: MARKETING (ROLES: ADMIN, GERENTE) -->
         {% if user_agency_role in 'admin,gerente' %}
         <button @click="openCategories.marketing = !openCategories.marketing"
-            x-show="sidebarOpen" x-transition
+            x-show="sidebarOpen || mobileMenuOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
             <span>{% trans "Marketing" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
@@ -340,7 +340,7 @@
         </button>
         <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
-        <div x-show="!sidebarOpen || openCategories.marketing" x-transition class="space-y-1">
+        <div x-show="(!sidebarOpen && !mobileMenuOpen) || openCategories.marketing" x-transition class="space-y-1">
         <a href="{% url 'crm:marketing_hub' %}"
             class="nav-item {% if 'marketing' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
@@ -359,7 +359,7 @@
 
         <!-- CATEGORÍA: INTELIGENCIA AI (VISIBLE PARA TODOS) -->
         <button @click="openCategories.inteligencia = !openCategories.inteligencia"
-            x-show="sidebarOpen" x-transition
+            x-show="sidebarOpen || mobileMenuOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
             <span>{% trans "Inteligencia AI" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
@@ -367,7 +367,7 @@
         </button>
         <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
-        <div x-show="!sidebarOpen || openCategories.inteligencia" x-transition class="space-y-1">
+        <div x-show="(!sidebarOpen && !mobileMenuOpen) || openCategories.inteligencia" x-transition class="space-y-1">
         <a href="{% url 'contabilidad:asistente_brain' %}"
             class="nav-item {% if 'asistente' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
@@ -401,7 +401,7 @@
         <!-- CATEGORÍA: SISTEMA (ROLES: ADMIN, GERENTE) -->
         {% if user_agency_role in 'admin,gerente' %}
         <button @click="openCategories.sistema = !openCategories.sistema"
-            x-show="sidebarOpen" x-transition
+            x-show="sidebarOpen || mobileMenuOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
             <span>{% trans "Sistema" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
@@ -409,7 +409,7 @@
         </button>
         <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
-        <div x-show="!sidebarOpen || openCategories.sistema" x-transition class="space-y-1">
+        <div x-show="(!sidebarOpen && !mobileMenuOpen) || openCategories.sistema" x-transition class="space-y-1">
         <a href="{% url 'core:catalogos_center' %}"
             class="nav-item {% if 'catalogos' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
@@ -462,7 +462,7 @@
 
 
         <button @click="openCategories.custom = !openCategories.custom"
-            x-show="sidebarOpen" x-transition
+            x-show="sidebarOpen || mobileMenuOpen" x-transition
             class="w-full flex items-center justify-between mt-5 mb-1.5 px-2 text-[10px] font-black text-text-muted hover:text-primary transition-all uppercase tracking-widest text-left select-none">
             <span>{% trans "Administración Custom" %}</span>
             <span class="material-symbols-outlined text-[14px] transition-transform duration-200"
@@ -470,7 +470,7 @@
         </button>
         <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
-        <div x-show="!sidebarOpen || openCategories.custom" x-transition class="space-y-1">
+        <div x-show="(!sidebarOpen && !mobileMenuOpen) || openCategories.custom" x-transition class="space-y-1">
         <a href="{% url 'bookings:proveedor_list' %}"
             class="nav-item {% if 'proveedores' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">

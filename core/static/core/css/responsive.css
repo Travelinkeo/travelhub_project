@@ -11,9 +11,14 @@
   /* El body en mobile: scroll natural para el contenido principal */
   body {
     height: auto !important;
-    min-height: 100svh !important;
+    min-height: 100dvh !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
+  }
+
+  /* Lock de scroll del body cuando el sidebar está abierto */
+  body.mobile-menu-open {
+    overflow: hidden !important;
   }
 
   main {
@@ -49,8 +54,8 @@
     top: 0 !important;
     bottom: 0 !important;
     left: 0 !important;
-    max-height: 100svh !important;
-    height: 100svh !important;
+    max-height: 100dvh !important;
+    height: 100dvh !important;
     overflow: hidden !important;          /* Contiene el flex interno */
     z-index: 50 !important;
     box-shadow: 4px 0 24px rgba(0,0,0,0.35) !important;
@@ -69,6 +74,8 @@
     min-height: 0 !important;            /* CRÍTICO: permite que overflow funcione */
     overflow-y: auto !important;         /* scroll interno del nav */
     overflow-x: hidden !important;
+    overscroll-behavior: contain !important;  /* No propaga scroll al body */
+    touch-action: pan-y !important;           /* Solo scroll vertical táctil */
     -webkit-overflow-scrolling: touch !important;
   }
 

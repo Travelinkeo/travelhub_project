@@ -19,7 +19,7 @@
         <!-- Sidebar Tabs -->
         <div class="md:col-span-1 space-y-2">
             <button @click="activeTab = 'perfil'"
-                :class="activeTab === 'perfil' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-text-muted hover:bg-surface-2 hover:text-white'"
+                :class="activeTab === 'perfil' ? 'bg-primary text-white shadow-[var(--btn-shadow)]' : 'text-text-muted hover:bg-surface-2 hover:text-white'"
                 class="w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex items-center">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -29,7 +29,7 @@
             </button>
 
             <button @click="activeTab = 'seguridad'"
-                :class="activeTab === 'seguridad' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'text-text-muted hover:bg-surface-2 hover:text-white'"
+                :class="activeTab === 'seguridad' ? 'bg-primary text-white shadow-[var(--btn-shadow)]' : 'text-text-muted hover:bg-surface-2 hover:text-white'"
                 class="w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex items-center">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -44,7 +44,7 @@
             </div>
 
             <button @click="activeTab = 'agencia'"
-                :class="activeTab === 'agencia' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' : 'text-text-muted hover:bg-surface-2 hover:text-white'"
+                :class="activeTab === 'agencia' ? 'bg-primary text-white shadow-[var(--btn-shadow)]' : 'text-text-muted hover:bg-surface-2 hover:text-white'"
                 class="w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex items-center">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -54,7 +54,7 @@
             </button>
 
             <button @click="activeTab = 'automatizacion'"
-                :class="activeTab === 'automatizacion' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30' : 'text-text-muted hover:bg-surface-2 hover:text-white'"
+                :class="activeTab === 'automatizacion' ? 'bg-primary text-white shadow-[var(--btn-shadow)]' : 'text-text-muted hover:bg-surface-2 hover:text-white'"
                 class="w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex items-center">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -70,7 +70,7 @@
 
             <!-- Tab: Mi Perfil -->
             <div x-show="activeTab === 'perfil'"
-                class="bg-surface-2/50 border border-slate-700 rounded-2xl p-6 glass-panel" x-cloak>
+                class="bg-surface-2/50 border border-border-color rounded-2xl p-6 glass-panel" x-cloak>
                 <h2 class="text-xl font-bold text-text-main mb-6">Información Personal</h2>
                 <form method="post">
                     {% csrf_token %}
@@ -93,7 +93,7 @@
 
                     <div class="flex justify-end">
                         <button type="submit"
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition shadow-lg shadow-blue-600/20">
+                            class="bg-primary hover:bg-primary-hover text-on-primary px-6 py-2 rounded-lg font-medium transition shadow-[var(--btn-shadow)]">
                             Guardar Cambios
                         </button>
                     </div>
@@ -102,18 +102,18 @@
 
             <!-- Tab: Seguridad -->
             <div x-show="activeTab === 'seguridad'"
-                class="bg-surface-2/50 border border-slate-700 rounded-2xl p-6 glass-panel" x-cloak>
+                class="bg-surface-2/50 border border-border-color rounded-2xl p-6 glass-panel" x-cloak>
                 <h2 class="text-xl font-bold text-text-main mb-6">Seguridad de la Cuenta</h2>
 
-                <div class="bg-yellow-900/20 border border-yellow-700/50 p-4 rounded-xl mb-6 flex items-start">
-                    <svg class="w-6 h-6 text-yellow-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
+                <div class="bg-[var(--status-warning-bg)] border border-[var(--status-warning)]/50 p-4 rounded-xl mb-6 flex items-start">
+                    <svg class="w-6 h-6 text-[var(--status-warning)] mr-3 flex-shrink-0" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                     <div>
-                        <h4 class="font-bold text-yellow-500 text-sm">Importante</h4>
-                        <p class="text-sm text-yellow-200/80">Al cambiar tu contraseña, mantendrás la sesión activa en
+                        <h4 class="font-bold text-[var(--status-warning)] text-sm">Importante</h4>
+                        <p class="text-sm text-[var(--status-warning)]/80">Al cambiar tu contraseña, mantendrás la sesión activa en
                             este dispositivo pero deberás volver a ingresar en los demás.</p>
                     </div>
                 </div>
@@ -127,13 +127,13 @@
                         <div>
                             <label class="block text-sm font-medium text-text-muted mb-2">{{ field.label }}</label>
                             <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}"
-                                class="bg-surface-2 border border-slate-700 text-text-main rounded-lg block w-full p-2.5"
+                                class="bg-surface-2 border border-border-color text-text-main rounded-lg block w-full p-2.5"
                                 required>
                             {% if field.help_text %}
                             <p class="text-xs text-text-muted mt-1">{{ field.help_text }}</p>
                             {% endif %}
                             {% for error in field.errors %}
-                            <p class="text-xs text-red-500 mt-1">{{ error }}</p>
+                            <p class="text-xs text-[var(--status-danger)] mt-1">{{ error }}</p>
                             {% endfor %}
                         </div>
                         {% endfor %}
@@ -141,7 +141,7 @@
 
                     <div class="flex justify-end">
                         <button type="submit"
-                            class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition shadow-lg shadow-red-600/20">
+                            class="bg-[var(--danger)] hover:bg-[var(--danger-hover)] text-white px-6 py-2 rounded-lg font-medium transition shadow-[var(--btn-shadow)]">
                             Actualizar Contraseña
                         </button>
                     </div>
@@ -151,7 +151,7 @@
             {% if agencia %}
             <!-- Tab: Agencia -->
             <div x-show="activeTab === 'agencia'"
-                class="bg-surface-2/50 border border-slate-700 rounded-2xl p-6 glass-panel" x-cloak>
+                class="bg-surface-2/50 border border-border-color rounded-2xl p-6 glass-panel" x-cloak>
                 <h2 class="text-xl font-bold text-text-main mb-6">Marca y Contacto</h2>
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
@@ -159,7 +159,7 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <!-- Logo Upload -->
-                        <div class="md:col-span-2 bg-surface-2/50 p-6 rounded-xl border border-dashed border-slate-600">
+                            <div class="md:col-span-2 bg-surface-2/50 p-6 rounded-xl border border-dashed border-border-color">
                             <label class="block text-sm font-medium text-text-muted mb-4">Logotipo de la Agencia</label>
                             <div class="flex items-center gap-6">
                                 {% if agencia.logo %}
@@ -198,7 +198,7 @@
 
                     <div class="flex justify-end">
                         <button type="submit"
-                            class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition shadow-lg shadow-purple-600/20">
+                            class="bg-primary hover:bg-primary-hover text-on-primary px-6 py-2 rounded-lg font-medium transition shadow-[var(--btn-shadow)]">
                             Guardar Configuración
                         </button>
                     </div>
@@ -207,21 +207,21 @@
 
             <!-- Tab: Automatización -->
             <div x-show="activeTab === 'automatizacion'"
-                class="bg-surface-2/50 border border-slate-700 rounded-2xl p-6 glass-panel" x-cloak>
+                class="bg-surface-2/50 border border-border-color rounded-2xl p-6 glass-panel" x-cloak>
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-bold text-text-main">Configuración del Mailbot</h2>
                     <div class="flex items-center gap-2">
                         <span
-                            class="w-2 h-2 rounded-full {% if agencia.email_monitor_active %}bg-green-500 animate-pulse{% else %}bg-red-500{% endif %}"></span>
+                            class="w-2 h-2 rounded-full {% if agencia.email_monitor_active %}bg-[var(--status-success)] animate-pulse{% else %}bg-[var(--status-danger)]{% endif %}"></span>
                         <span
-                            class="text-sm font-mono {% if agencia.email_monitor_active %}text-green-400{% else %}text-red-400{% endif %}">
+                            class="text-sm font-mono {% if agencia.email_monitor_active %}text-[var(--status-success)]{% else %}text-[var(--status-danger)]{% endif %}">
                             {% if agencia.email_monitor_active %}ACTIVO{% else %}INACTIVO{% endif %}
                         </span>
                     </div>
                 </div>
 
-                <div class="bg-blue-900/20 border border-blue-700/50 p-4 rounded-xl mb-6">
-                    <p class="text-sm text-blue-200">
+                <div class="bg-[var(--status-info-bg)] border border-[var(--status-info)]/50 p-4 rounded-xl mb-6">
+                    <p class="text-sm text-text-secondary">
                         El Mailbot escanea tu correo en busca de boletos PDF (KIU, Sabre, Amadeus) y los importa
                         automáticamente.
                         Debes usar una <b>Contraseña de Aplicación</b> de Google, no tu contraseña normal.
@@ -246,7 +246,7 @@
                                 en 2 pasos > Contraseñas de aplicaciones.</p>
                         </div>
 
-                        <div class="flex items-center p-4 bg-surface-2/50 rounded-lg border border-slate-700">
+                        <div                                 class="flex items-center p-4 bg-surface-2/50 rounded-lg border border-border-color">
                             {{ agency_automation_form.email_monitor_active }}
                             <div class="ml-3">
                                 <span class="text-text-main font-medium block">Activar Lectura Automática</span>
@@ -264,7 +264,7 @@
 
                     <div class="flex justify-end">
                         <button type="submit"
-                            class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-medium transition shadow-lg shadow-emerald-600/20">
+                            class="bg-primary hover:bg-primary-hover text-on-primary px-6 py-2 rounded-lg font-medium transition shadow-[var(--btn-shadow)]">
                             Actualizar Robot
                         </button>
                     </div>

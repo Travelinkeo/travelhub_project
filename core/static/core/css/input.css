@@ -25,7 +25,7 @@
     @apply h-[40px] inline-flex items-center justify-center gap-2 px-4 bg-surface-2 border border-border-color text-text-main hover:bg-surface-3 text-[13px] font-bold rounded-[8px] transition-colors shadow-sm;
   }
   .btn-danger {
-    @apply h-[40px] inline-flex items-center justify-center gap-2 px-4 bg-red-600 hover:bg-red-700 text-white text-[13px] font-bold rounded-[8px] transition-all shadow-md;
+    @apply h-[40px] inline-flex items-center justify-center gap-2 px-4 bg-[var(--danger)] hover:bg-[var(--danger-hover)] text-white text-[13px] font-bold rounded-[8px] transition-all shadow-md;
   }
 
   /* Tarjetas Base (DataGrids, Formularios) */

@@ -126,9 +126,9 @@
                     <span class="hidden sm:inline">Instalar</span>
                 </button>
 
-                <button @click="$dispatch('open-ai-panel')" class="hidden md:flex items-center gap-2 bg-purple-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm">
+                <button @click="$dispatch('open-ai-panel')" class="flex items-center gap-2 bg-[var(--ai-accent-bg)] border border-[var(--ai-accent)]/30 text-[var(--ai-accent)] hover:bg-[var(--ai-accent-bg)]/80 px-2 md:px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm">
                     <span class="material-symbols-outlined text-[16px] animate-pulse">auto_awesome</span>
-                    BI-IA Insight
+                    <span class="hidden md:inline">BI-IA Insight</span>
                 </button>
 
                 <a href="{% url 'core:user_profile' %}"

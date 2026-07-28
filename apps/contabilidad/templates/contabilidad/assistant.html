@@ -8,7 +8,7 @@
      data-chat-url="{% url 'contabilidad:api_chat' %}">
     <!-- Container Principal con efecto Cristalline -->
     <div class="assistant-container bg-gray-800/40 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex flex-col h-[750px] animate-in fade-in slide-in-from-bottom-4 duration-700">
-        
+
         <!-- Header del Asistente -->
         <div class="p-6 bg-gray-900/60 border-b border-white/5 flex items-center justify-between">
             <div class="flex items-center gap-4">
@@ -26,7 +26,7 @@
                     </p>
                 </div>
             </div>
-            
+
             <div class="flex items-center gap-3">
                 <button @click="clearChat" class="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all" title="Limpiar Conversación">
                     <span class="material-symbols-outlined w-5 h-5">restart_alt</span>
@@ -42,13 +42,13 @@
         <!-- Área de Mensajes -->
         <div class="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar scroll-smooth" id="chat-container">
             <template x-for="(msg, index) in messages" :key="index">
-                <div :class="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'" 
+                <div :class="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'"
                      class="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    
+
                     <div class="flex gap-3 max-w-[85%]" :class="msg.role === 'user' ? 'flex-row-reverse' : ''">
                         <!-- Avatar Mini -->
                         <div class="flex-shrink-0 mt-auto mb-1">
-                            <div :class="msg.role === 'user' ? 'bg-indigo-500' : 'bg-gray-700'" 
+                            <div :class="msg.role === 'user' ? 'bg-indigo-500' : 'bg-gray-700'"
                                  class="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
                                 <span x-text="msg.role === 'user' ? 'YO' : 'AI'"></span>
                             </div>
@@ -57,9 +57,9 @@
                         <!-- Burbuja -->
                         <div :class="msg.role === 'user' ? 'bg-[var(--primary)] text-white rounded-2xl rounded-tr-none shadow-lg shadow-[var(--primary)]/10' : 'bg-[var(--surface-2)] text-[var(--text-primary)] rounded-2xl rounded-tl-none border border-[var(--border)] shadow-xl'"
                              class="p-4 relative">
-                            
+
                             <div class="text-sm leading-relaxed whitespace-pre-wrap" x-html="formatMessage(msg.content)"></div>
-                            
+
                             <!-- Indicador de Datos Reales -->
                             <template x-if="msg.data_found">
                                 <div class="mt-3 pt-2 border-t border-white/10 flex items-center gap-1.5 text-[9px] text-indigo-300 font-bold uppercase tracking-widest">
@@ -67,14 +67,14 @@
                                     Consulta Local Exitosa
                                 </div>
                             </template>
-                            
+
                             <!-- Timestamp -->
                             <span class="block mt-1 text-[8px] opacity-40 text-right" x-text="msg.time"></span>
                         </div>
                     </div>
                 </div>
             </template>
-            
+
             <!-- Loading State -->
             <div x-show="loading" class="flex justify-start animate-in fade-in duration-200">
                 <div class="bg-gray-800/80 p-4 rounded-2xl rounded-tl-none border border-white/10 flex gap-2">
@@ -90,7 +90,7 @@
             <!-- Sugerencias Rápidas -->
             <div class="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar">
                 <template x-for="sug in suggestions" :key="sug">
-                    <button @click="userInput = sug; sendMessage();" 
+                    <button @click="userInput = sug; sendMessage();"
                             class="whitespace-nowrap px-3 py-1.5 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/5 rounded-full text-[10px] transition-all font-medium">
                         <span x-text="sug"></span>
                     </button>
@@ -99,18 +99,18 @@
 
             <form @submit.prevent="sendMessage" class="relative">
                 {% csrf_token %}
-                <input type="text" x-model="userInput" 
+                <input type="text" x-model="userInput"
                        placeholder="Escriba aquí su consulta sobre operaciones, finanzas, viajes o marketing..."
                        class="w-full bg-gray-950/50 border border-white/10 rounded-2xl px-5 py-4 pr-16 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500/50 transition-all shadow-inner"
                        :disabled="loading">
-                
-                <button type="submit" 
+
+                <button type="submit"
                         class="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-[var(--primary)] hover:bg-[var(--primary-hover)] active:scale-95 text-white rounded-xl flex items-center justify-center transition-all shadow-lg hover:shadow-[var(--primary)]/40 disabled:opacity-50"
                         :disabled="!userInput.trim() || loading">
                     <span class="material-symbols-outlined w-5 h-5">send</span>
                 </button>
             </form>
-            
+
             <div class="flex items-center justify-center gap-4 mt-4 opacity-30">
                 <span class="text-[9px] text-gray-400">Powered by Gemini 2.0 Flash</span>
                 <div class="w-1 h-1 bg-gray-600 rounded-full"></div>

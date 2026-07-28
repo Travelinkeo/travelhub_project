@@ -20,10 +20,10 @@ scene_files = []
 for idx, img_name in enumerate(scenes, 1):
     img_path = os.path.join(capturas_dir, img_name)
     scene_out = os.path.join(capturas_dir, f"scene_{idx}.mp4")
-    
+
     # Scale screenshot cleanly into 1920x1080 HD frame with dark background
     vf_filter = "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=0x0f172a"
-    
+
     cmd = [
         ffmpeg_path, "-y",
         "-loop", "1",
@@ -35,7 +35,7 @@ for idx, img_name in enumerate(scenes, 1):
         "-r", "30",
         scene_out
     ]
-    
+
     print(f"Rendering scene {idx}: {img_name}...")
     subprocess.run(cmd, check=True)
     scene_files.append(scene_out)

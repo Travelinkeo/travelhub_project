@@ -44,7 +44,7 @@
         <div>
             <h2 class="text-5xl font-black text-white tracking-tight flex items-center gap-4 uppercase">
                 {{ venta.localizador|default:"S/L" }}
-                <button @click="navigator.clipboard.writeText('{{ venta.localizador }}'); $dispatch('notify', { message: 'Copiado!', type: 'success' })" 
+                <button @click="navigator.clipboard.writeText('{{ venta.localizador }}'); $dispatch('notify', { message: 'Copiado!', type: 'success' })"
                     class="text-slate-500 hover:text-blue-500 transition-colors" title="Copiar PNR">
                     <span class="material-symbols-outlined w-6 h-6">content_copy</span>
                 </button>
@@ -57,7 +57,7 @@
                     Emisión: {{ venta.fecha_venta|date:"d M Y" }}
                 </span>
                 <span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
-                <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest 
+                <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest
                     {% if venta.estado == 'PAG' or venta.estado == 'COM' %}bg-emerald-500/10 text-emerald-500 border border-emerald-500/20
                     {% elif venta.estado == 'PEN' %}bg-amber-500/10 text-amber-500 border border-amber-500/20
                     {% else %}bg-blue-500/10 text-blue-400 border border-blue-500/20{% endif %}">
@@ -65,7 +65,7 @@
                 </span>
             </div>
         </div>
-        
+
         <div class="flex gap-3">
             <a href="{% url 'bookings:venta_update' venta.pk %}" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-3 px-6 rounded-2xl transition-all flex items-center gap-2 text-sm">
                 <span class="material-symbols-outlined w-4 h-4 text-blue-400">edit</span> Editar Venta
@@ -78,14 +78,14 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
+
         <!-- COLUMNA IZQUIERDA (8/12): EL TIMELINE -->
         <div class="lg:col-span-8 bg-[#0f172a]/40 border border-white/5 rounded-[2.5rem] p-10 shadow-sm backdrop-blur-sm">
             <h3 class="text-xl font-black text-white mb-10 border-b border-white/5 pb-6 flex items-center gap-3">
                 <i data-lucide="activity" class="w-6 h-6 text-blue-500"></i>
                 Línea de Vida de la Reserva
             </h3>
-            
+
             <div class="timeline-container">
                 {% for event in timeline_events %}
                 <div class="timeline-item">
@@ -101,7 +101,7 @@
                             <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{{ event.date|timesince }}</span>
                         </div>
                         <p class="text-sm text-slate-400 mb-6">{{ event.description }}</p>
-                        
+
                         <div class="bg-slate-900/80 border border-white/5 rounded-2xl p-5 flex items-center justify-between">
                             <div>
                                 <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Monto a Cobrar</p>
@@ -153,13 +153,13 @@
 
         <!-- COLUMNA DERECHA (4/12): SUMARIO FINANCIERO Y DOCS -->
         <div class="lg:col-span-4 flex flex-col gap-8">
-            
+
             <!-- Resumen Financiero -->
             <div class="bg-[#0f172a]/40 border border-white/5 rounded-[2.5rem] p-8 shadow-sm backdrop-blur-sm">
                 <h3 class="text-[11px] font-black text-slate-500 uppercase tracking-[0.25em] mb-8 flex items-center gap-2">
                     <i data-lucide="wallet" class="w-3.5 h-3.5"></i> Resumen Financiero
                 </h3>
-                
+
                 <div class="space-y-5 mb-10">
                     <div class="flex justify-between items-center text-sm">
                         <span class="text-slate-400">Tarifa GDS + Impuestos</span>
@@ -203,7 +203,7 @@
                     <span>Documentos Digitales</span>
                     <span class="bg-white/10 text-slate-300 px-3 py-1 rounded-full text-[10px] font-black">{{ venta.boletos_adjuntos.count }}</span>
                 </h3>
-                
+
                 <div class="space-y-4">
                     {% for boleto in venta.boletos_adjuntos.all %}
                     <!-- Original -->
@@ -260,14 +260,14 @@
 <!-- Modal Global para HTMX -->
 <div x-data="{ open: false }" @open-modal.window="open = true" @close-modal.window="open = false" x-show="open"
     class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-cloak>
-    <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md" @click="open = false" 
-        x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" 
+    <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md" @click="open = false"
+        x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
         x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
-    
+
     <div class="relative bg-slate-900 border border-white/10 rounded-[2.5rem] shadow-2xl w-full max-w-xl overflow-hidden"
         x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 translate-y-4" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
         x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-95 translate-y-4">
-        
+
         <div class="flex items-center justify-between p-6 border-b border-white/5 bg-white/5">
             <h3 class="text-lg font-black text-white uppercase tracking-widest">Acción de Reserva</h3>
             <button @click="open = false" class="text-slate-500 hover:text-white transition-colors">
@@ -286,7 +286,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', () => { lucide.createIcons(); });
     document.body.addEventListener('htmx:afterSwap', () => { lucide.createIcons(); });
 

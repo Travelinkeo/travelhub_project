@@ -18,14 +18,14 @@ Permite filtrar por rango de fechas y tipo de período.
         <!-- Fecha Desde -->
         <div class="flex-1 min-w-[150px]" id="fecha-desde-container" style="display: none;">
             <label class="block text-xs font-medium text-gray-400 mb-1">Desde</label>
-            <input type="date" name="fecha_desde" id="fecha_desde" value="{{ fecha_desde }}" 
+            <input type="date" name="fecha_desde" id="fecha_desde" value="{{ fecha_desde }}"
                    class="w-full bg-gray-800 border border-gray-600 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
         </div>
 
         <!-- Fecha Hasta -->
         <div class="flex-1 min-w-[150px]" id="fecha-hasta-container" style="display: none;">
             <label class="block text-xs font-medium text-gray-400 mb-1">Hasta</label>
-            <input type="date" name="fecha_hasta" id="fecha_hasta" value="{{ fecha_hasta }}" 
+            <input type="date" name="fecha_hasta" id="fecha_hasta" value="{{ fecha_hasta }}"
                    class="w-full bg-gray-800 border border-gray-600 text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
         </div>
 
@@ -51,7 +51,7 @@ Permite filtrar por rango de fechas y tipo de período.
     </form>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 // Toggle de fechas personalizadas
 document.getElementById('periodo').addEventListener('change', function(e) {
     const esCustom = e.target.value === 'custom';

@@ -12,7 +12,7 @@
         </div>
         <div class="flex gap-2 text-[13px]">
              <span class="font-bold bg-surface-2 border border-border-color px-3 py-1.5 rounded-full flex items-center gap-2 text-text-main shadow-sm">
-                <span class="material-symbols-outlined text-[18px] text-status-success">smart_toy</span> 
+                <span class="material-symbols-outlined text-[18px] text-status-success">smart_toy</span>
                 Vendedor IA Activo
             </span>
         </div>
@@ -30,7 +30,7 @@
                     </h3>
                     <span class="text-xs font-bold bg-surface-2 text-text-secondary border border-border-color px-2 py-0.5 rounded-full">{{ leads_new_count }}</span>
                 </div>
-                <div id="col-NEW" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'NEW')" 
+                <div id="col-NEW" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'NEW')"
                      class="column-drop-zone flex-1 bg-surface-1 border border-border-color border-opacity-50 rounded-2xl p-3 overflow-y-auto transition-all shadow-inset-custom">
                     {% for lead in leads_new %}
                         {% include "crm/partials/kanban_card.html" with lead=lead %}
@@ -46,7 +46,7 @@
                     </h3>
                     <span class="text-xs font-bold bg-surface-2 text-text-secondary border border-border-color px-2 py-0.5 rounded-full">{{ leads_quo_count }}</span>
                 </div>
-                <div id="col-QUO" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'QUO')" 
+                <div id="col-QUO" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'QUO')"
                      class="column-drop-zone flex-1 bg-surface-1 border border-border-color border-opacity-50 rounded-2xl p-3 overflow-y-auto transition-all shadow-inset-custom">
                     {% for lead in leads_quo %}
                         {% include "crm/partials/kanban_card.html" with lead=lead %}
@@ -62,7 +62,7 @@
                     </h3>
                     <span class="text-xs font-bold bg-surface-2 text-text-secondary border border-border-color px-2 py-0.5 rounded-full">{{ leads_pay_count }}</span>
                 </div>
-                <div id="col-PAY" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'PAY')" 
+                <div id="col-PAY" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'PAY')"
                      class="column-drop-zone flex-1 bg-surface-1 border border-border-color border-opacity-50 rounded-2xl p-3 overflow-y-auto transition-all shadow-inset-custom">
                     {% for lead in leads_pay %}
                         {% include "crm/partials/kanban_card.html" with lead=lead %}
@@ -78,7 +78,7 @@
                     </h3>
                     <span class="text-xs font-bold bg-surface-2 text-text-secondary border border-border-color px-2 py-0.5 rounded-full">{{ leads_won_count }}</span>
                 </div>
-                <div id="col-WON" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'WON')" 
+                <div id="col-WON" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'WON')"
                      class="column-drop-zone flex-1 bg-status-success-bg/5 border border-status-success border-opacity-20 rounded-2xl p-3 overflow-y-auto transition-all shadow-inset-custom">
                     {% for lead in leads_won %}
                         {% include "crm/partials/kanban_card.html" with lead=lead %}
@@ -94,7 +94,7 @@
                     </h3>
                     <span class="text-xs font-bold bg-surface-2 text-text-secondary border border-border-color px-2 py-0.5 rounded-full">{{ leads_los_count }}</span>
                 </div>
-                <div id="col-LOS" data-stage="LOS" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'LOS')" 
+                <div id="col-LOS" data-stage="LOS" @dragover.prevent="dragOver($event)" @dragleave.prevent="dragLeave($event)" @drop="drop($event, 'LOS')"
                      class="column-drop-zone flex-1 bg-red-500/10 border border-red-500/20 rounded-2xl p-3 overflow-y-auto transition-all shadow-inset-custom">
                     {% for lead in leads_los %}
                         {% include "crm/partials/kanban_card.html" with lead=lead %}
@@ -115,7 +115,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     document.addEventListener('alpine:init', () => {
         Alpine.data('kanbanApp', () => ({
             draggedId: null,

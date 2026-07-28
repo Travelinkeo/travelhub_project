@@ -102,10 +102,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0
                         {% trans "Abrir Hub Completo" %}
                     </a>
                 </div>
-                
-                <form hx-post="{% url 'marketing:generar_social_advanced' %}" 
+
+                <form hx-post="{% url 'marketing:generar_social_advanced' %}"
                       hx-target="#social-hub-results"
-                      hx-indicator="#loading-social" 
+                      hx-indicator="#loading-social"
                       class="space-y-4">
                     {% csrf_token %}
                     <div class="grid grid-cols-1 gap-4">
@@ -192,7 +192,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0
     </div>
 </main>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 #flyer-preview img {
     max-width: 100%;
     border-radius: 1rem;

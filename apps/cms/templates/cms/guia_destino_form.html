@@ -95,7 +95,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     async function suggestAI(field) {
         const nombreInput = document.querySelector('[name="nombre"]');
         const context = (nombreInput ? nombreInput.value : "") || "Viajes";

@@ -13,6 +13,6 @@
             <button type="submit">Continuar</button>
         </noscript>
     </form>
-    <script>document.getElementById('saml_form').submit();</script>
+    <script nonce="{{ request.csp_nonce }}">document.getElementById('saml_form').submit();</script>
 </body>
 </html>

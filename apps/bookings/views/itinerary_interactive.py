@@ -14,17 +14,30 @@ logger = logging.getLogger(__name__)
 
 
 def _enrich_segments(venta):
-    """Añade coordenadas geográficas a segmentos de vuelo para el mapa."""
+    """Añade coordenadas geográficas a segmentos de vuelo para el mapa (batch query)."""
+    iata_codes = set()
+    iata_map = {}
+    for seg in venta.segmentos_vuelo.all():
+        if seg.origen and seg.origen.codigo_iata:
+            iata_codes.add(seg.origen.codigo_iata)
+            iata_map[(seg.pk, "origen")] = seg.origen.codigo_iata
+        if seg.destino and seg.destino.codigo_iata:
+            iata_codes.add(seg.destino.codigo_iata)
+            iata_map[(seg.pk, "destino")] = seg.destino.codigo_iata
+    if iata_codes:
+        aeropuertos = {
+            a.codigo_iata: a for a in Aeropuerto.objects.filter(codigo_iata__in=iata_codes)
+        }
+    else:
+        aeropuertos = {}
     for seg in venta.segmentos_vuelo.all():
         try:
-            if seg.origen and seg.origen.codigo_iata:
-                apt = Aeropuerto.objects.filter(codigo_iata=seg.origen.codigo_iata).first()
-                seg._origen_lat = apt.latitud if apt else None
-                seg._origen_lng = apt.longitud if apt else None
-            if seg.destino and seg.destino.codigo_iata:
-                apt = Aeropuerto.objects.filter(codigo_iata=seg.destino.codigo_iata).first()
-                seg._destino_lat = apt.latitud if apt else None
-                seg._destino_lng = apt.longitud if apt else None
+            apt_origen = aeropuertos.get(iata_map.get((seg.pk, "origen")))
+            seg._origen_lat = apt_origen.latitud if apt_origen else None
+            seg._origen_lng = apt_origen.longitud if apt_origen else None
+            apt_destino = aeropuertos.get(iata_map.get((seg.pk, "destino")))
+            seg._destino_lat = apt_destino.latitud if apt_destino else None
+            seg._destino_lng = apt_destino.longitud if apt_destino else None
         except Exception:
             seg._origen_lat = seg._origen_lng = seg._destino_lat = seg._destino_lng = None
 
@@ -110,7 +123,9 @@ class ItineraryMapDataView(View):
         from core.api import Agencia, agency_context
 
         with agency_context(Agencia.objects.get(pk=agencia_id)):
-            venta = Venta.all_objects.get(pk=venta_id, agencia_id=agencia_id, is_deleted=False)
+            venta = Venta.all_objects.prefetch_related("segmentos_vuelo").get(
+                pk=venta_id, agencia_id=agencia_id, is_deleted=False
+            )
             _enrich_segments(venta)
 
             routes = []

@@ -188,19 +188,30 @@ def dashboard_stats(request):
     else:
         boletos_qs = BoletoImportado.objects.none()
 
-    procesados_hoy = boletos_qs.filter(fecha_subida__date=hoy, estado_parseo="COM").count()
-    procesados_semana = boletos_qs.filter(
-        fecha_subida__date__gte=inicio_semana, estado_parseo="COM"
-    ).count()
-    procesados_mes = boletos_qs.filter(
-        fecha_subida__date__gte=inicio_mes, estado_parseo="COM"
-    ).count()
-    procesados_total = boletos_qs.filter(estado_parseo="COM").count()
+    from django.db.models import Count, Q
 
-    pendientes = boletos_qs.filter(estado_parseo="PEN").count()
-    errores = boletos_qs.filter(estado_parseo="ERR").count()
-    revision = boletos_qs.filter(estado_parseo="REV").count()
-    total = boletos_qs.count()
+    stats = boletos_qs.aggregate(
+        total=Count("pk"),
+        procesados_total=Count("pk", filter=Q(estado_parseo="COM")),
+        procesados_hoy=Count("pk", filter=Q(fecha_subida__date=hoy, estado_parseo="COM")),
+        procesados_semana=Count(
+            "pk", filter=Q(fecha_subida__date__gte=inicio_semana, estado_parseo="COM")
+        ),
+        procesados_mes=Count(
+            "pk", filter=Q(fecha_subida__date__gte=inicio_mes, estado_parseo="COM")
+        ),
+        pendientes=Count("pk", filter=Q(estado_parseo="PEN")),
+        errores=Count("pk", filter=Q(estado_parseo="ERR")),
+        revision=Count("pk", filter=Q(estado_parseo="REV")),
+    )
+    total = stats["total"]
+    procesados_total = stats["procesados_total"]
+    procesados_hoy = stats["procesados_hoy"]
+    procesados_semana = stats["procesados_semana"]
+    procesados_mes = stats["procesados_mes"]
+    pendientes = stats["pendientes"]
+    errores = stats["errores"]
+    revision = stats["revision"]
 
     top_aerolineas = list(
         boletos_qs.filter(estado_parseo="COM")

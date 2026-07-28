@@ -106,7 +106,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     async function suggestAI(field) {
         const destinoInput = document.querySelector('[name="destino"]');
         const tituloInput = document.querySelector('[name="titulo"]');

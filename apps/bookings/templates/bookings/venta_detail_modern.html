@@ -332,7 +332,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', function () {
         lucide.createIcons();
     });

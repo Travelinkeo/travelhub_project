@@ -24,7 +24,7 @@ Chart.js donut chart para distribución de ventas.
     </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function() {
     const ctx = document.getElementById('{{ chart_id }}');
     if (!ctx) return;
@@ -83,7 +83,7 @@ Chart.js donut chart para distribución de ventas.
             const value = chartData.values[index];
             const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
             const color = colors[index % colors.length];
-            
+
             const item = document.createElement('div');
             item.className = 'flex items-center justify-between text-sm';
             item.innerHTML = `

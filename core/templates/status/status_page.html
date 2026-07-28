@@ -338,7 +338,7 @@
 </footer>
 
 <!-- Auto-refresh cada 60 segundos -->
-<script>
+<script nonce="{{ request.csp_nonce }}">
   setTimeout(() => location.reload(), 60_000);
 </script>
 </body>

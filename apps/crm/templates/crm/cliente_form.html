@@ -29,7 +29,7 @@
         <!-- Main Info Card -->
         <div class="card-base p-8 relative overflow-hidden group">
             <div class="absolute -right-10 -top-10 size-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors"></div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
                 <!-- Profile Picture Upload -->
                 <div class="flex flex-col items-center space-y-4">
@@ -98,7 +98,7 @@
                         <p class="text-[11px] text-text-muted italic">Datos fiscales y comunicación</p>
                     </div>
                 </div>
-                
+
                 <div class="space-y-6">
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Cédula / RIF / ID Fiscal</label>
@@ -134,7 +134,7 @@
                         <p class="text-[11px] text-text-muted italic">Dirección de facturación o entrega</p>
                     </div>
                 </div>
-                
+
                 <div class="space-y-6">
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Ciudad</label>
@@ -170,7 +170,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     document.querySelector('input[type=file][name=foto_perfil]').addEventListener('change', function() { previewImage(this); });
 
     function previewImage(input) {

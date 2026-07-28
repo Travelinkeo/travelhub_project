@@ -29,10 +29,8 @@ COPY fixtures/ ./fixtures/
 COPY tailwind.config.js ./
 
 COPY compilar.sh ./compilar.sh
-COPY compile_i18n.py ./compile_i18n.py
 
 RUN chmod +x ./compilar.sh && sed -i 's/\r$//' ./compilar.sh && bash ./compilar.sh || true
-RUN python compile_i18n.py || true
 
 RUN PYTHONPATH=/install/lib/python3.12/site-packages \
     DJANGO_SETTINGS_MODULE=travelhub.settings \

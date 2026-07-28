@@ -9,90 +9,90 @@
     <!-- Top Action Buttons -->
     <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 mt-1">
         <!-- Nueva Venta -->
-        <a href="{% url 'bookings:venta_create' %}" class="group flex items-center gap-2 bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70 rounded-xl p-2.5 shadow-md hover:shadow-[var(--btn-shadow)] transition-all hover:-translate-y-0.5 active:scale-[0.98] duration-150">
-            <div class="bg-white/15 p-1.5 rounded-lg group-hover:bg-white/25 transition shrink-0 flex items-center justify-center">
-                <span class="material-symbols-outlined text-[var(--text-on-primary)] text-[18px]">add_shopping_cart</span>
+        <a href="{% url 'bookings:venta_create' %}" class="group flex items-center gap-2 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl p-2.5 shadow-md hover:shadow-blue-500/20 transition-all hover:-translate-y-0.5 active:scale-[0.98] duration-150">
+            <div class="bg-white/10 p-1.5 rounded-lg group-hover:bg-white/20 transition shrink-0 flex items-center justify-center">
+                <span class="material-symbols-outlined text-white text-[18px]">add_shopping_cart</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-[var(--text-on-primary)] leading-tight">{% trans "Nueva Venta" %}</h3>
-                <p class="text-[var(--text-on-primary)]/60 text-[9px] truncate mt-0.5">{% trans "Cotizar o Reservar" %}</p>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "Nueva Venta" %}</h3>
+                <p class="text-blue-200 text-[9px] truncate mt-0.5">{% trans "Cotizar o Reservar" %}</p>
             </div>
         </a>
 
         <!-- Inbox WhatsApp -->
-        <a href="{% url 'crm:inbox' %}" class="group flex items-center gap-2 bg-gradient-to-br from-[var(--primary)]/85 to-[var(--primary)]/55 rounded-xl p-2.5 shadow-md hover:shadow-[var(--btn-shadow)] transition-all hover:-translate-y-0.5 active:scale-[0.98] duration-150">
-            <div class="bg-white/15 p-1.5 rounded-lg group-hover:bg-white/25 transition shrink-0 flex items-center justify-center">
-                <span class="material-symbols-outlined text-[var(--text-on-primary)] text-[18px]">chat</span>
+        <a href="{% url 'crm:inbox' %}" class="group flex items-center gap-2 bg-gradient-to-br from-green-600 to-emerald-800 rounded-xl p-2.5 shadow-md hover:shadow-emerald-500/20 transition-all hover:-translate-y-0.5 active:scale-[0.98] duration-150">
+            <div class="bg-white/10 p-1.5 rounded-lg group-hover:bg-white/20 transition shrink-0 flex items-center justify-center">
+                <span class="material-symbols-outlined text-white text-[18px]">chat</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-[var(--text-on-primary)] leading-tight">{% trans "WhatsApp" %}</h3>
-                <p class="text-[var(--text-on-primary)]/60 text-[9px] truncate mt-0.5">CRM + IA</p>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "WhatsApp" %}</h3>
+                <p class="text-emerald-100 text-[9px] truncate mt-0.5">CRM + IA</p>
             </div>
         </a>
 
         <!-- Escanear ID -->
-        <label for="passport-file-input" id="btn-scan-passport" class="group flex items-center gap-2 bg-gradient-to-br from-[var(--primary)]/75 to-[var(--primary)]/45 rounded-xl p-2.5 shadow-md cursor-pointer hover:shadow-[var(--btn-shadow)] hover:-translate-y-0.5 active:scale-[0.98] duration-150 transition-all">
-            <div class="bg-white/15 p-1.5 rounded-lg group-hover:bg-white/25 transition shrink-0 flex items-center justify-center">
-                <span class="material-symbols-outlined text-[var(--text-on-primary)] text-[18px]">document_scanner</span>
+        <label for="passport-file-input" id="btn-scan-passport" class="group flex items-center gap-2 bg-gradient-to-br from-emerald-600 to-teal-800 rounded-xl p-2.5 shadow-md cursor-pointer hover:shadow-emerald-500/20 hover:-translate-y-0.5 active:scale-[0.98] duration-150 transition-all">
+            <div class="bg-white/10 p-1.5 rounded-lg group-hover:bg-white/20 transition shrink-0 flex items-center justify-center">
+                <span class="material-symbols-outlined text-white text-[18px]">document_scanner</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-[var(--text-on-primary)] leading-tight">{% trans "Escanear ID" %}</h3>
-                <p class="text-[var(--text-on-primary)]/60 text-[9px] truncate mt-0.5">Pasaporte (OCR)</p>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "Escanear ID" %}</h3>
+                <p class="text-emerald-200 text-[9px] truncate mt-0.5">Pasaporte (OCR)</p>
             </div>
         </label>
 
         <!-- Subir Boleto -->
-        <label id="btn-upload-ticket" class="group flex items-center gap-2 bg-gradient-to-r from-[var(--primary)] to-[var(--danger)]/70 rounded-xl p-2.5 shadow-md cursor-pointer hover:shadow-[var(--btn-shadow)] hover:-translate-y-0.5 active:scale-[0.98] duration-150 transition-all">
-            <div class="bg-white/15 p-1.5 rounded-lg group-hover:bg-white/25 transition shrink-0 flex items-center justify-center">
-                <span class="material-symbols-outlined text-[var(--text-on-primary)] text-[18px]">upload_file</span>
+        <label id="btn-upload-ticket" class="group flex items-center gap-2 bg-gradient-to-r from-pink-600 to-rose-600 rounded-xl p-2.5 shadow-md cursor-pointer hover:shadow-pink-500/20 hover:-translate-y-0.5 active:scale-[0.98] duration-150 transition-all">
+            <div class="bg-white/20 p-1.5 rounded-lg group-hover:bg-white/30 transition shrink-0 flex items-center justify-center">
+                <span class="material-symbols-outlined text-white text-[18px]">upload_file</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-[var(--text-on-primary)] leading-tight">{% trans "Subir Boleto" %}</h3>
-                <p class="text-[var(--text-on-primary)]/60 text-[9px] truncate mt-0.5">{% trans "PDF o Texto GDS" %}</p>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "Subir Boleto" %}</h3>
+                <p class="text-pink-100 text-[9px] truncate mt-0.5">{% trans "PDF o Texto GDS" %}</p>
             </div>
         </label>
 
         <!-- Facturación -->
-        <a href="{% url 'finance:facturacion_dashboard' %}" class="group flex items-center gap-2 bg-gradient-to-br from-[var(--primary)]/90 to-[var(--primary)]/60 rounded-xl p-2.5 shadow-md hover:shadow-[var(--btn-shadow)] transition-all hover:-translate-y-0.5 active:scale-[0.98] duration-150">
-            <div class="bg-white/15 p-1.5 rounded-lg group-hover:bg-white/25 transition shrink-0 flex items-center justify-center">
-                <span class="material-symbols-outlined text-[var(--text-on-primary)] text-[18px]">receipt_long</span>
+        <a href="{% url 'finance:facturacion_dashboard' %}" class="group flex items-center gap-2 bg-gradient-to-br from-indigo-600 to-violet-800 rounded-xl p-2.5 shadow-md hover:shadow-indigo-500/20 transition-all hover:-translate-y-0.5 active:scale-[0.98] duration-150">
+            <div class="bg-white/10 p-1.5 rounded-lg group-hover:bg-white/20 transition shrink-0 flex items-center justify-center">
+                <span class="material-symbols-outlined text-white text-[18px]">receipt_long</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-[var(--text-on-primary)] leading-tight">{% trans "Facturación" %}</h3>
-                <p class="text-[var(--text-on-primary)]/60 text-[9px] truncate mt-0.5">{% trans "Borradores" %}</p>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "Facturación" %}</h3>
+                <p class="text-indigo-200 text-[9px] truncate mt-0.5">{% trans "Borradores" %}</p>
             </div>
         </a>
 
         <!-- Conciliación IA -->
-        <a href="#" class="group flex items-center gap-2 bg-gradient-to-br from-[var(--primary)]/70 to-[var(--primary)]/40 rounded-xl p-2.5 shadow-md hover:shadow-[var(--btn-shadow)] transition-all hover:-translate-y-0.5 active:scale-[0.98] duration-150">
-            <div class="bg-white/15 p-1.5 rounded-lg group-hover:bg-white/25 transition shrink-0 flex items-center justify-center">
-                <span class="material-symbols-outlined text-[var(--text-on-primary)] text-[18px]">auto_awesome</span>
+        <a href="#" class="group flex items-center gap-2 bg-gradient-to-br from-emerald-600 to-teal-800 rounded-xl p-2.5 shadow-md hover:shadow-emerald-500/20 transition-all hover:-translate-y-0.5 active:scale-[0.98] duration-150">
+            <div class="bg-white/10 p-1.5 rounded-lg group-hover:bg-white/20 transition shrink-0 flex items-center justify-center">
+                <span class="material-symbols-outlined text-white text-[18px]">auto_awesome</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-[var(--text-on-primary)] leading-tight">{% trans "Conciliación" %}</h3>
-                <p class="text-[var(--text-on-primary)]/60 text-[9px] truncate mt-0.5">{% trans "Proveedores" %}</p>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "Conciliación" %}</h3>
+                <p class="text-emerald-100 text-[9px] truncate mt-0.5">{% trans "Proveedores" %}</p>
             </div>
         </a>
 
         <!-- Analizador GDS -->
-        <a href="{% url 'core:gds_analyzer' %}" class="group flex items-center gap-2 bg-surface-2 border border-primary/30 rounded-xl p-2.5 shadow-md hover:shadow-primary/10 transition-all hover:-translate-y-0.5 active:scale-[0.98] duration-150">
+        <a href="{% url 'core:gds_analyzer' %}" class="group flex items-center gap-2 bg-[#13171f] border border-primary/20 rounded-xl p-2.5 shadow-md hover:shadow-primary/10 transition-all hover:-translate-y-0.5 active:scale-[0.98] duration-150">
             <div class="bg-primary/10 p-1.5 rounded-lg group-hover:bg-primary/20 transition shrink-0 flex items-center justify-center">
                 <span class="material-symbols-outlined text-primary text-[18px]">bolt</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-text-main leading-tight">{% trans "Analizador GDS" %}</h3>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "Analizador GDS" %}</h3>
                 <p class="text-primary text-[9px] font-mono uppercase tracking-tighter truncate mt-0.5">AI GDS</p>
             </div>
         </a>
 
         <!-- Magic Quoter AI -->
-        <a href="{% url 'bookings:cotizacion_magic' %}" class="group flex items-center gap-2 bg-gradient-to-br from-[var(--primary)] to-[var(--ai-accent)]/60 rounded-xl p-2.5 shadow-md hover:shadow-[var(--btn-shadow)] transition-all hover:-translate-y-0.5 active:scale-[0.98] duration-150">
-            <div class="bg-white/15 p-1.5 rounded-lg group-hover:bg-white/25 transition shrink-0 flex items-center justify-center">
-                <span class="material-symbols-outlined text-[var(--text-on-primary)] text-[18px]">magic_button</span>
+        <a href="{% url 'bookings:cotizacion_magic' %}" class="group flex items-center gap-2 bg-gradient-to-br from-purple-600 to-indigo-800 rounded-xl p-2.5 shadow-md hover:shadow-purple-500/20 transition-all hover:-translate-y-0.5 active:scale-[0.98] duration-150">
+            <div class="bg-white/10 p-1.5 rounded-lg group-hover:bg-white/20 transition shrink-0 flex items-center justify-center">
+                <span class="material-symbols-outlined text-white text-[18px]">magic_button</span>
             </div>
             <div class="min-w-0">
-                <h3 class="text-xs font-bold text-[var(--text-on-primary)] leading-tight">{% trans "Magic Quoter" %}</h3>
-                <p class="text-[var(--text-on-primary)]/60 text-[9px] truncate mt-0.5">{% trans "Cotizador IA" %}</p>
+                <h3 class="text-xs font-bold text-white leading-tight">{% trans "Magic Quoter" %}</h3>
+                <p class="text-purple-100 text-[9px] truncate mt-0.5">{% trans "Cotizador IA" %}</p>
             </div>
         </a>
     </div>

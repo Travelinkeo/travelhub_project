@@ -143,10 +143,10 @@
     .wiki-prose tr:last-child td { border-bottom: none; }
     .wiki-prose tbody tr { transition: background 0.15s; }
     .wiki-prose tbody tr:hover { background: var(--surface-2); }
-    /* Primera columna = comando resaltado en verde esmeralda legible en todo fondo */
+    /* Primera columna = comando resaltado con color primario del tema */
     .wiki-prose td:first-child {
         font-family: 'Geist Mono', 'Fira Code', 'Courier New', monospace;
-        color: #10b981; font-weight: 700; font-size: 13px;
+        color: var(--primary); font-weight: 700; font-size: 13px;
         white-space: nowrap;
     }
 
@@ -272,9 +272,9 @@
         <div class="wiki-search-bar">
             <div class="relative max-w-2xl mx-auto">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[20px] pointer-events-none">search</span>
-                <input 
-                    type="search" 
-                    id="wiki-search" 
+                <input
+                    type="search"
+                    id="wiki-search"
                     class="wiki-search-input"
                     placeholder="¿Qué comando necesitas? (Ej: DOCS, Reemisión, Mascotas, OSI)"
                     autocomplete="off"
@@ -287,7 +287,7 @@
 
         <!-- ARTICLE -->
         <div class="max-w-6xl mx-auto px-6 md:px-10 py-10" id="article-content">
-            
+
             <!-- Breadcrumb mobile -->
             <div class="lg:hidden flex items-center gap-2 text-[10px] font-black text-text-muted uppercase tracking-widest mb-8">
                 <a href="{% url 'core:wiki_list' %}" class="hover:text-primary transition-colors">Wiki GDS</a>
@@ -398,14 +398,14 @@ function buildSearchIndex() {
         }
         index.push({ title: h.textContent.trim(), snippet: content.trim().substring(0, 120), el: h });
     });
-    
+
     // También indexar celdas de tablas (comandos)
     const cells = article.querySelectorAll('td:first-child');
     cells.forEach(td => {
         const row = td.closest('tr');
         const desc = row.querySelectorAll('td')[1];
-        index.push({ 
-            title: td.textContent.trim(), 
+        index.push({
+            title: td.textContent.trim(),
             snippet: desc ? desc.textContent.trim().substring(0, 100) : '',
             el: td,
             isCmd: true
@@ -420,8 +420,8 @@ document.addEventListener('DOMContentLoaded', () => { searchIndex = buildSearchI
 searchInput.addEventListener('input', function() {
     const q = this.value.trim().toLowerCase();
     if (q.length < 2) { searchResults.classList.add('hidden'); return; }
-    
-    const matches = searchIndex.filter(item => 
+
+    const matches = searchIndex.filter(item =>
         item.title.toLowerCase().includes(q) || item.snippet.toLowerCase().includes(q)
     ).slice(0, 8);
 
@@ -430,7 +430,7 @@ searchInput.addEventListener('input', function() {
         searchResults.innerHTML = `<div class="p-4 text-xs text-text-muted text-center">Sin resultados para "<strong>${escQ}</strong>"</div>`;
     } else {
         searchResults.innerHTML = matches.map(m => `
-            <button data-jump-index="${searchIndex.indexOf(m)}" 
+            <button data-jump-index="${searchIndex.indexOf(m)}"
                 class="w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-surface-3 transition-colors border-b border-border-color last:border-0">
                 <span class="material-symbols-outlined text-[16px] text-text-muted mt-0.5 flex-shrink-0">${m.isCmd ? 'terminal' : 'title'}</span>
                 <div>
@@ -475,7 +475,7 @@ function copyPageUrl() {
 // Convertir inline code en GDS commands con estilo especial
 document.addEventListener('DOMContentLoaded', () => {
     searchIndex = buildSearchIndex();
-    
+
     // Añadir "Copy" button a bloques de código PRE
     document.querySelectorAll('.wiki-prose pre').forEach(pre => {
         const btn = document.createElement('button');

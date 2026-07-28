@@ -122,6 +122,30 @@ def limpiar_sesiones_expiradas():
 
 
 @shared_task(
+    name="core.tasks.limpiar_audit_log",
+    time_limit=600,
+    soft_time_limit=540,
+    max_retries=2,
+    default_retry_delay=3600,
+)
+def limpiar_audit_log(days=180):
+    """Elimina registros de auditoría anteriores a N días."""
+    try:
+        from django.utils import timezone
+
+        from core.models import AuditLog
+
+        cutoff = timezone.now() - datetime.timedelta(days=days)
+        count, _ = AuditLog.objects.filter(creado_en__lt=cutoff).delete()
+        result = f"AuditLog limpiado: {count} registros eliminados (>{days} días)"
+        logger.info(result)
+        return result
+    except Exception as e:
+        logger.error(f"Error limpiando AuditLog: {e}")
+        return f"Error limpiando AuditLog: {e}"
+
+
+@shared_task(
     name="core.tasks.limpiar_celery_results",
     time_limit=300,
     soft_time_limit=270,

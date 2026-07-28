@@ -123,4 +123,9 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(minute="0"),  # cada hora en punto
         "args": (),
     },
+    "limpiar-audit-log-mensual": {
+        "task": "core.tasks.limpiar_audit_log",
+        "schedule": crontab(day_of_month="1", hour="6", minute="0"),  # 1er día del mes 6:00 AM
+        "kwargs": {"days": 180},
+    },
 }

@@ -1,3 +1,9 @@
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   # ---------------------------------------------------------------------------
   # 1. PROXY INVERSO Y CAPA SSL (Traefik)
@@ -6,6 +12,7 @@ services:
     image: traefik:v3.0
     container_name: travelhub_proxy
     restart: unless-stopped
+    logging: *default-logging
     security_opt:
       - no-new-privileges:true
     ports:
@@ -39,6 +46,7 @@ services:
     image: postgres:15-alpine
     container_name: travelhub_db
     restart: unless-stopped
+    logging: *default-logging
     shm_size: 256mb
     environment:
       POSTGRES_DB: ${DB_NAME}
@@ -70,6 +78,7 @@ services:
     image: edoburu/pgbouncer:latest
     container_name: travelhub_pooler
     restart: unless-stopped
+    logging: *default-logging
     environment:
       DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       POOL_MODE: transaction
@@ -95,6 +104,7 @@ services:
     image: redis:7-alpine
     container_name: travelhub_broker
     restart: unless-stopped
+    logging: *default-logging
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
@@ -121,6 +131,7 @@ services:
       target: runtime
     container_name: travelhub_web
     restart: unless-stopped
+    logging: *default-logging
     command:
       - sh
       - -c
@@ -137,8 +148,8 @@ services:
         --preload
     # SECURITY: Puerto de Gunicorn comentado - solo accesible via Traefik
     # Para acceso local durante desarrollo, descomentar temporalmente:
-    ports:
-      - "8000:8000"
+    #ports:
+    #  - "8000:8000"
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@pgbouncer:5432/${DB_NAME}
       - REDIS_URL=redis://redis:6379/0
@@ -157,12 +168,7 @@ services:
     volumes:
       - static_volume:/app/staticfiles
       - ./media:/app/media
-      - ./apps:/app/apps
-      - ./core:/app/core
       - ./boletos_importados:/app/boletos_importados
-      - ./tests:/app/tests
-      - ./entrypoint.sh:/app/entrypoint.sh
-      - ./compose/healthcheck.py:/app/compose/healthcheck.py
     depends_on:
       db:
         condition: service_healthy
@@ -198,6 +204,7 @@ services:
     image: nginx:1.25-alpine
     container_name: travelhub_nginx
     restart: unless-stopped
+    logging: *default-logging
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - static_volume:/app/staticfiles:ro
@@ -233,11 +240,16 @@ services:
     image: jaegertracing/all-in-one:1.58
     container_name: travelhub_jaeger
     restart: unless-stopped
+    logging: *default-logging
+    # SECURITY: Jaeger UI solo accesible via red interna
+    # Descomentar para depuración local:
+    #ports:
+    #  - "16686:16686"
     environment:
       - COLLECTOR_OTLP_ENABLED=true
       - SPAN_STORAGE_TYPE=memory
-    ports:
-      - "16686:16686"   # UI: http://localhost:16686
+    #ports:
+    #  - "16686:16686"   # UI: http://localhost:16686
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:16686/"]
       interval: 30s
@@ -264,6 +276,7 @@ services:
       target: runtime
     container_name: travelhub_worker
     restart: unless-stopped
+    logging: *default-logging
     command: celery -A travelhub worker --loglevel=info -Q celery --concurrency=4 --max-tasks-per-child=1000 --max-memory-per-child=512000
     env_file:
       - .env.local
@@ -276,6 +289,8 @@ services:
       - ./media:/app/media
       - ./boletos_importados:/app/boletos_importados
     depends_on:
+      db:
+        condition: service_healthy
       pgbouncer:
         condition: service_started
       redis:
@@ -301,6 +316,7 @@ services:
       target: runtime
     container_name: travelhub_notifications
     restart: unless-stopped
+    logging: *default-logging
     command: celery -A travelhub worker --loglevel=info -Q notifications --concurrency=2 --max-tasks-per-child=1000 --max-memory-per-child=256000
     env_file:
       - .env.local
@@ -312,6 +328,8 @@ services:
     volumes:
       - ./media:/app/media
     depends_on:
+      db:
+        condition: service_healthy
       pgbouncer:
         condition: service_started
       redis:
@@ -341,6 +359,7 @@ services:
       target: runtime
     container_name: travelhub_beat
     restart: unless-stopped
+    logging: *default-logging
     command: celery -A travelhub beat --loglevel=info
     env_file:
       - .env.local
@@ -375,6 +394,7 @@ services:
     image: atendai/evolution-api:latest
     container_name: travelhub_evolution
     restart: unless-stopped
+    logging: *default-logging
     volumes:
       - evolution_data:/evolution/instances
     environment:
@@ -417,6 +437,7 @@ services:
     image: postgres:15-alpine
     container_name: travelhub_evolution_db
     restart: unless-stopped
+    logging: *default-logging
     environment:
       - POSTGRES_USER=${EVOLUTION_DB_USER:-evolution}
       - POSTGRES_PASSWORD=${EVOLUTION_DB_PASSWORD:-evolution}

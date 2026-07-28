@@ -362,9 +362,16 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
             ):
                 puntos_ganados = int(self.total_venta / 10)
                 if puntos_ganados > 0:
-                    self.cliente.puntos_fidelidad += puntos_ganados
+                    from django.db.models import F
+
+                    from apps.crm.models import Cliente
+
+                    Cliente.objects.filter(pk=self.cliente_id).update(
+                        puntos_fidelidad=F("puntos_fidelidad") + puntos_ganados,
+                    )
+                    self.cliente.refresh_from_db(fields=["puntos_fidelidad"])
                     self.cliente.calcular_cliente_frecuente()
-                    self.cliente.save(update_fields=["puntos_fidelidad", "es_cliente_frecuente"])
+                    self.cliente.save(update_fields=["es_cliente_frecuente"])
                     self.puntos_fidelidad_asignados = True
                     super().save(update_fields=["puntos_fidelidad_asignados"])
         except Exception:

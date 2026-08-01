@@ -580,6 +580,24 @@ Cierre del checklist de housekeeping de la rama `hardening/operational-risks`:
   (IA chat) usados por `run_telegram_bot.py:245` y referenciados en tests; LinkedIn también
   es canal en `apps/cms/models.py`.
 
+### 2026-07-31 — Commit de cierre `01b06fca`
+
+Commit final de la tanda en `hardening/operational-risks` (191 archivos). Además del
+housekeeping ya documentado, incluyó:
+
+- **Fix de arquitectura**: `email_unified.py` importaba `apps.contabilidad.supplier_report_service`
+  (ilegal, `communications` no puede importar `contabilidad`). Ahora emite la señal
+  `reporte_proveedor_pdf_recibido` (definida en `core/signals.py`) y `apps/contabilidad/signals.py`
+  la escucha, delegando en `SupplierReportProcessorService.process_pdf_report`.
+- **Bug fijo**: los callers usaban `procesar_pdf_reporte` (inexistente, AttributeError silencioso);
+  el método real es `process_pdf_report`. Corregido en `email_unified.py` (vía señal) y en
+  `importar_reportes_proveedores.py`.
+- **Lint fix (39→0)**: F821 (imports faltantes `settings`, `timedelta`, `APIClient`,
+  `QuotaExhaustedException`; `track_parser_metrics` retornaba `wrapper` en vez de `decorator`),
+  F841, F601 (dict key `fecha_emision` duplicada en adapter), S110, B904, B007, UP038, S104.
+- **pre-commit config**: `check-yaml` excluye `k8s/helm/` (templates Jinja, no YAML puro);
+  hook `ruff` excluye `^\.agents/` (scripts auxiliares del agente).
+
 ---
 
 ## Métricas del sistema (post-hardening)

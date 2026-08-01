@@ -14,7 +14,7 @@ from apps.communications.models.push_subscription import PushSubscription
 
 
 @require_POST
-@csrf_exempt
+@csrf_exempt  # CSRF exempt: llamado desde Service Worker (sin token CSRF); requiere user autenticado (P3-71)
 def push_subscribe(request):
     """Registra una suscripción push del navegador."""
     try:
@@ -48,9 +48,12 @@ def push_subscribe(request):
 
 
 @require_POST
-@csrf_exempt
+@csrf_exempt  # CSRF exempt: llamado desde Service Worker (sin token CSRF); requiere user autenticado (P3-71)
 def push_unsubscribe(request):
     """Desuscribe una suscripción push."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
@@ -58,6 +61,6 @@ def push_unsubscribe(request):
 
     endpoint = data.get("endpoint")
     if endpoint:
-        PushSubscription.objects.filter(endpoint=endpoint).update(active=False)
+        PushSubscription.objects.filter(endpoint=endpoint, user=request.user).update(active=False)
 
     return JsonResponse({"status": "unsubscribed"})

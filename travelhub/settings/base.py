@@ -382,6 +382,7 @@ WHATSAPP_MICROSERVICE_URL = os.getenv("WHATSAPP_MICROSERVICE_URL", "http://evolu
 WHATSAPP_MICROSERVICE_TOKEN = os.getenv("WHATSAPP_MICROSERVICE_TOKEN")
 EVOLUTION_PUBLIC_URL = os.getenv("EVOLUTION_PUBLIC_URL", "http://localhost:8080")
 EVOLUTION_INSTANCE_TOKEN = os.getenv("EVOLUTION_INSTANCE_TOKEN")
+EVOLUTION_WEBHOOK_URL = os.getenv("EVOLUTION_WEBHOOK_URL", "http://web:8000/crm/webhook/evolution/")
 WHATSAPP_NOTIFICATIONS_ENABLED = (
     os.getenv("WHATSAPP_NOTIFICATIONS_ENABLED", "true").lower() == "true"
 )
@@ -758,6 +759,11 @@ SECURE_REDIRECT_EXEMPT = [r"^health/$", r"^health$"]
 # Usar JWT_SIGNING_KEY separada de SECRET_KEY para limitar el impacto
 # si SECRET_KEY se ve comprometida (SECRET_KEY también firma sesiones, CSRF, etc.)
 _JWT_SIGNING_KEY = env("JWT_SIGNING_KEY", default=SECRET_KEY)
+if _JWT_SIGNING_KEY == SECRET_KEY:
+    logging.getLogger("settings").warning(
+        "⚠️ JWT_SIGNING_KEY NO configurada — se está usando SECRET_KEY. "
+        "Configura JWT_SIGNING_KEY en .env (requerido en producción)."
+    )
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),

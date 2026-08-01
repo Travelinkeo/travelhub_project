@@ -117,7 +117,7 @@ def safe_delay(
                 task_func(*args, **kwargs)
                 return f"SYNC_COMPLETED_{task_func.name}"
             except Exception as se:
-                logger.error(f"❌ Error en ejecución síncrona de {task_func.name}: {se}")
+                logger.error(f" Error en ejecución síncrona de {task_func.name}: {se}")
                 return None
 
         logger.error(
@@ -192,7 +192,7 @@ def tenant_task(*task_args: Any, **task_kwargs: Any) -> Callable[[_F], _F]:
             # Esto activa el bypass en AgenciaManager.get_queryset()
             from core.api import system_context
 
-            logger.warning(f"🌐 [GLOBAL TASK] Tarea {func.__name__} ejecutándose en Modo Sistema.")
+            logger.warning(f" [GLOBAL TASK] Tarea {func.__name__} ejecutándose en Modo Sistema.")
             with system_context():
                 return func(*args, **kwargs)
 

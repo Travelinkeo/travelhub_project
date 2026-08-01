@@ -1,0 +1,131 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-web-ingress
+  labels:
+    app: {{ .Release.Name }}-web
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Release.Name }}-web
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-celery-egress
+  labels:
+    app: {{ .Release.Name }}-celery-worker
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Release.Name }}-celery-worker
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Release.Name }}-redis-broker
+      ports:
+        - protocol: TCP
+          port: 6379
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Release.Name }}-redis-cache
+      ports:
+        - protocol: TCP
+          port: 6379
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Release.Name }}-postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Release.Name }}-evolution
+      ports:
+        - protocol: TCP
+          port: 8080
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-db-ingress
+  labels:
+    app: {{ .Release.Name }}-postgres
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Release.Name }}-postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Release.Name }}-web
+        - podSelector:
+            matchLabels:
+              app: {{ .Release.Name }}-celery-worker
+        - podSelector:
+            matchLabels:
+              app: {{ .Release.Name }}-celery-beat
+        - podSelector:
+            matchLabels:
+              app: {{ .Release.Name }}-pgbouncer
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-redis-ingress
+  labels:
+    app: {{ .Release.Name }}-redis
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Release.Name }}-redis
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Release.Name }}-web
+        - podSelector:
+            matchLabels:
+              app: {{ .Release.Name }}-celery-worker
+        - podSelector:
+            matchLabels:
+              app: {{ .Release.Name }}-celery-beat
+        - podSelector:
+            matchLabels:
+              app: {{ .Release.Name }}-evolution
+      ports:
+        - protocol: TCP
+          port: 6379

@@ -12,6 +12,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from apps.bookings.models import Venta
 from apps.finance.models_stubs import FacturaConsolidada, ItemFacturaConsolidada
 from core.api.mixins.tenant import TenantViewSetMixin
+from core.security import get_object_tenant_or_404
 from core.serializers_facturacion_consolidada import (
     FacturaConsolidadaSerializer,
     ItemFacturaConsolidadaSerializer,
@@ -160,7 +161,8 @@ class FacturaConsolidadaViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
             )
 
         try:
-            venta = Venta.objects.get(id_venta=venta_id)
+            agencia = request.agencia
+            venta = get_object_tenant_or_404(Venta, agencia, id_venta=venta_id)
             fee_servicio = Decimal(str(fee_servicio))
 
             factura_tercero, factura_propia = DobleFacturacionService.generar_facturas_venta(

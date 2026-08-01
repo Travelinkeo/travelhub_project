@@ -90,25 +90,48 @@ class BusinessIntelligenceEngine:
     def get_monthly_sales_chart_data(cls, agencia: Any) -> dict[str, list[str] | list[float]]:
         """
         Prepara los datos para el gráfico de barras de Chart.js.
-        Últimos 6 meses.
+        Últimos 6 meses - OPTIMIZADO: usa una sola query con conditional aggregation.
         """
         data: list[float] = []
         labels: list[str] = []
         hoy: datetime = timezone.now()
 
+        # Crear rangos de fechas para los últimos 6 meses
+        months = []
         for i in range(5, -1, -1):
             mes = hoy.replace(day=1) - timedelta(days=i * 30)
             inicio = mes.replace(day=1)
             fin = (inicio + timedelta(days=32)).replace(day=1) - timedelta(seconds=1)
+            months.append((inicio, fin, inicio.strftime("%b")))
 
-            total = (
-                Venta.objects.filter(agencia=agencia, fecha_venta__range=(inicio, fin)).aggregate(
-                    s=Sum("total_venta")
-                )["s"]
-                or 0
+        # Una sola query con conditional aggregation para los 6 meses
+        from django.db.models import Case, DecimalField, Sum, When
+
+        ventas = Venta.objects.filter(agencia=agencia)
+
+        # Create expressions for each month
+        monthly_expressions = {}
+        for idx, (inicio, fin, _label) in enumerate(months):
+            monthly_expressions[f"month_{idx}_sum"] = Sum(
+                Case(
+                    When(fecha_venta__range=(inicio, fin), then="total_venta"),
+                    default=Decimal("0.00"),
+                    output_field=DecimalField(),
+                )
+            )
+            monthly_expressions[f"month_{idx}_count"] = Sum(
+                Case(
+                    When(fecha_venta__range=(inicio, fin), then=1),
+                    default=0,
+                    output_field=DecimalField(),
+                )
             )
 
-            labels.append(inicio.strftime("%b"))
+        results = ventas.aggregate(**monthly_expressions)
+
+        for idx, (_inicio, _fin, label) in enumerate(months):
+            total = results.get(f"month_{idx}_sum") or Decimal("0.00")
+            labels.append(label)
             data.append(float(total))
 
         return {"labels": labels, "values": data}

@@ -40,4 +40,4 @@ def apply_locale_patch():
             "✅ [SRE L3] Global locale.setlocale monkey patch applied successfully via ready()."
         )
     except Exception as e_patch:
-        logger.error(f"❌ [SRE L3] Failed to apply locale monkey patch: {e_patch}")
+        logger.error(f" [SRE L3] Failed to apply locale monkey patch: {e_patch}")

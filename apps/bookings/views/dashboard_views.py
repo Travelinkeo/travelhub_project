@@ -64,9 +64,9 @@ def dashboard_metricas(request):
 
     ventas_qs = Venta.objects.filter(agencia=agencia)
     if fecha_desde:
-        ventas_qs = ventas_qs.filter(fecha_venta__gte=fecha_desde)
+        ventas_qs = ventas_qs.filter(fecha_venta__date__gte=fecha_desde)
     if fecha_hasta:
-        ventas_qs = ventas_qs.filter(fecha_venta__lte=fecha_hasta)
+        ventas_qs = ventas_qs.filter(fecha_venta__date__lte=fecha_hasta)
 
     total_ventas = ventas_qs.aggregate(
         count=Count("id_venta"),
@@ -188,9 +188,9 @@ def dashboard_alertas(request):
 
     ventas_sin_cliente = Venta.objects.filter(agencia=agencia, cliente__isnull=True).count()
 
-    hace_7_dias = timezone.now() - timedelta(days=7)
+    hace_7_dias = timezone.now().date() - timedelta(days=7)
     ventas_mora = Venta.objects.filter(
-        agencia=agencia, saldo_pendiente__gt=0, fecha_venta__lt=hace_7_dias
+        agencia=agencia, saldo_pendiente__gt=0, fecha_venta__date__lt=hace_7_dias
     ).count()
 
     boletos_sin_venta = BoletoImportado.objects.filter(
@@ -246,16 +246,20 @@ class DashboardView(LoginRequiredMixin, View):
 
         # Stats personales del mes (blindadas por agencia)
         base_qs_ventas = Venta.objects.filter(
-            agencia=agencia, creado_por=request.user, fecha_venta__gte=inicio_mes
+            agencia=agencia, creado_por=request.user, fecha_venta__date__gte=inicio_mes
         )
         boletos_mes = BoletoImportado.objects.filter(
-            agencia=agencia, venta_asociada__creado_por=request.user, fecha_subida__gte=inicio_mes
+            agencia=agencia,
+            venta_asociada__creado_por=request.user,
+            fecha_subida__date__gte=inicio_mes,
         ).count()
 
         monto_total_mes = base_qs_ventas.aggregate(total=Sum("total_venta"))["total"] or 0
         comisiones_mes = (
             ItemVenta.objects.filter(
-                agencia=agencia, venta__creado_por=request.user, venta__fecha_venta__gte=inicio_mes
+                agencia=agencia,
+                venta__creado_por=request.user,
+                venta__fecha_venta__date__gte=inicio_mes,
             ).aggregate(total=Sum("comision_agencia_monto"))["total"]
             or 0
         )
@@ -316,55 +320,71 @@ class DashboardView(LoginRequiredMixin, View):
         if rol == "vendedor":
             return self.get_vendedor_dashboard(request, agencia)
 
-        # 2. CALCULO DE STATS CON NUEVO MOTOR BLINDADO
-        from core.api import get_dashboard_stats
+        try:
+            # 2. CALCULO DE STATS CON NUEVO MOTOR BLINDADO
+            from core.api import get_dashboard_stats
 
-        stats = get_dashboard_stats(agencia)
+            stats = get_dashboard_stats(agencia)
 
-        # 3. TASAS (CON FALLBACK ANTI-CEROS)
-        # TasaCambio query removed as it was unused and could cause ProgrammingError.
+            # 3. TASAS (CON FALLBACK ANTI-CEROS)
+            # TasaCambio query removed as it was unused and could cause ProgrammingError.
 
-        # 4. TABLA RECIENTE (Limitada a agencia)
-        ventas_recientes = (
-            Venta.objects.filter(agencia=agencia)
-            .select_related("cliente", "moneda", "agencia")
-            .prefetch_related("boletos_adjuntos", "pagos_venta__moneda")
-            .order_by("-fecha_venta")[:8]
-        )
+            # 4. TABLA RECIENTE (Limitada a agencia)
+            ventas_recientes = (
+                Venta.objects.filter(agencia=agencia)
+                .select_related("cliente", "moneda", "agencia")
+                .prefetch_related("boletos_adjuntos", "pagos_venta__moneda")
+                .order_by("-fecha_venta")[:8]
+            )
 
-        # 5. ALERTAS (Ya blindadas en stats o calculadas aquí)
-        alertas = {
-            "sin_cliente": Venta.objects.filter(agencia=agencia, cliente__isnull=True).count(),
-            "deuda_antigua": Venta.objects.filter(
-                agencia=agencia,
-                saldo_pendiente__gt=0,
-                fecha_venta__lt=(timezone.now() - timedelta(days=7)),
-            ).count(),
-            "boletos_huerfanos": BoletoImportado.objects.filter(
-                agencia=agencia, venta_asociada__isnull=True
-            ).count(),
-        }
+            # 5. ALERTAS (Ya blindadas en stats o calculadas aquí)
+            alertas = {
+                "sin_cliente": Venta.objects.filter(agencia=agencia, cliente__isnull=True).count(),
+                "deuda_antigua": Venta.objects.filter(
+                    agencia=agencia,
+                    saldo_pendiente__gt=0,
+                    fecha_venta__date__lt=(timezone.now().date() - timedelta(days=7)),
+                ).count(),
+                "boletos_huerfanos": BoletoImportado.objects.filter(
+                    agencia=agencia, venta_asociada__isnull=True
+                ).count(),
+            }
 
-        # Tasas de cambio para el sidebar
-        from apps.finance.models_stubs import TipoCambio
+            # Tasas de cambio para el sidebar
+            tasas_sidebar = []
+            try:
+                from apps.finance.models_stubs import TipoCambio
 
-        tasas_sidebar = (
-            TipoCambio.objects.select_related("moneda_destino")
-            .filter(moneda_destino__codigo_iso="VES")
-            .order_by("-fecha_efectiva")[:3]
-        )
+                tasas_sidebar = list(
+                    TipoCambio.objects.select_related("moneda_destino")
+                    .filter(moneda_destino__codigo_iso="VES")
+                    .order_by("-fecha_efectiva")[:3]
+                )
+            except Exception:
+                logger.warning("Error fetching TipoCambio for dashboard", exc_info=True)
 
-        context = {
-            "agencia": agencia,
-            "tasas": tasas_sidebar,
-            "stats": stats,  # Contiene automatización, margen, etc.
-            "ganancia_estimada": stats.get("ventas_mes", {}).get(
-                "total", 0
-            ),  # Para retrocompatibilidad manual
-            "saldo_pendiente": stats.get("pendientes_pago", {}).get("total", 0),
-            "ventas_recientes": ventas_recientes,
-            "alertas": alertas,
-            "hoy": timezone.now(),
-        }
+            context = {
+                "agencia": agencia,
+                "tasas": tasas_sidebar,
+                "stats": stats,
+                "ganancia_estimada": stats.get("ventas_mes", {}).get("total", 0),
+                "saldo_pendiente": stats.get("pendientes_pago", {}).get("total", 0),
+                "ventas_recientes": ventas_recientes,
+                "alertas": alertas,
+                "hoy": timezone.now(),
+            }
+        except Exception as exc:
+            logger.critical(
+                "DashboardView crashed for user %s, agencia %s: %s",
+                request.user,
+                agencia,
+                exc,
+                exc_info=True,
+            )
+            return render(
+                request,
+                "errors/no_agency.html",
+                {"message": "Error al cargar el dashboard. Contacta a soporte."},
+            )
 
         return render(request, "core/dashboard_modern.html", context)

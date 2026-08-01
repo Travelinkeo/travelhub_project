@@ -1,0 +1,59 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Release.Name }}-web-pdb
+  labels:
+    app: {{ .Release.Name }}-web
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-web
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Release.Name }}-celery-worker-pdb
+  labels:
+    app: {{ .Release.Name }}-celery-worker
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-celery-worker
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Release.Name }}-celery-beat-pdb
+  labels:
+    app: {{ .Release.Name }}-celery-beat
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-celery-beat
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Release.Name }}-postgres-pdb
+  labels:
+    app: {{ .Release.Name }}-postgres
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-postgres
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Release.Name }}-redis-pdb
+  labels:
+    app: {{ .Release.Name }}-redis
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-redis

@@ -615,17 +615,61 @@ def whatsapp_qr_view(request):
         estado_ui = "disconnected"
     logger.debug(f"whatsapp_qr_view -> final estado_ui: {estado_ui}")
 
-    qr_code = None
     if estado_ui != "connected":
-        qr_code = WhatsAppService.get_qr_code(session_name)
-        if not qr_code:
-            # Intentar despertar la instancia si no hay QR
+        # Si la instancia está cerrada o desconectada, debemos forzar su inicio
+        if estado_ui == "disconnected":
+            logger.info(f"Instancia {session_name} desconectada. Iniciando sesión...")
             WhatsAppService.start_session(session_name)
-            qr_code = WhatsAppService.get_qr_code(session_name)
-
-        # Si tenemos un QR, el estado debe ser 'connecting' (esperando escaneo)
-        if qr_code:
             estado_ui = "connecting"
+
+        # Leer QR de Redis (Celery lo pone ahí o lo encolamos)
+        from django.core.cache import cache
+        from django.urls import reverse
+
+        cache_key = f"evo_qr:{session_name}"
+        cached_qr = cache.get(cache_key)
+
+        if cached_qr:
+            if not cached_qr.startswith("data:image"):
+                cached_qr = f"data:image/png;base64,{cached_qr}"
+            qr_code = cached_qr
+            estado_ui = "connecting"
+        else:
+            # Sin cache — intentar fetch SINCRONO para garantizar que devolvemos
+            # base64 inline (no URL → no iframe con PNG roto / 404).
+            try:
+                from apps.communications.services.evolution_api_service import EvolutionService
+
+                sync_qr = EvolutionService.get_connection_qr_base64(session_name, timeout=8)
+                if sync_qr:
+                    qr_code = f"data:image/png;base64,{sync_qr}"
+                    estado_ui = "connecting"
+                else:
+                    # Fallback al endpoint que sirve PNG directo (NO al Manager UI proxy).
+                    try:
+                        qr_code = reverse(
+                            "core:evolution_qr_image", kwargs={"instance_name": session_name}
+                        )
+                    except Exception:
+                        qr_code = reverse(
+                            "evolution_qr_image", kwargs={"instance_name": session_name}
+                        )
+            except Exception as e:
+                logger.error(f"Error en sync fetch QR para '{session_name}': {e}")
+                try:
+                    qr_code = reverse(
+                        "core:evolution_qr_image", kwargs={"instance_name": session_name}
+                    )
+                except Exception:
+                    qr_code = reverse("evolution_qr_image", kwargs={"instance_name": session_name})
+            try:
+                from apps.common.tasks import fetch_evolution_qr_task
+
+                fetch_evolution_qr_task.delay(session_name)
+            except Exception as e:
+                logger.error(
+                    f"Error encolando fetch QR en bookings_views para '{session_name}': {e}"
+                )
 
     context = {
         "estado": estado_ui,

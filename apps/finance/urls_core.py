@@ -8,6 +8,7 @@ from apps.finance.views.facturacion_views import (
     emitir_factura_definitiva,
     generar_factura_desde_venta,
 )
+from apps.finance.views.liquidaciones_views import LiquidacionDashboardView
 
 
 def dynamic_view(view_path):
@@ -29,7 +30,9 @@ urlpatterns = [
     path("facturacion/<int:pk>/pdf/", descargar_pdf_factura, name="factura_pdf"),
     path("ventas/<int:pk>/facturar/", generar_factura_desde_venta, name="venta_facturar"),
     path("facturacion/<int:pk>/emitir/", emitir_factura_definitiva, name="factura_emitir"),
-    # Conciliación de Proveedores / Liquidaciones
+    # Liquidaciones
+    path("liquidaciones/", LiquidacionDashboardView.as_view(), name="liquidacion_dashboard"),
+    # Conciliación de Proveedores
     path(
         "supplier-reconciliation/",
         import_string("apps.contabilidad.views.reconciliation_view"),

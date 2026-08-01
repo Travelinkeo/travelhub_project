@@ -215,7 +215,7 @@ class VentaService:
                 circuito.dias_total = None
                 circuito.fecha_fin = None
             circuito.save(update_fields=["dias_total", "fecha_fin"])
-            logger.info(f"🔄 VentaService: Updated circuit days for Circuit {circuito.pk}")
+            logger.info(f" VentaService: Updated circuit days for Circuit {circuito.pk}")
             return True
         except Exception as e:
             logger.error(f"Error in VentaService.update_circuit_days: {e}")

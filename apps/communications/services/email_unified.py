@@ -63,7 +63,7 @@ def send_custom_email(
                 "html": html_content,
             }
             resend.Emails.send(params)
-            logger.info(f"✨ Email enviado vía RESEND API: {subject} a {recipient}")
+            logger.info(f" Email enviado vía RESEND API: {subject} a {recipient}")
         else:
             text_content = strip_tags(html_content)
             connection = None
@@ -109,11 +109,11 @@ def send_custom_email(
                     html_message=html_content,
                     fail_silently=False,
                 )
-            logger.info(f"📧 Email enviado vía Django SMTP: {subject} a {recipient}")
+            logger.info(f" Email enviado vía Django SMTP: {subject} a {recipient}")
 
         return True
     except Exception as e:
-        logger.error(f"❌ Error crítico enviando email: {str(e)}")
+        logger.error(f" Error crítico enviando email: {str(e)}")
         return False
 
 
@@ -545,13 +545,13 @@ class EmailMonitorService:
 
     def start(self):
         """Inicia el monitoreo continuo"""
-        logger.info(f"🚀 Monitor iniciado -> {self.notification_type}: {self.destination}")
+        logger.info(f" Monitor iniciado -> {self.notification_type}: {self.destination}")
 
         while True:
             try:
                 self._procesar_correos()
             except Exception as e:
-                logger.error(f"❌ Error en ciclo: {e}")
+                logger.error(f" Error en ciclo: {e}")
 
             time.sleep(self.interval)
 
@@ -565,7 +565,7 @@ class EmailMonitorService:
                 config.email_monitor_last_check = timezone.now()
                 config.save(update_fields=["email_monitor_last_check"])
         except Exception as e:
-            logger.warning(f"⚠️ No se pudo actualizar email_monitor_last_check: {e}")
+            logger.warning(f" No se pudo actualizar email_monitor_last_check: {e}")
 
     def _procesar_correos(self):
         """Procesa correos no leídos, registra ejecución en EmailMonitorLog y retorna cantidad procesada"""
@@ -587,7 +587,7 @@ class EmailMonitorService:
 
             if not imap_user or not imap_pass:
                 msg = f"Agencia {self.agencia.nombre} no tiene credenciales de correo configuradas."
-                logger.warning(f"⚠️ {msg}")
+                logger.warning(f" {msg}")
                 EmailMonitorLog.objects.create(
                     agencia=self.agencia,
                     estado=EmailMonitorLog.Estado.WARNING,
@@ -613,7 +613,7 @@ class EmailMonitorService:
                 mail = imaplib.IMAP4_SSL(imap_host, imap_port)
             except Exception as e_conn:
                 msg = f"Error conectando al servidor IMAP {imap_host}:{imap_port}: {e_conn}"
-                logger.error(f"❌ {msg}")
+                logger.error(f" {msg}")
                 EmailMonitorLog.objects.create(
                     agencia=self.agencia,
                     estado=EmailMonitorLog.Estado.ERROR,
@@ -630,7 +630,7 @@ class EmailMonitorService:
                 msg = (
                     f"Error de autenticación IMAP para {imap_user} en {imap_host}:{imap_port}: {e}"
                 )
-                logger.error(f"❌ {msg}")
+                logger.error(f" {msg}")
                 EmailMonitorLog.objects.create(
                     agencia=self.agencia,
                     estado=EmailMonitorLog.Estado.ERROR,
@@ -644,7 +644,7 @@ class EmailMonitorService:
             select_status, _ = mail.select("inbox")
             if select_status != "OK":
                 msg = f"No se pudo seleccionar inbox en {imap_host}:{imap_port}"
-                logger.error(f"❌ {msg}")
+                logger.error(f" {msg}")
                 mail.logout()
                 EmailMonitorLog.objects.create(
                     agencia=self.agencia,
@@ -658,15 +658,15 @@ class EmailMonitorService:
 
             if self.process_all:
                 _, messages = mail.search(None, "ALL")
-                logger.info("📦 Procesando TODOS los correos")
+                logger.info(" Procesando TODOS los correos")
             else:
                 _, messages = mail.search(None, "(UNSEEN)")
-                logger.info("🆕 Procesando solo correos NO LEÍDOS")
+                logger.info(" Procesando solo correos NO LEÍDOS")
 
             message_ids = messages[0].split()
 
             if not message_ids:
-                logger.info("📭 No hay correos nuevos")
+                logger.info(" No hay correos nuevos")
                 mail.close()
                 mail.logout()
                 EmailMonitorLog.objects.create(
@@ -680,7 +680,7 @@ class EmailMonitorService:
                 self._actualizar_last_check()
                 return 0
 
-            logger.info(f"📬 Encontrados {len(message_ids)} correos nuevos")
+            logger.info(f" Encontrados {len(message_ids)} correos nuevos")
             procesados = 0
 
             for num in message_ids:
@@ -689,10 +689,10 @@ class EmailMonitorService:
                     message = email.message_from_bytes(msg_data[0][1])
 
                     if self._procesar_mensaje(message, num, mail):
-                        logger.info(f"✅ Correo {num} procesado")
+                        logger.info(f" Correo {num} procesado")
                         procesados += 1
                 except Exception as e:
-                    logger.error(f"❌ Error procesando {num}: {e}")
+                    logger.error(f" Error procesando {num}: {e}")
 
             mail.close()
             mail.logout()
@@ -770,20 +770,22 @@ class EmailMonitorService:
 
             # 1. Intentar procesar como Reporte de Ventas de Proveedor (CTG, MY DESTINY, etc.)
             try:
-                from apps.contabilidad.supplier_report_service import SupplierReportProcessorService
+                from core.signals import reporte_proveedor_pdf_recibido
 
                 for part in message.walk():
                     fn = part.get_filename()
                     if fn and fn.lower().endswith(".pdf"):
                         pdf_data = part.get_payload(decode=True)
                         if pdf_data:
-                            reporte = SupplierReportProcessorService.procesar_pdf_reporte(
+                            respuestas = reporte_proveedor_pdf_recibido.send(
+                                sender=self.__class__,
+                                agencia=self.agencia,
                                 pdf_bytes=pdf_data,
                                 filename=fn,
                                 subject=subject,
                                 sender_email=from_addr,
-                                agencia=self.agencia,
                             )
+                            reporte = next((r for _receptor, r in respuestas if r), None)
                             if reporte:
                                 logger.info(
                                     f"✅ Reporte de proveedor {reporte.proveedor_nombre} "
@@ -800,7 +802,7 @@ class EmailMonitorService:
                 if self.mark_as_read and mail_connection:
                     mail_connection.store(msg_num, "+FLAGS", "\\Seen")
                 return True
-            logger.warning("⚠️ Falló el procesamiento del PDF, intentando fallback a HTML...")
+            logger.warning(" Falló el procesamiento del PDF, intentando fallback a HTML...")
 
         is_kiu_subject = (
             "E-TICKET ITINERARY RECEIPT" in subject_upper
@@ -887,7 +889,7 @@ class EmailMonitorService:
                             sentry_sdk.capture_exception(e)
                     except ImportError:
                         pass
-                    logger.error(f"❌ Error en parseo autónomo de email GDS: {e}")
+                    logger.error(f" Error en parseo autónomo de email GDS: {e}")
 
         if is_kiu_subject:
             logger.info("Procesando como KIU/HTML por Asunto")
@@ -902,7 +904,7 @@ class EmailMonitorService:
     def _procesar_boleto_email(self, message, msg_num, mail_connection):
         """Procesa boleto desde HTML/texto del correo usando TicketParserService"""
         try:
-            logger.info("📩 Procesando Email (Body/HTML)...")
+            logger.info(" Procesando Email (Body/HTML)...")
             from django.apps import apps
             from django.core.files.base import ContentFile
 
@@ -940,12 +942,12 @@ class EmailMonitorService:
             )
             boleto.archivo_boleto.save(filename, ContentFile(content.encode("utf-8")))
             boleto.save()
-            logger.info(f"📁 BoletoImportado creado: ID {boleto.pk}")
+            logger.info(f" BoletoImportado creado: ID {boleto.pk}")
 
             from apps.bookings.tasks import parsear_boleto_individual
 
             parsear_boleto_individual.delay(boleto.pk)
-            logger.info(f"🚀 Parseo async encolado para Boleto {boleto.pk}")
+            logger.info(f" Parseo async encolado para Boleto {boleto.pk}")
 
             return True
 
@@ -956,7 +958,7 @@ class EmailMonitorService:
     def _procesar_boleto_pdf(self, message, msg_num, mail_connection):
         """Procesa todos los boletos desde PDFs adjuntos usando TicketParserService"""
         try:
-            logger.info("📎 Investigando adjuntos PDF...")
+            logger.info(" Investigando adjuntos PDF...")
             from django.apps import apps
             from django.core.files.base import ContentFile
 
@@ -969,7 +971,7 @@ class EmailMonitorService:
 
             procesados_exito = 0
             for i, (filename, pdf_content) in enumerate(pdfs):
-                logger.info(f"📄 Guardando PDF {i + 1}/{len(pdfs)}: {filename}")
+                logger.info(f" Guardando PDF {i + 1}/{len(pdfs)}: {filename}")
 
                 if not self._es_pdf_boleto_valido(pdf_content, filename):
                     logger.info(
@@ -1015,7 +1017,7 @@ class EmailMonitorService:
         """Maneja la respuesta del Parser Service"""
 
         if isinstance(resultado, dict) and resultado.get("status") == "REVIEW_REQUIRED":
-            logger.warning(f"⚠️ BOLETO {boleto.pk} REQUIERE REVISIÓN MANUAL (Datos faltantes)")
+            logger.warning(f" BOLETO {boleto.pk} REQUIERE REVISIÓN MANUAL (Datos faltantes)")
 
             msg = (
                 f"⚠️ <b>ACCIÓN REQUERIDA</b>\n\n"
@@ -1050,7 +1052,7 @@ class EmailMonitorService:
 
             return True
 
-        logger.error(f"❌ Procesamiento falló para Boleto {boleto.pk}")
+        logger.error(f" Procesamiento falló para Boleto {boleto.pk}")
         return False
 
     def _enviar_respaldo_email(self, boleto, pdf_path):
@@ -1112,7 +1114,7 @@ class EmailMonitorService:
             f"<i>TravelHub - Oficina Digital</i>"
         )
 
-        logger.info("📤 Enviando Telegram a Admin...")
+        logger.info(" Enviando Telegram a Admin...")
         return send_telegram_file_sync(
             pdf_path,
             caption=mensaje,
@@ -1163,10 +1165,10 @@ TravelHub - Sistema Automático""",
             email_msg.attach_file(pdf_path)
             email_msg.send()
 
-            logger.info(f"✅ Email enviado: {numero_boleto}")
+            logger.info(f" Email enviado: {numero_boleto}")
             return True
         except Exception as e:
-            logger.error(f"❌ Error enviando email: {e}")
+            logger.error(f" Error enviando email: {e}")
             return False
 
     def _enviar_whatsapp_drive(
@@ -1226,7 +1228,7 @@ _TravelHub - Sistema Automático_"""
 
             return f"https://drive.google.com/uc?export=download&id={file_id}"
         except Exception as e:
-            logger.error(f"❌ Error subiendo a Drive: {e}")
+            logger.error(f" Error subiendo a Drive: {e}")
             return None
 
     def _tiene_pdf_adjunto(self, message):

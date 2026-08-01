@@ -1,5 +1,6 @@
 import base64
 import datetime
+import json
 import logging
 import os
 from email.header import decode_header
@@ -7,6 +8,7 @@ from io import BytesIO
 
 from celery import shared_task
 from django.conf import settings
+from django.core.cache import cache
 
 from apps.common.utils.celery_utils import idempotent_task, tenant_task
 
@@ -51,7 +53,7 @@ def procesar_correo_individual_agencia(agencia_id):
             return f"Agencia {agencia_id} no configurada (falta usuario/contraseña de monitoreo)."
 
         with agency_context(agencia):
-            logger.info(f"🔄 Procesando agencia SaaS (individual): {agencia.nombre} ({email_user})")
+            logger.info(f" Procesando agencia SaaS (individual): {agencia.nombre} ({email_user})")
 
             monitor = EmailMonitorService(
                 agencia=agencia, notification_type="telegram", process_all=False, mark_as_read=True
@@ -65,7 +67,7 @@ def procesar_correo_individual_agencia(agencia_id):
 
             return f"Agencia {agencia.nombre} procesada con éxito. {cantidad} correos procesados."
     except Exception as e:
-        logger.error(f"❌ Error procesando agencia {agencia_id} en paralelo: {e}")
+        logger.error(f" Error procesando agencia {agencia_id} en paralelo: {e}")
         raise
 
 
@@ -108,9 +110,9 @@ def _notificar_operador_telegram(agencia, cantidad_correos):
         )
 
         send_telegram_task.delay(message=mensaje, chat_id=chat_id)
-        logger.info(f"✅ Telegram de monitoreo enviado a operador de {agencia.nombre}")
+        logger.info(f" Telegram de monitoreo enviado a operador de {agencia.nombre}")
     except Exception as e:
-        logger.warning(f"⚠️ No se pudo enviar Telegram al operador de {agencia.nombre}: {e}")
+        logger.warning(f" No se pudo enviar Telegram al operador de {agencia.nombre}: {e}")
 
 
 def _notificar_operador_whatsapp(agencia, cantidad_correos):
@@ -133,9 +135,9 @@ def _notificar_operador_whatsapp(agencia, cantidad_correos):
         )
 
         enviar_whatsapp(telefono, mensaje, agencia=agencia)
-        logger.info(f"✅ WhatsApp de monitoreo enviado a operador de {agencia.nombre}")
+        logger.info(f" WhatsApp de monitoreo enviado a operador de {agencia.nombre}")
     except Exception as e:
-        logger.warning(f"⚠️ No se pudo enviar WhatsApp al operador de {agencia.nombre}: {e}")
+        logger.warning(f" No se pudo enviar WhatsApp al operador de {agencia.nombre}: {e}")
 
 
 @shared_task(
@@ -148,7 +150,6 @@ def _notificar_operador_whatsapp(agencia, cantidad_correos):
 )
 def process_incoming_emails():
     """process_incoming_emails."""
-    from django.core.cache import cache
     from django.db.models import Q
 
     from core.models.agencia import Agencia
@@ -252,7 +253,7 @@ def enviar_notificacion_whatsapp_task(
             tiempo_espera = retrasos_escalonados[self.request.retries]
             raise self.retry(exc=exc, countdown=tiempo_espera) from exc
         else:
-            logger.error(f"❌ Fallo definitivo enviando WhatsApp a {numero_cliente}.")
+            logger.error(f" Fallo definitivo enviando WhatsApp a {numero_cliente}.")
 
             alerta_agencia = (
                 f"🚨 *FALLO WHATSAPP - {agencia_nombre}*\n\n"
@@ -355,7 +356,7 @@ def cleanup_temporary_storage_files(days=7):
     from django.core.files.storage import default_storage
     from django.utils import timezone
 
-    logger.info(f"🧹 Iniciando limpieza de archivos temporales (Antigüedad > {days} días)...")
+    logger.info(f" Iniciando limpieza de archivos temporales (Antigüedad > {days} días)...")
 
     prefixes = ["temp/", "tmp/", "vouchers_tmp/"]
     count = 0
@@ -377,12 +378,12 @@ def cleanup_temporary_storage_files(days=7):
                         default_storage.delete(filepath)
                         count += 1
                         deleted_size += size
-                        logger.debug(f"🗑️ Eliminado: {filepath} ({size} bytes)")
+                        logger.debug(f" Eliminado: {filepath} ({size} bytes)")
                 except Exception as e:
-                    logger.error(f"⚠️ No se pudo procesar/borrar {filepath}: {e}")
+                    logger.error(f" No se pudo procesar/borrar {filepath}: {e}")
 
         except Exception as e:
-            logger.warning(f"⚠️ Error accediendo al prefijo {prefix}: {e}")
+            logger.warning(f" Error accediendo al prefijo {prefix}: {e}")
 
     result = f"Limpieza completada. Se eliminaron {count} archivos ({deleted_size / 1024:.2f} KB)."
     logger.info(result)
@@ -731,7 +732,6 @@ def send_factura_to_whatsapp_task(self, factura_id):
 def create_binance_order_task(factura_id):
     """create_binance_order_task."""
     from celery import current_task
-    from django.core.cache import cache
 
     from apps.finance.models import Factura
     from apps.finance.services.binance_service import BinancePayService
@@ -948,8 +948,6 @@ def fetch_unsplash_image_task(self, query):
 )
 def fetch_airline_logo_task(self, airline_name):
     """fetch_airline_logo_task."""
-    import json
-
     import requests
     from django.conf import settings
 
@@ -1267,15 +1265,8 @@ def process_twilio_voice_quote_task(
 
 @shared_task(queue="default", time_limit=120, soft_time_limit=100)
 def fetch_all_qr_codes_task():
-    """Renueva el QR de WhatsApp para todas las agencias con Evolution configurado.
-
-    Se ejecuta periódicamente por Celery Beat. Por cada agencia activa con un
-    subdominio_slug configurado, dispara fetch_evolution_qr_task en paralelo.
-    Solo dispara fetch si la instancia NO está ya conectada.
-    """
     from core.models.agencia import Agencia
 
-    # subdominio_slug vive en AgenciaConfiguracion, usamos el ORM correcto
     agencias = (
         Agencia.objects.filter(activa=True)
         .select_related("configuracion")
@@ -1308,10 +1299,7 @@ def fetch_evolution_qr_task(self, instance_name):
     it in Redis for 2 minutes. It replaces the previous incorrectly‑bound task
     definition that prevented execution.
     """
-    import json
-
     import requests
-    from django.core.cache import cache
 
     from apps.communications.services.evolution_api_service import EvolutionService
 
@@ -1339,38 +1327,52 @@ def fetch_evolution_qr_task(self, instance_name):
             )
         if response.status_code == 200:
             data = response.json()
-            if isinstance(data, dict) and data.get("base64"):
-                cache.set(cache_key, data["base64"], 300)  # 5 minutos
+            qr_b64 = data.get("base64")
+            # Evolution API v2 nested format fallback
+            if not qr_b64 and isinstance(data.get("qrcode"), dict):
+                qr_b64 = data["qrcode"].get("base64")
+
+            if qr_b64:
+                # TTL 120s (2 min) — el Beat refresca cada 60s, así siempre hay cache
+                # disponible y el frontend no cae al fallback iframe (404).
+                cache.set(cache_key, qr_b64, 120)
                 logger.info(f"Evolution QR cached via HTTP for {instance_name}")
-                return data["base64"]
+                return qr_b64
     except (requests.RequestException, json.JSONDecodeError, ValueError) as e:
         logger.error(f"Failed to fetch Evolution QR for {instance_name}: {e}")
         return None
 
     try:
-        import websocket
+        import socketio
 
-        ws_url = base_url.replace("http://", "ws://")
-        ws_url = f"{ws_url}/{instance_name}"
-        ws_headers = {"apikey": headers.get("apikey", "")}
+        sio = socketio.Client(logger=False, engineio_logger=False)
+        qr_result = {}
 
-        ws = websocket.create_connection(ws_url, header=ws_headers, timeout=2)
-        for _ in range(10):
-            try:
-                message = ws.recv()
-                data = json.loads(message)
-                event = data.get("event", "")
-                qr = data.get("qrcode", data if event else {})
-                if isinstance(qr, dict) and qr.get("base64"):
-                    cache.set(cache_key, qr["base64"], 120)
-                    logger.info(f"Evolution QR cached via WebSocket for {instance_name}")
-                    ws.close()
-                    return qr["base64"]
-            except (json.JSONDecodeError, KeyError, ValueError):
-                continue
-        ws.close()
+        @sio.on("connection.update")
+        def on_connection_update(data):
+            qrcode_data = data.get("qrcode", {}) if isinstance(data, dict) else {}
+            if isinstance(qrcode_data, dict):
+                qr_b64 = qrcode_data.get("base64")
+                if qr_b64:
+                    qr_result["base64"] = qr_b64
+
+        sio.connect(
+            f"{base_url}/{instance_name}",
+            headers={"apikey": headers.get("apikey", "")},
+            transports=["polling"],
+            wait_timeout=5,
+        )
+        sio.sleep(3)
+        sio.disconnect()
+
+        if qr_result.get("base64"):
+            cache.set(cache_key, qr_result["base64"], 300)
+            logger.info(f"Evolution QR cached via Socket.IO for {instance_name}")
+            return qr_result["base64"]
     except ImportError:
-        logger.warning("websocket module not available for QR fetch")
+        logger.warning("python-socketio module not available for QR fetch")
+    except Exception as e:
+        logger.warning(f"Socket.IO QR fetch failed for {instance_name}: {e}")
     return None
 
 
@@ -1584,147 +1586,3 @@ def limpiar_celery_results(days=30):
 
 _WHATSAPP_HEALTH_LAST_STATE_KEY = "monitor:whatsapp_health:last_state"
 _WHATSAPP_HEALTH_LAST_STATE_TTL = 3600  # 1 hora de gracia (evita reset)
-
-
-@shared_task(name="apps.common.tasks.monitor_whatsapp_health_task", queue="default", time_limit=60)
-def monitor_whatsapp_health_task():
-    """Monitor proactivo del flujo WhatsApp/Evolution. Alerta a Telegram si down/degraded."""
-    from django.core.cache import cache
-
-    # 1. Llamar al endpoint interno en lugar de re-implementar la lógica
-    base_url = getattr(settings, "WHATSAPP_MICROSERVICE_URL", None) or os.getenv(  # noqa: F841
-        "WHATSAPP_MICROSERVICE_URL", "http://evolution:8080"
-    )
-    # Calculamos el host Django correctamente desde settings.
-    # Como esto corre en web container, apuntamos a localhost:8000.
-    django_base = "http://localhost:8000"
-    health_url = f"{django_base}/system/whatsapp/health/"
-
-    started_ts = datetime.datetime.now(datetime.UTC)
-    health_data = None
-    http_status = None
-
-    try:
-        import requests
-
-        # Backend URL desde settings Django
-        django_base = (
-            getattr(settings, "DJANGO_BASE_URL", None)
-            or os.getenv("DJANGO_BASE_URL")
-            or "http://localhost:8000"
-        )
-        health_url = f"{django_base}/system/whatsapp/health/"
-
-        # Generar headers de service-account si existen
-        headers = {"User-Agent": "travelhub-monitor/1.0"}
-        service_token = os.getenv("MONITOR_SERVICE_TOKEN")
-        if service_token:
-            headers["Authorization"] = f"Bearer {service_token}"
-
-        response = requests.get(health_url, headers=headers, timeout=30)
-        http_status = response.status_code
-        if response.status_code == 200:
-            health_data = response.json()
-        else:
-            health_data = {"error": f"HTTP {http_status}", "raw": response.text[:500]}
-    except Exception as e:
-        logger.exception("monitor_whatsapp_health_task: error fetching health endpoint")
-        health_data = {"error": str(e), "status": "down"}
-
-    # 2. Evaluar estado
-    overall = (health_data or {}).get("status", "down")
-    checks = (health_data or {}).get("checks", {})
-
-    # 3. Construir resumen
-    if overall == "ok":
-        summary = "✅ Todos los flujos WhatsApp OK"
-    else:
-        affected = [
-            f"• {slug}: {info.get('status')} (state={info['checks'].get('evolution_state')}, qr_gen={info['checks'].get('qr_generable')})"
-            for slug, info in checks.items()
-        ]
-        summary = (
-            f"❌ Estado: <b>{overall.upper()}</b>\n"
-            + ("Instances afectadas:\n" + "\n".join(affected) if affected else "")
-            + f"\nDebug: `{django_base.rstrip('/')}/system/whatsapp/health/`"
-        )
-
-    # 4. Resumir performance
-    overall_ms = (health_data or {}).get("overall_ms", "?")
-
-    # 5. Detectar cambios de estado para evitar spam
-    last_state = cache.get(_WHATSAPP_HEALTH_LAST_STATE_KEY)
-    alert_needed = last_state != overall and overall in ("degraded", "down")
-
-    if not alert_needed:
-        # Loggear igual para auditoría
-        logger.info(
-            "monitor_whatsapp_health: state=%s elapsed_ms=%s affected=%d",
-            overall,
-            overall_ms,
-            len(checks),
-        )
-        cache.set(_WHATSAPP_HEALTH_LAST_STATE_KEY, overall, _WHATSAPP_HEALTH_LAST_STATE_TTL)
-        return {"status": overall, "alert_sent": False, "overall_ms": overall_ms}
-
-    # 6. Construir mensaje de Telegram
-    elapsed = (datetime.datetime.now(datetime.UTC) - started_ts).total_seconds()
-    telegram_msg = (
-        f"🚨 <b>WhatsApp Health Alert</b>\n"
-        f"⏰ {started_ts.strftime('%Y-%m-%d %H:%M:%S UTC')}\n"
-        f"⏱ Verificado en {elapsed:.2f}s ({overall_ms}ms en endpoint)\n"
-        f"\n{summary}"
-    )
-
-    # 7. Enviar alerta (USAR SEND TELEGRAM TASK para no bloquear)
-    try:
-        from django.conf import settings as dj_settings
-
-        from apps.common.tasks import send_telegram_task
-
-        admin_chat_id = getattr(dj_settings, "TELEGRAM_ADMIN_ID", None)
-        if admin_chat_id:
-            send_telegram_task.delay(telegram_msg, chat_id=str(admin_chat_id))
-            logger.error(
-                "monitor_whatsapp_health: Alert sent to Telegram admin=%s state=%s",
-                admin_chat_id,
-                overall,
-            )
-        else:
-            logger.warning(
-                "monitor_whatsapp_health: state=%s but TELEGRAM_ADMIN_ID not configured",
-                overall,
-            )
-    except Exception as e:
-        logger.error("monitor_whatsapp_health: error sending telegram alert: %s", e)
-
-    # 7b. Log a Sentry también si está disponible
-    try:
-        import sentry_sdk
-
-        with sentry_sdk.push_scope() as scope:
-            scope.set_tag("component", "whatsapp_monitor")
-            scope.set_tag("state", overall)
-            scope.set_extra("health_data", health_data)
-            sentry_sdk.capture_message(
-                f"whatsapp health {overall}",
-                level="error" if overall == "down" else "warning",
-            )
-    except Exception:  # noqa: S110
-        pass
-
-    # 8. Update cache con nuevo estado
-    cache.set(_WHATSAPP_HEALTH_LAST_STATE_KEY, overall, _WHATSAPP_HEALTH_LAST_STATE_TTL)
-
-    kpis = {
-        "ok": sum(1 for c in checks.values() if c.get("status") == "ok"),
-        "degraded": sum(1 for c in checks.values() if c.get("status") == "degraded"),
-        "down": sum(1 for c in checks.values() if c.get("status") == "down"),
-    }
-
-    return {
-        "status": overall,
-        "alert_sent": alert_needed,
-        "overall_ms": overall_ms,
-        "instances": kpis,
-    }

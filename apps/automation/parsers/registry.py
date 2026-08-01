@@ -4,6 +4,7 @@ Permite registrar y buscar parsers dinámicamente.
 """
 
 import logging
+import threading
 
 from .base_parser import BaseTicketParser
 
@@ -16,6 +17,7 @@ class ParserRegistry:
     def __init__(self):
         """__init__."""
         self._parsers: list[BaseTicketParser] = []
+        self._lock = threading.Lock()
 
     def register(self, parser: BaseTicketParser) -> None:
         """
@@ -29,7 +31,8 @@ class ParserRegistry:
                 f"Parser debe ser instancia de BaseTicketParser, recibido: {type(parser)}"
             )
 
-        self._parsers.append(parser)
+        with self._lock:
+            self._parsers.append(parser)
         logger.info(f"Parser registrado: {parser.__class__.__name__}")
 
     def find_parser(self, text: str) -> BaseTicketParser | None:
@@ -42,7 +45,9 @@ class ParserRegistry:
         Returns:
             Parser que puede procesar el texto o None si no se encuentra
         """
-        for parser in self._parsers:
+        with self._lock:
+            parsers_copy = list(self._parsers)
+        for parser in parsers_copy:
             try:
                 if parser.can_parse(text):
                     logger.info(f"Parser encontrado: {parser.__class__.__name__}")
@@ -56,11 +61,13 @@ class ParserRegistry:
 
     def get_all_parsers(self) -> list[BaseTicketParser]:
         """Retorna lista de todos los parsers registrados"""
-        return self._parsers.copy()
+        with self._lock:
+            return list(self._parsers)
 
     def clear(self) -> None:
         """Limpia todos los parsers registrados"""
-        self._parsers.clear()
+        with self._lock:
+            self._parsers.clear()
         logger.info("Registro de parsers limpiado")
 
 

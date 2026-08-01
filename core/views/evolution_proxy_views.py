@@ -9,8 +9,8 @@ import logging
 import re
 
 import requests
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseServerError
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
@@ -21,11 +21,14 @@ logger = logging.getLogger(__name__)
 # Patrón seguro para instance_name: solo alfanuméricos, guiones y guiones bajos
 INSTANCE_NAME_PATTERN = re.compile(r"^[a-zA-Z0-9_-]+$")
 
+# Sesión HTTP reutilizada entre requests (P2-43): evita nueva conexión TCP por request.
+_proxy_session = requests.Session()
 
-@login_required  # CSRF exempt: secured by @login_required + instance_name + agency validation
-@csrf_exempt
+
+@csrf_exempt  # CSRF exempt: proxy reverso; assets Vite no envían cookies; login+SSRF+agencia validados abajo (P3-71)
+@xframe_options_sameorigin
 @require_http_methods(["GET", "POST"])
-def evolution_manager_proxy(request, instance_name):
+def evolution_manager_proxy(request, instance_name, extra=None, **kwargs):
     """
     Proxy reverso para el Evolution Manager UI.
     Sirve la pagina de QR del Evolution Manager como si fuera parte del portal,
@@ -34,6 +37,16 @@ def evolution_manager_proxy(request, instance_name):
     GET /whatsapp/qr/{instance_name}/ → Evolution Manager QR page
     GET /whatsapp/qr/{instance_name}/assets/... → Evolution static assets
     """
+    # FIX Vite crossorigin modules: Permitir assets estáticos sin autenticación
+    # ya que Vite los pide con crossorigin="anonymous" y no envían cookies.
+    is_static_asset = extra and (extra.startswith("assets/") or extra.startswith("evolution/"))
+
+    if not is_static_asset:
+        if not request.user.is_authenticated:
+            from django.contrib.auth.views import redirect_to_login
+
+            return redirect_to_login(request.get_full_path())
+
     # FIX SEGURIDAD: Validar instance_name contra SSRF
     if not INSTANCE_NAME_PATTERN.match(instance_name):
         logger.warning(f"Instance name inválido rechazado: {instance_name}")
@@ -41,7 +54,7 @@ def evolution_manager_proxy(request, instance_name):
 
     # Seguridad: validar que el instance_name corresponde a la agencia del usuario
     agencia = getattr(request, "agencia", None)
-    if agencia and not request.user.is_superuser:
+    if not is_static_asset and agencia and not request.user.is_superuser:
         expected_slug = (
             agencia.subdominio_slug
             if hasattr(agencia, "subdominio_slug")
@@ -55,17 +68,16 @@ def evolution_manager_proxy(request, instance_name):
 
     base_url = EvolutionService._get_base_url()
 
-    # Extraer el path de forma robusta ignorando cualquier prefijo como /system/
-    marker = f"/whatsapp/qr/{instance_name}"
-    idx = request.path.find(marker)
-    if idx != -1:
-        path = request.path[idx + len(marker) :]
+    if extra:
+        path = f"/{extra}"
     else:
         path = "/"
-    if not path:
-        path = "/"
 
-    target_url = f"{base_url}/manager/qr/{instance_name}{path}"
+    # Las rutas de assets y evolution se sirven desde la raíz en Evolution API
+    if path.startswith("/assets/") or path.startswith("/evolution/"):
+        target_url = f"{base_url}{path}"
+    else:
+        target_url = f"{base_url}/manager/qr/{instance_name}{path}"
 
     if request.META.get("QUERY_STRING"):
         from urllib.parse import parse_qs, urlencode
@@ -87,10 +99,10 @@ def evolution_manager_proxy(request, instance_name):
 
     try:
         if request.method == "GET":
-            resp = requests.get(target_url, headers=headers, timeout=15, allow_redirects=True)
+            resp = _proxy_session.get(target_url, headers=headers, timeout=15, allow_redirects=True)
         elif request.method == "POST":
             body = request.body
-            resp = requests.post(
+            resp = _proxy_session.post(
                 target_url, data=body, headers=headers, timeout=15, allow_redirects=True
             )
         else:
@@ -111,13 +123,32 @@ def evolution_manager_proxy(request, instance_name):
                 )
             except Exception as e:
                 logger.warning("No se pudo resolver reverse para %s: %s", instance_name, e)
-                prefix_url = f"/system/whatsapp/qr/{instance_name}/"
+                prefix_url = f"/manager/qr/{instance_name}/"
 
             if not prefix_url.endswith("/"):
                 prefix_url += "/"
 
             text = text.replace("/assets/", f"{prefix_url}assets/")
             text = text.replace("/evolution/", f"{prefix_url}evolution/")
+
+            # FIX Vite + Cloudflare / Django Auth issue:
+            # Eliminar crossorigin para que el navegador envíe las cookies (cf_clearance, sessionid)
+            # al pedir los assets desde nuestro mismo dominio.
+            text = text.replace("crossorigin ", "")
+            text = text.replace("crossorigin", "")
+
+            # Fix crossorigin and add CSP nonces
+            text = text.replace(" crossorigin", "")
+
+            nonce = getattr(request, "csp_nonce", "")
+            if nonce:
+                # Inject CSP nonce into script and style tags so they can execute
+                text = text.replace("<script ", f'<script nonce="{nonce}" ')
+                text = text.replace("<style ", f'<style nonce="{nonce}" ')
+                # Handle tags that might not have a trailing space before the closing bracket
+                text = text.replace("<script>", f'<script nonce="{nonce}">')
+                text = text.replace("<style>", f'<style nonce="{nonce}">')
+
             content = text.encode("utf-8")
 
         response = HttpResponse(content, status=resp.status_code, content_type=content_type)

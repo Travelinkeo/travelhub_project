@@ -7,17 +7,17 @@
 {% block page_subtitle %}Localiza boletos por múltiples criterios en toda la base de datos.{% endblock %}
 
 {% block content %}
-<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-4 md:p-8">
 
     <!-- Header & Action Bar -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 mb-6 sm:mb-10 pb-4 sm:pb-6 border-b border-border-color">
         <div>
-            <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">Base de Datos de Boletos</h1>
-            <p class="text-text-muted text-sm mt-1">Consultas exhaustivas cruzando pasajeros, rutas, fechas y sistemas GDS.</p>
+            <h1 class="text-2xl sm:text-3xl font-black text-text-main tracking-tight uppercase">Base de Datos de Boletos</h1>
+            <p class="text-text-muted text-xs sm:text-sm mt-1">Consultas exhaustivas cruzando pasajeros, rutas, fechas y sistemas GDS.</p>
         </div>
-        <div class="flex gap-3">
-            <button data-action="buscar-boletos" class="btn-primary !h-12 !px-10 shadow-lg shadow-primary/20 group">
-                <span class="material-symbols-outlined group-hover:rotate-180 transition-transform duration-500">bolt</span>
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <button data-action="buscar-boletos" class="btn-primary !h-10 sm:!h-12 !px-6 sm:!px-10 shadow-lg shadow-primary/20 group text-xs">
+                <span class="material-symbols-outlined text-[18px] group-hover:rotate-180 transition-transform duration-500">bolt</span>
                 <span>Ejecutar Búsqueda</span>
             </button>
         </div>
@@ -29,7 +29,7 @@
     <div class="card-base p-8 mb-10 bg-surface-1 border-2 border-primary/5 shadow-2xl relative overflow-hidden">
         <!-- Decoración de fondo -->
         <div class="absolute -top-24 -right-24 size-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
-        
+
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
             {# Pasajero #}
             <div class="space-y-2">
@@ -100,7 +100,7 @@
                 <h2 class="text-sm font-black text-text-main uppercase tracking-widest">Resultados de Búsqueda</h2>
                 <span id="resultados-counter" class="ml-2 text-[10px] font-black bg-surface-1 border border-border-color px-3 py-1 rounded-full text-text-muted uppercase tracking-widest shadow-inner">0 Resultados</span>
             </div>
-            
+
             <div class="flex items-center gap-4">
                 <label class="flex items-center gap-3 px-3 py-1.5 bg-surface-base/50 rounded-xl border border-border-color cursor-pointer hover:bg-surface-base transition-all group">
                     <input type="checkbox" id="select-all-search" class="size-4 rounded border-border-color bg-surface-1 text-primary focus:ring-primary">
@@ -215,8 +215,8 @@
         document.getElementById('pg-range').textContent = `1 - ${Math.min(filtered.length, 50)}`;
 
         container.innerHTML = filtered.map(b => {
-            const fecha = b.fecha_emision_boleto 
-                ? new Date(b.fecha_emision_boleto).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' }) 
+            const fecha = b.fecha_emision_boleto
+                ? new Date(b.fecha_emision_boleto).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' })
                 : '---';
             const total = Number(b.total_boleto || 0).toLocaleString('en-US', { minimumFractionDigits: 2 });
             const pasajero = b.nombre_pasajero_procesado || 'Sin Nombre';

@@ -36,7 +36,7 @@ def conciliar_reporte_batch_task(reporte_id, agencia_id):
 
             SmartReconciliationService.procesar_reporte(reporte_id)
 
-        logger.info(f"✅ Tarea finalizada con éxito para Reporte {reporte_id}")
+        logger.info(f" Tarea finalizada con éxito para Reporte {reporte_id}")
         return str(reporte_id)
 
     except Exception as e:

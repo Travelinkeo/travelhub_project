@@ -9,7 +9,11 @@ from apps.crm.services.freelancer_service import FreelancerService
 logger = logging.getLogger(__name__)
 
 
-@shared_task
+@shared_task(
+    bind=True,
+    max_retries=3,
+    default_retry_delay=3600,
+)
 def liquidar_comisiones_mensual_task() -> str:
     """
     Tarea mensual (o manual) para liquidar todas las comisiones pendientes

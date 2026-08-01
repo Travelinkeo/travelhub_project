@@ -252,12 +252,12 @@ class GastoOperativo(AgenciaMixin, models.Model):
         blank=True,
         verbose_name="Registrado por",
     )
-    creado = models.DateTimeField(auto_now_add=True)
+    creado = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     actualizado = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "Gasto Operativo"
-        verbose_name_plural = "Gastos Operativos"
+        verbose_name = "Factura Consolidada"
+        verbose_name_plural = "Facturas Consolidadas"
         ordering = ["-fecha", "-creado"]
         indexes = [
             models.Index(fields=["agencia", "fecha"]),

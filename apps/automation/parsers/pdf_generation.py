@@ -31,7 +31,7 @@ class PdfGenerationService:
             html_out = render_to_string(template_name, context)
 
             # --- RENDERIZADO DE PDF (WeasyPrint) ---
-            logger.info(f"🖨️ Generando PDF para PNR: {context.get('CODIGO_RESERVA')}")
+            logger.info(f" Generando PDF para PNR: {context.get('CODIGO_RESERVA')}")
             pdf_bytes = PdfRendererService.render_html_to_pdf(html_out)
 
             # Nombre de archivo profesional
@@ -53,7 +53,7 @@ class PdfGenerationService:
             return pdf_bytes, fname
 
         except Exception as e:
-            logger.error(f"❌ Fallo crítico en generación de PDF de boleto: {e}", exc_info=True)
+            logger.error(f" Fallo crítico en generación de PDF de boleto: {e}", exc_info=True)
             return b"", "error_generacion.pdf"
 
     @staticmethod

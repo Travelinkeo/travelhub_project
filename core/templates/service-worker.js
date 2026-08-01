@@ -1,8 +1,9 @@
-// TravelHub PWA — Service Worker v4
+// TravelHub PWA — Service Worker v5
 // Estrategias: Network First para HTML, Cache First para assets, Stale-While-Revalidate para HTMX
 // Push notifications, Background Sync, offline indicator
+// FIXED: respondWith siempre devuelve Response válida (nunca undefined)
 
-const CACHE_NAME = 'travelhub-v8';
+const CACHE_NAME = 'travelhub-v11';
 const STATIC_ASSETS = [
   '/offline/',
   '/static/core/css/tailwind-built.css',
@@ -59,8 +60,9 @@ self.addEventListener('fetch', (event) => {
   // Assets estáticos: Cache First
   if (url.pathname.startsWith('/static/') || url.pathname.startsWith('/media/')) {
     event.respondWith(
-      caches.match(request).then((cached) =>
-        cached || fetch(request).then((response) => {
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request).then((response) => {
           if (response.status === 200) {
             return caches.open(CACHE_NAME).then((cache) => {
               cache.put(request, response.clone());
@@ -68,13 +70,14 @@ self.addEventListener('fetch', (event) => {
             });
           }
           return response;
-        })
-      )
+        }).catch(() => new Response('', { status: 503, statusText: 'Service Unavailable' }));
+      })
     );
     return;
   }
 
   // HTMX partials y demás peticiones: Stale-While-Revalidate
+  // IMPORTANTE: respondWith SIEMPRE debe recibir una Response válida, nunca undefined.
   event.respondWith(
     caches.match(request).then((cached) => {
       const fetchPromise = fetch(request).then((response) => {
@@ -85,7 +88,11 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return response;
-      }).catch(() => cached);
+      }).catch(() => {
+        // Si la red falla y hay cache, úsalo; si no, devuelve 503 (nunca undefined)
+        if (cached) return cached;
+        return new Response('', { status: 503, statusText: 'Service Unavailable' });
+      });
       return cached || fetchPromise;
     })
   );

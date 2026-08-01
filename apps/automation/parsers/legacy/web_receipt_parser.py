@@ -477,7 +477,7 @@ class WebReceiptParser(BaseTicketParser):
         import logging
 
         logger = logging.getLogger(__name__)
-        logger.info(f"🔍 DEBUG AVIOR RAW TEXT: {text[:500]}...")  # Primeros 500 chars
+        logger.info(f" DEBUG AVIOR RAW TEXT: {text[:500]}...")  # Primeros 500 chars
 
         # 2. Pasajeros y Tickets
         nombres = []
@@ -769,7 +769,7 @@ class WebReceiptParser(BaseTicketParser):
         num_pax = len(ticket_labels)
 
         if num_pax == 0:
-            logger.warning("⚠️ No se encontraron labels de 'Número de ticket' en Estelar HTML")
+            logger.warning(" No se encontraron labels de 'Número de ticket' en Estelar HTML")
             return {"error": "No se encontraron pasajeros"}
 
         monto_por_pax = total_monto / num_pax if num_pax > 0 else 0
@@ -993,7 +993,7 @@ class WebReceiptParser(BaseTicketParser):
                             fecha_iso = f"{year}-{mes_num}-{d_day.zfill(2)}"
                             fecha_display = f"{d_day} de {d_month}"
                 except Exception as e:
-                    logger.warning(f"⚠️ Error parseando fecha Avior '{fecha_str}': {e}")
+                    logger.warning(f" Error parseando fecha Avior '{fecha_str}': {e}")
 
             v = {
                 "origen": origen,
@@ -1374,7 +1374,7 @@ class WebReceiptParser(BaseTicketParser):
                 a = re.sub(r"\s+", "", a).replace("\n", "").upper()
                 nombres.append(f"{a}/{n}")
         except Exception as e:
-            logger.warning(f"⚠️ Error extrayendo nombres en Rutaca Text: {e}")
+            logger.warning(f" Error extrayendo nombres en Rutaca Text: {e}")
 
         if not nombres:
             nombres = ["PASAJERO/RUTACA"]

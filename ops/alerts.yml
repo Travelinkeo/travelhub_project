@@ -28,3 +28,122 @@ groups:
         annotations:
           summary: "DB connection pool at {{ $value | humanizePercentage }}"
           description: "Active connections are at {{ $value | humanizePercentage }} of max_connections. Pool may be exhausted."
+
+      # --- 13 ALERTAS FALTANTES ---
+
+      - alert: SentryErrorRateHigh
+        expr: increase(sentry_errors_total[5m]) > 10
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Sentry error rate spike"
+          description: "{{ $value }} errors in last 5 minutes. Check Sentry dashboard."
+
+      - alert: DiskSpaceCritical
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk space critical on {{ $labels.instance }}"
+          description: "Only {{ $value | humanizePercentage }}% free space remaining on /."
+
+      - alert: RedisMemoryHigh
+        expr: (redis_memory_used_bytes / redis_memory_max_bytes) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis is using {{ $value | humanizePercentage }}% of maxmemory. Consider increasing limit or enabling eviction policy."
+
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis instance down"
+          description: "Redis exporter reports Redis is unreachable. All queues and caching will fail."
+
+      - alert: BackupFailed
+        expr: increase(backup_job_failures_total[1h]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backup job failed"
+          description: "Scheduled backup job reported failure. Check backup logs immediately."
+
+      - alert: BackupStale
+        expr: time() - backup_last_success_timestamp > 86400
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backup stale (>24h)"
+          description: "Last successful backup was {{ $value | humanizeDuration }} ago. Expected daily backup."
+
+      - alert: AuthFailureRateHigh
+        expr: increase(travelhub_auth_failures_total[5m]) > 50
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High authentication failure rate"
+          description: "{{ $value }} failed login attempts in 5 minutes. Possible brute force attack."
+
+      - alert: CeleryWorkerDown
+        expr: up{job="celery"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Celery worker down"
+          description: "Celery worker {{ $labels.instance }} is unreachable. Queue processing halted."
+
+      - alert: CeleryBeatDown
+        expr: up{job="celery-beat"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Celery Beat scheduler down"
+          description: "Celery Beat scheduler is unreachable. Scheduled tasks will not run."
+
+      - alert: WebhookSignatureFailuresHigh
+        expr: increase(travelhub_webhook_signature_failures_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High webhook signature failures"
+          description: "{{ $value }} webhook requests failed signature verification in 5 minutes. Possible replay attack or misconfigured webhook."
+
+      - alert: AIProviderUnavailable
+        expr: ai_provider_healthy{provider=~".*"} == 0
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "AI provider {{ $labels.provider }} unavailable"
+          description: "All AI providers are down or rate limited. AI-powered features (ticket parsing, GDS analysis) will fail."
+
+      - alert: TaxRefundProcessingStalled
+        expr: increase(tax_refund_opportunities_stalled_total[1h]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tax refund processing stalled"
+          description: "{{ $value }} tax refund opportunities stuck in processing for >1 hour. Check TaxRefundOpportunity table."
+
+      - alert: APIRateLimitExhausted
+        expr: increase(travelhub_api_rate_limit_exhausted_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API rate limit exhausted"
+          description: "API key {{ $labels.api_key_prefix }} has exhausted its rate limit. Consider upgrading plan."

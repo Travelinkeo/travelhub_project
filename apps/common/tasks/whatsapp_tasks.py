@@ -77,7 +77,7 @@ def enviar_notificacion_whatsapp_task(
             tiempo_espera = retrasos_escalonados[self.request.retries]
             raise self.retry(exc=exc, countdown=tiempo_espera) from exc
         else:
-            logger.error(f"❌ Fallo definitivo enviando WhatsApp a {numero_cliente}.")
+            logger.error(f" Fallo definitivo enviando WhatsApp a {numero_cliente}.")
 
             alerta_agencia = (
                 f"🚨 *FALLO WHATSAPP - {agencia_nombre}*\n\n"

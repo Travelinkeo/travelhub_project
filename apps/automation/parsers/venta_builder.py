@@ -54,7 +54,7 @@ class VentaBuilderService:
         )
 
         if not created:
-            logger.info(f"♻️ Reutilizando Venta {venta.pk} existente para PNR {pnr}")
+            logger.info(f" Reutilizando Venta {venta.pk} existente para PNR {pnr}")
             if cliente_pagador and (
                 not venta.cliente or venta.cliente.id_cliente != cliente_pagador.id_cliente
             ):
@@ -92,7 +92,7 @@ class VentaBuilderService:
         # 4. Recalcular total de la venta
         VentaBuilderService._recalcular_total_venta(venta)
 
-        logger.info(f"💳 Venta Multipax {pnr} ({len(boletos_data)} pax) construida exitosamente.")
+        logger.info(f" Venta Multipax {pnr} ({len(boletos_data)} pax) construida exitosamente.")
         return venta
 
     @staticmethod

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-postgres-exporter
+  labels:
+    app: {{ .Release.Name }}-postgres-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-postgres-exporter
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-postgres-exporter
+    spec:
+      containers:
+        - name: postgres-exporter
+          image: "{{ .Values.exporters.postgres.image }}"
+          env:
+            - name: DATA_SOURCE_NAME
+              value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@db:5432/$(POSTGRES_DB)?sslmode=disable"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-secrets
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-secrets
+                  key: POSTGRES_DB
+          ports:
+            - containerPort: 9187
+          resources:
+            {{- toYaml .Values.exporters.postgres.resources | nindent 12 }}

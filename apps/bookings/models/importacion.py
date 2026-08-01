@@ -5,6 +5,7 @@ import logging
 from django.conf import settings
 from django.contrib.postgres.indexes import GinIndex
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.api import (
@@ -69,6 +70,17 @@ class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
         blank=True,
         null=True,
         help_text=_("Información extraída del boleto en formato JSON."),
+    )
+    datos_parseados_version = models.PositiveIntegerField(
+        _("Versión Datos Parseados"),
+        default=1,
+        help_text=_("Versión de los datos parseados (incrementa en cada re-parseo)"),
+    )
+    datos_parseados_actualizado = models.DateTimeField(
+        _("Datos Parseados Actualizado"),
+        null=True,
+        blank=True,
+        help_text=_("Fecha de última actualización de los datos parseados"),
     )
 
     class EstadoParseo(models.TextChoices):
@@ -310,16 +322,18 @@ class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
                 f"Truncando log_parseo de {len(self.log_parseo)} a {MAX_LOG_LENGTH} chars para BoletoImportado {self.pk}"
             )
             self.log_parseo = self.log_parseo[-MAX_LOG_LENGTH:]
+
+        # Incrementar versión de datos_parseados si cambió el contenido
+        if self.pk:
+            try:
+                original = BoletoImportado.objects.only("datos_parseados").get(pk=self.pk)
+                if original.datos_parseados != self.datos_parseados:
+                    self.datos_parseados_version += 1
+                    self.datos_parseados_actualizado = timezone.now()
+            except BoletoImportado.DoesNotExist:
+                pass
+
         super().save(*args, **kwargs)
-
-    @property
-    def fecha_emision(self):
-        return self.fecha_emision_boleto
-
-    @fecha_emision.setter
-    def fecha_emision(self, value):
-        """fecha_emision."""
-        self.fecha_emision_boleto = value
 
 
 class SolicitudAnulacion(AgenciaMixin, models.Model):

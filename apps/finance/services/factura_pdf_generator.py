@@ -86,7 +86,7 @@ def guardar_pdf_factura(factura):
         logger.info(f"PDF generado, tamaño: {len(pdf_content)} bytes")
         return pdf_content
     except Exception as e:
-        logger.error(f"❌ Error guardando PDF: {str(e)}")
+        logger.error(f" Error guardando PDF: {str(e)}")
         import traceback
 
         logger.error(traceback.format_exc())

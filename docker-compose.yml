@@ -100,12 +100,79 @@ services:
   # ---------------------------------------------------------------------------
   # 3. BROKER DE MENSAJERÍA Y CACHE (Redis)
   # ---------------------------------------------------------------------------
+  # Redis principal - Cache (DB 0)
+  redis_cache:
+    image: redis:7-alpine
+    container_name: travelhub_redis_cache
+    restart: unless-stopped
+    logging: *default-logging
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD:-}
+    volumes:
+      - redis_cache_data:/data
+    networks:
+      - travelhub_private
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: '0.5'
+
+  # Redis - Celery Broker (DB 1)
+  redis_broker:
+    image: redis:7-alpine
+    container_name: travelhub_redis_broker
+    restart: unless-stopped
+    logging: *default-logging
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD:-}
+    volumes:
+      - redis_broker_data:/data
+    networks:
+      - travelhub_private
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: '0.5'
+
+  # Redis - Evolution API (DB 2)
+  redis_evolution:
+    image: redis:7-alpine
+    container_name: travelhub_redis_evolution
+    restart: unless-stopped
+    logging: *default-logging
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD:-}
+    volumes:
+      - redis_evolution_data:/data
+    networks:
+      - travelhub_private
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+  # Legacy alias for backwards compatibility
   redis:
     image: redis:7-alpine
     container_name: travelhub_broker
     restart: unless-stopped
     logging: *default-logging
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
     volumes:
       - redis_data:/data
     networks:
@@ -132,29 +199,16 @@ services:
     container_name: travelhub_web
     restart: unless-stopped
     logging: *default-logging
-    command:
-      - sh
-      - -c
-      - >
-        gunicorn travelhub.wsgi:application
-        --bind 0.0.0.0:8000
-        --workers ${GUNICORN_WORKERS:-4}
-        --worker-class gthread
-        --threads 2
-        --max-requests 1000
-        --max-requests-jitter 100
-        --timeout 120
-        --keep-alive 5
-        --preload
+    command: gunicorn travelhub.wsgi:application --bind 0.0.0.0:8000 --workers ${GUNICORN_WORKERS:-4} --worker-class sync --max-requests 1000 --max-requests-jitter 100 --timeout 120 --keep-alive 5
     # SECURITY: Puerto de Gunicorn comentado - solo accesible via Traefik
     # Para acceso local durante desarrollo, descomentar temporalmente:
     #ports:
     #  - "8000:8000"
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@pgbouncer:5432/${DB_NAME}
-      - REDIS_URL=redis://redis:6379/0
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - REDIS_URL=redis://redis_cache:6379/0
+      - CELERY_BROKER_URL=redis://redis_broker:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis_broker:6379/0
       # Settings module explícito — producción
       - DJANGO_SETTINGS_MODULE=travelhub.settings.production
       - DJANGO_ENV=production
@@ -169,12 +223,16 @@ services:
       - static_volume:/app/staticfiles
       - ./media:/app/media
       - ./boletos_importados:/app/boletos_importados
+      - ./apps:/app/apps
+      - ./core:/app/core
     depends_on:
       db:
         condition: service_healthy
       pgbouncer:
         condition: service_started
-      redis:
+      redis_cache:
+        condition: service_healthy
+      redis_broker:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python3", "/app/compose/healthcheck.py"]
@@ -282,9 +340,9 @@ services:
       - .env.local
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@pgbouncer:5432/${DB_NAME}
-      - REDIS_URL=redis://redis:6379/0
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - REDIS_URL=redis://redis_cache:6379/0
+      - CELERY_BROKER_URL=redis://redis_broker:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis_broker:6379/0
     volumes:
       - ./media:/app/media
       - ./boletos_importados:/app/boletos_importados
@@ -293,7 +351,9 @@ services:
         condition: service_healthy
       pgbouncer:
         condition: service_started
-      redis:
+      redis_cache:
+        condition: service_healthy
+      redis_broker:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "celery -A travelhub inspect ping --timeout 30 || exit 1"]
@@ -322,9 +382,9 @@ services:
       - .env.local
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@pgbouncer:5432/${DB_NAME}
-      - REDIS_URL=redis://redis:6379/0
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - REDIS_URL=redis://redis_cache:6379/0
+      - CELERY_BROKER_URL=redis://redis_broker:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis_broker:6379/0
     volumes:
       - ./media:/app/media
     depends_on:
@@ -332,7 +392,9 @@ services:
         condition: service_healthy
       pgbouncer:
         condition: service_started
-      redis:
+      redis_cache:
+        condition: service_healthy
+      redis_broker:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "celery -A travelhub inspect ping --timeout 30 || exit 1"]
@@ -365,13 +427,15 @@ services:
       - .env.local
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@pgbouncer:5432/${DB_NAME}
-      - REDIS_URL=redis://redis:6379/0
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - REDIS_URL=redis://redis_cache:6379/0
+      - CELERY_BROKER_URL=redis://redis_broker:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis_broker:6379/0
     depends_on:
       pgbouncer:
         condition: service_started
-      redis:
+      redis_cache:
+        condition: service_healthy
+      redis_broker:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import os; query = 'beat'; pids = [pid for pid in os.listdir('/proc') if pid.isdigit() and int(pid) != os.getpid()]; cmds = [open(f'/proc/{pid}/cmdline').read() for pid in pids if os.path.exists(f'/proc/{pid}/cmdline')]; assert any(query in cmd for cmd in cmds)"]
@@ -400,7 +464,7 @@ services:
     environment:
       - SERVER_TYPE=http
       - SERVER_PORT=8080
-      - SERVER_URL=http://localhost:8080
+      - SERVER_URL=http://evolution:8080
       - AUTHENTICATION_TYPE=apikey
       - AUTHENTICATION_API_KEY=${WHATSAPP_MICROSERVICE_TOKEN}
       - LANGUAGE=es
@@ -411,16 +475,18 @@ services:
       - DATABASE_CONNECTION_URI=postgresql://${EVOLUTION_DB_USER:-evolution}:${EVOLUTION_DB_PASSWORD:-evolution}@evolution_db:5432/evolution_v2?schema=public
       - DATABASE_CONNECTION_CLIENT_NAME=travelhub
       - DATABASE_SAVE_DATA_INSTANCE=true
+      - QRCODE_LIMIT=30
       - DATABASE_SAVE_DATA_NEW_MESSAGE=true
       - DATABASE_SAVE_DATA_CONTACTS=true
       - DATABASE_SAVE_DATA_CHATS=true
       - CACHE_REDIS_ENABLED=true
-      - CACHE_REDIS_URI=redis://redis:6379/1
+      - CACHE_REDIS_URI=redis://redis_evolution:6379/0
       - CACHE_REDIS_PREFIX_KEY=travelhub_evolution
       - CONFIG_SESSION_PHONE_VERSION=2.3000.1035194821
       - LOG_LEVEL=INFO
+      - LOG_BAILEYS=debug
     depends_on:
-      redis:
+      redis_evolution:
         condition: service_healthy
       evolution_db:
         condition: service_healthy
@@ -473,6 +539,15 @@ volumes:
   redis_data:
     external: true
     name: travelhub_redis_data
+  redis_cache_data:
+    external: true
+    name: travelhub_redis_cache_data
+  redis_broker_data:
+    external: true
+    name: travelhub_redis_broker_data
+  redis_evolution_data:
+    external: true
+    name: travelhub_redis_evolution_data
   static_volume:
     external: true
     name: travelhub_static_volume

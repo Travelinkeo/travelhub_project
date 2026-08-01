@@ -136,7 +136,7 @@ def send_webhook_task(self, webhook_id: int, event_type: str, payload: dict):
             duration_ms=duration_ms,
         )
 
-        logger.warning(f"Webhook error: {event_type} → {webhook.url}: {e}")
+        logger.warning(f"Webhook error: {event_type}  {webhook.url}: {e}")
         raise self.retry(exc=e, countdown=30 * (2**self.request.retries)) from e
 
 
@@ -148,7 +148,7 @@ def notify_venta_creada(venta):
     dispatch_webhook_event(
         "venta.creada",
         {
-            "venta_id": venta.id,
+            "venta_id": venta.pk,
             "numero": getattr(venta, "numero", None),
             "monto_total": str(getattr(venta, "monto_total", 0)),
             "moneda": getattr(venta, "moneda", "USD"),

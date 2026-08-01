@@ -24,7 +24,7 @@ class WhatsAppEvolutionService:
         try:
             return AgenciaConfiguracion.objects.get(agencia_id=self.agencia_id)
         except AgenciaConfiguracion.DoesNotExist:
-            logger.error(f"❌ Configuración no encontrada para la agencia {self.agencia_id}")
+            logger.error(f" Configuración no encontrada para la agencia {self.agencia_id}")
             return None
 
     def _get_headers(self):
@@ -72,16 +72,16 @@ class WhatsAppEvolutionService:
             response = requests.post(url, json=payload, headers=self._get_headers(), timeout=20)
 
             if response.status_code in [200, 201]:
-                logger.info(f"✅ WhatsApp enviado a {clean_number} (Agencia {self.agencia_id})")
+                logger.info(f" WhatsApp enviado a {clean_number} (Agencia {self.agencia_id})")
                 return True
 
-            logger.error(f"❌ Error Evolution API ({response.status_code}): {response.text}")
+            logger.error(f" Error Evolution API ({response.status_code}): {response.text}")
             return False
 
         except requests.exceptions.Timeout:
-            logger.error(f"⏱️ Timeout conectando con Evolution API para agencia {self.agencia_id}")
+            logger.error(f" Timeout conectando con Evolution API para agencia {self.agencia_id}")
         except requests.exceptions.ConnectionError:
-            logger.error("🔌 Error de conexión con Evolution API")
+            logger.error(" Error de conexión con Evolution API")
         except Exception as e:
             logger.exception(f"❌ Excepción inesperada en send_message: {e}")
 
@@ -115,12 +115,12 @@ class WhatsAppEvolutionService:
             response = requests.post(url, json=payload, headers=self._get_headers(), timeout=40)
 
             if response.status_code in [200, 201]:
-                logger.info(f"📄 Documento WhatsApp enviado a {clean_number}")
+                logger.info(f" Documento WhatsApp enviado a {clean_number}")
                 return True
 
-            logger.error(f"❌ Error Evolution Media ({response.status_code}): {response.text}")
+            logger.error(f" Error Evolution Media ({response.status_code}): {response.text}")
             return False
 
         except Exception as e:
-            logger.error(f"❌ Excepción en send_document: {e}")
+            logger.error(f" Excepción en send_document: {e}")
             return False

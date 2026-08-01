@@ -30,7 +30,8 @@ def generar_reporte_comisiones(fecha_inicio=None, fecha_fin=None):
 
     # Obtener boletos del período
     boletos = BoletoImportado.objects.filter(
-        fecha_emision_boleto__range=[fecha_inicio, fecha_fin], estado_parseo="COM"
+        fecha_emision_boleto__range=[fecha_inicio, fecha_fin],
+        estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO,
     ).exclude(aerolinea_emisora__isnull=True)
 
     # Agrupar por aerolínea

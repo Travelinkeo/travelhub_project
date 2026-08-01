@@ -7,35 +7,6 @@ from django.db import models
 from core.models.base import AgenciaMixin
 
 
-# Stub for migration compatibility — will be removed after squashing
-class DetalleAsiento(models.Model):
-    """DetalleAsiento."""
-
-    class Meta:
-        managed = False
-
-
-class PlanContable(models.Model):
-    """PlanContable."""
-
-    class Meta:
-        managed = False
-
-
-class ItemLiquidacion(models.Model):
-    """ItemLiquidacion."""
-
-    class Meta:
-        managed = False
-
-
-class LiquidacionProveedor(models.Model):
-    """LiquidacionProveedor."""
-
-    class Meta:
-        managed = False
-
-
 class CuentaContable(AgenciaMixin, models.Model):
     """CuentaContable."""
 

@@ -1,0 +1,138 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-alerts
+  labels:
+    release: {{ .Release.Name }}
+spec:
+  groups:
+    - name: travelhub.rules
+      interval: 30s
+      rules:
+        # Celery
+        - alert: CeleryQueueDepthHigh
+          expr: travelhub_celery_queue_depth_total > 1000
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Celery queue {{ $labels.queue }} depth is {{ $value }}"
+            description: "Queue {{ $labels.queue }} has {{ $value }} pending tasks (threshold: 1000). Consumers may be falling behind."
+
+        # N+1
+        - alert: NPlusOneDetected
+          expr: increase(travelhub_nplusone_alerts_total[5m]) > 0
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "N+1 queries detected on {{ $labels.path }}"
+            description: "Endpoint {{ $labels.method }} {{ $labels.path }} exceeded query threshold (15+ queries in >1s) in the last 5 minutes."
+
+        # DB Pool
+        - alert: DBConnectionPoolHigh
+          expr: travelhub_db_active_connections / travelhub_db_max_connections * 100 > 80
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "DB connection pool at {{ $value | humanizePercentage }}"
+            description: "Active connections are at {{ $value | humanizePercentage }} of max_connections. Pool may be exhausted."
+
+        # Redis
+        - alert: RedisDown
+          expr: up{job=~"redis.*"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Redis instance down"
+            description: "Redis instance {{ $labels.instance }} has been down for 1 minute."
+
+        - alert: RedisMemoryHigh
+          expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 90
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Redis memory usage at {{ $value | humanizePercentage }}"
+            description: "Redis memory usage is above 90%. Consider increasing maxmemory or reducing cache TTL."
+
+        # Postgres
+        - alert: PostgresDown
+          expr: up{job="postgres-exporter"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "PostgreSQL exporter down"
+            description: "PostgreSQL metrics exporter has been down for 1 minute."
+
+        - alert: PostgresReplicationLag
+          expr: pg_replication_lag > 300
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "PostgreSQL replication lag high"
+            description: "Replication lag is {{ $value }} seconds. Replica may be falling behind."
+
+        # Celery Beat
+        - alert: CeleryBeatDown
+          expr: up{job="celery-beat"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Celery Beat scheduler down"
+            description: "Celery Beat has been down for 1 minute. 22 scheduled tasks will not run."
+
+        # Auth
+        - alert: AuthFailuresHigh
+          expr: rate(travelhub_auth_failures_total[5m]) > 10
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High authentication failure rate"
+            description: "{{ $value }} auth failures per second in last 5 minutes. Possible brute force attack."
+
+        # Backups
+        - alert: BackupFailed
+          expr: travelhub_backup_last_success_timestamp < time() - 86400
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Backup has not succeeded in 24 hours"
+            description: "Last successful backup was {{ $value | humanizeTimestamp }}. Database backup may be failing."
+
+        # Disk
+        - alert: DiskSpaceCritical
+          expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Disk space critical on {{ $labels.instance }}"
+            description: "Filesystem {{ $labels.mountpoint }} has less than 10% free space."
+
+        # Webhook signatures
+        - alert: WebhookSignatureFailures
+          expr: rate(travelhub_webhook_signature_failures_total[5m]) > 5
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High webhook signature failure rate"
+            description: "{{ $value }} webhook signature failures per second. Possible attack or misconfiguration."
+
+        # Sentry
+        - alert: SentryErrorsHigh
+          expr: rate(sentry_events_total{level=~"error|fatal"}[5m]) > 100
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High Sentry error rate"
+            description: "{{ $value }} Sentry errors per second in last 5 minutes. Check Sentry dashboard."

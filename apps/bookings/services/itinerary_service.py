@@ -162,10 +162,10 @@ class ItineraryService:
                     for key, value in seg_data.items():
                         setattr(seg_existente, key, value)
                     seg_existente.save()
-                    logger.info(f"✈️ SegmentoVuelo actualizado: {vuelo_num}")
+                    logger.info(f" SegmentoVuelo actualizado: {vuelo_num}")
                 else:
                     SegmentoVuelo.objects.create(**seg_data)
-                    logger.info(f"✈️ SegmentoVuelo creado: {vuelo_num}")
+                    logger.info(f" SegmentoVuelo creado: {vuelo_num}")
 
             except Exception as seg_err:
                 logger.error(f"Error procesando segmento de vuelo: {seg_err}")

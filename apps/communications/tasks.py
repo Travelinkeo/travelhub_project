@@ -1,6 +1,7 @@
 import logging
 
 from celery import shared_task
+from django.core.cache import cache
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -29,9 +30,16 @@ def send_lead_followup_email():
         if not lead.email:
             continue
 
+        lock_key_1 = f"lead_followup_1:{lead.id}"
+        lock_key_2 = f"lead_followup_2:{lead.id}"
+
         hours_since = (now - lead.created_at).total_seconds() / 3600
 
         if 23 <= hours_since <= 25 and not lead._followup_1_sent:
+            if cache.get(lock_key_1):
+                continue
+            cache.set(lock_key_1, True, 3600)
+
             sent = send_custom_email(
                 subject="Cómo una agencia en Caracas triplicó sus ventas con TravelHub",
                 recipient=lead.email,
@@ -47,6 +55,10 @@ def send_lead_followup_email():
                 logger.info(f"Follow-up 1 enviado a {lead.email}")
 
         elif 71 <= hours_since <= 73 and not lead._followup_2_sent:
+            if cache.get(lock_key_2):
+                continue
+            cache.set(lock_key_2, True, 3600)
+
             sent = send_custom_email(
                 subject="🎯 Demo personalizada: TravelHub en 5 minutos",
                 recipient=lead.email,

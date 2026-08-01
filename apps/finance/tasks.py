@@ -245,10 +245,10 @@ def procesar_facturacion_masiva_task(boleto_ids, cliente_id, **kwargs):
         )
 
         results = InvoiceService.mass_assign_and_invoice(queryset, cliente)
-        logger.info(f"✅ Facturación masiva completada: {len(results)} registros procesados.")
+        logger.info(f" Facturación masiva completada: {len(results)} registros procesados.")
         return results
     except Exception as e:
-        logger.error(f"❌ Error fatal en procesar_facturacion_masiva_task: {e}")
+        logger.error(f" Error fatal en procesar_facturacion_masiva_task: {e}")
         raise e
 
 
@@ -265,10 +265,10 @@ def create_invoice_from_sale_task(venta_id):
     """create_invoice_from_sale_task."""
     from apps.finance.services.invoice_service import InvoiceService
 
-    logger.info(f"📩 Generando factura automática para Venta {venta_id}")
+    logger.info(f" Generando factura automática para Venta {venta_id}")
     try:
         InvoiceService.create_invoice_from_sale(venta_id)
-        logger.info(f"✅ Factura automática creada para Venta {venta_id}")
+        logger.info(f" Factura automática creada para Venta {venta_id}")
     except Exception as e:
-        logger.error(f"❌ Error creando factura para Venta {venta_id}: {e}")
+        logger.error(f" Error creando factura para Venta {venta_id}: {e}")
         raise

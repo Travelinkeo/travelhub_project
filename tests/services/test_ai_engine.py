@@ -157,40 +157,7 @@ class TestPrepareImages:
         assert result == []
 
 
-# ─── _has_media ─────────────────────────────────────────────────────
-
-
-class TestHasMedia:
-    """TestHasMedia."""
-
-    def test_false_for_none(self):
-        """test_false_for_none."""
-        from apps.automation.services.ai_engine import AIEngine
-
-        assert not AIEngine()._has_media(None)
-        assert not AIEngine()._has_media([])
-
-    def test_true_for_dict_with_mime_type(self):
-        """test_true_for_dict_with_mime_type."""
-        from apps.automation.services.ai_engine import AIEngine
-
-        assert AIEngine()._has_media([{"mime_type": "image/png"}])
-
-    def test_true_for_file_like(self):
-        """test_true_for_file_like."""
-        import io
-
-        from apps.automation.services.ai_engine import AIEngine
-
-        assert AIEngine()._has_media([io.BytesIO(b"data")])
-
-    def test_false_for_plain_dict(self):
-        """test_false_for_plain_dict."""
-        from apps.automation.services.ai_engine import AIEngine
-
-        assert not AIEngine()._has_media([{"key": "value"}])
-
-
+# ─── _postprocess_result ────────────────────────────────────────────
 # ─── _postprocess_result ────────────────────────────────────────────
 
 

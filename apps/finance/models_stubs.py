@@ -4,6 +4,8 @@ from decimal import Decimal
 import django.utils.timezone
 from django.db import models
 
+from core.models.base import AgenciaMixinStubs
+
 
 class StubQuerySet(models.QuerySet):
     """StubQuerySet."""
@@ -25,7 +27,7 @@ class StubManager(models.Manager):
         return StubQuerySet(self.model, using=self._db)
 
 
-class CanalRecaudacion(models.Model):
+class CanalRecaudacion(AgenciaMixinStubs):
     """CanalRecaudacion."""
 
     class TipoCanal(models.TextChoices):
@@ -41,14 +43,13 @@ class CanalRecaudacion(models.Model):
     descripcion = models.TextField(blank=True)
     activo = models.BooleanField(default=True)
     moneda = models.ForeignKey("common.Moneda", models.DO_NOTHING, blank=True, null=True)
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "finance_canalrecaudacion"
 
 
-class ComisionVenta(models.Model):
+class ComisionVenta(AgenciaMixinStubs):
     """ComisionVenta."""
 
     class EstadoComision(models.TextChoices):
@@ -66,7 +67,6 @@ class ComisionVenta(models.Model):
     fecha_calculo = models.DateTimeField()
     fecha_liquidacion = models.DateTimeField(blank=True, null=True)
     venta_id = models.IntegerField()
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
     agente = models.ForeignKey("auth.User", models.DO_NOTHING)
     liquidacion_asociada = models.ForeignKey(
         "finance.LiquidacionAgente", models.DO_NOTHING, blank=True, null=True
@@ -80,7 +80,7 @@ class ComisionVenta(models.Model):
         db_table = "finance_comisionventa"
 
 
-class ConciliacionBoleto(models.Model):
+class ConciliacionBoleto(AgenciaMixinStubs):
     """ConciliacionBoleto."""
 
     class EstadosCruce(models.TextChoices):
@@ -116,7 +116,6 @@ class ConciliacionBoleto(models.Model):
     reporte = models.ForeignKey(
         "finance.ReporteReconciliacion", models.DO_NOTHING, related_name="conciliaciones"
     )
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
 
     def __str__(self):
         """__str__."""
@@ -127,7 +126,7 @@ class ConciliacionBoleto(models.Model):
         db_table = "finance_conciliacionboleto"
 
 
-class DiferenciaFinanciera(models.Model):
+class DiferenciaFinanciera(AgenciaMixinStubs):
     """DiferenciaFinanciera."""
 
     id = models.BigAutoField(primary_key=True)
@@ -138,14 +137,13 @@ class DiferenciaFinanciera(models.Model):
     resuelto = models.BooleanField()
     fecha_resolucion = models.DateTimeField(blank=True, null=True)
     item_reporte = models.ForeignKey("finance.ItemReporte", models.DO_NOTHING)
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "finance_diferenciafinanciera"
 
 
-class DocumentoExportacion(models.Model):
+class DocumentoExportacion(AgenciaMixinStubs):
     """DocumentoExportacion."""
 
     class Meta:
@@ -153,7 +151,7 @@ class DocumentoExportacion(models.Model):
         db_table = "finance_documentoexportacion"
 
 
-class DocumentoExportacionConsolidado(models.Model):
+class DocumentoExportacionConsolidado(AgenciaMixinStubs):
     """DocumentoExportacionConsolidado."""
 
     id = models.BigAutoField(primary_key=True)
@@ -175,7 +173,7 @@ class DocumentoExportacionConsolidado(models.Model):
 from apps.finance.models import FacturaConsolidada, ItemFacturaConsolidada  # noqa: F401, E402
 
 
-class FacturaFiscal(models.Model):
+class FacturaFiscal(AgenciaMixinStubs):
     """FacturaFiscal."""
 
     class EstadoFiscal(models.TextChoices):
@@ -191,7 +189,7 @@ class FacturaFiscal(models.Model):
         db_table = "finance_facturafiscal"
 
 
-class FacturaProveedor(models.Model):
+class FacturaProveedor(AgenciaMixinStubs):
     """FacturaProveedor."""
 
     class EstadoFactura(models.TextChoices):
@@ -210,7 +208,7 @@ class FacturaProveedor(models.Model):
 from apps.finance.models import GastoOperativo  # noqa: F401, E402
 
 
-class ItemReporte(models.Model):
+class ItemReporte(AgenciaMixinStubs):
     """ItemReporte."""
 
     class EstadoConciliacion(models.TextChoices):
@@ -234,14 +232,13 @@ class ItemReporte(models.Model):
         "bookings.BoletoImportado", models.DO_NOTHING, blank=True, null=True
     )
     reporte = models.ForeignKey("finance.ReporteProveedor", models.DO_NOTHING)
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "finance_itemreporte"
 
 
-class LineaReporteReconciliacion(models.Model):
+class LineaReporteReconciliacion(AgenciaMixinStubs):
     """LineaReporteReconciliacion."""
 
     id_linea = models.AutoField(primary_key=True)
@@ -258,7 +255,6 @@ class LineaReporteReconciliacion(models.Model):
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(blank=True, null=True)
     reporte = models.ForeignKey("finance.ReporteReconciliacion", models.DO_NOTHING)
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
 
     def __str__(self):
         """__str__."""
@@ -269,7 +265,7 @@ class LineaReporteReconciliacion(models.Model):
         db_table = "finance_lineareportereconciliacion"
 
 
-class LinkDePago(models.Model):
+class LinkDePago(AgenciaMixinStubs):
     """LinkDePago."""
 
     class EstadoPago(models.TextChoices):
@@ -293,7 +289,6 @@ class LinkDePago(models.Model):
     creado_en = models.DateTimeField(auto_now_add=True)
     expira_en = models.DateTimeField()
     venta = models.ForeignKey("bookings.Venta", models.DO_NOTHING)
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         """save."""
@@ -313,7 +308,7 @@ class LinkDePago(models.Model):
         db_table = "finance_linkdepago"
 
 
-class LiquidacionAgente(models.Model):
+class LiquidacionAgente(AgenciaMixinStubs):
     """LiquidacionAgente."""
 
     id = models.BigAutoField(primary_key=True)
@@ -326,7 +321,6 @@ class LiquidacionAgente(models.Model):
     fecha_generacion = models.DateTimeField()
     pagado = models.BooleanField()
     referencia_pago = models.CharField(max_length=100)
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
     agente = models.ForeignKey("auth.User", models.DO_NOTHING)
 
     class Meta:
@@ -335,7 +329,7 @@ class LiquidacionAgente(models.Model):
         unique_together = (("agente", "periodo_mes", "periodo_anio"),)
 
 
-class Moneda(models.Model):
+class Moneda(AgenciaMixinStubs):
     """Moneda."""
 
     codigo_iso = models.CharField(max_length=3)
@@ -347,7 +341,7 @@ class Moneda(models.Model):
         db_table = "finance_moneda"
 
 
-class PagoBinance(models.Model):
+class PagoBinance(AgenciaMixinStubs):
     """PagoBinance."""
 
     id_pago_binance = models.AutoField(primary_key=True)
@@ -363,14 +357,13 @@ class PagoBinance(models.Model):
     factura_id = models.IntegerField()
     is_deleted = models.BooleanField()
     deleted_at = models.DateTimeField(blank=True, null=True)
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = "finance_pagobinance"
 
 
-class PropuestaTransaccionIA(models.Model):
+class PropuestaTransaccionIA(AgenciaMixinStubs):
     """PropuestaTransaccionIA."""
 
     class EstadoPropuesta(models.TextChoices):
@@ -385,7 +378,7 @@ class PropuestaTransaccionIA(models.Model):
         db_table = "finance_propuestatransaccionia"
 
 
-class ReglaComision(models.Model):
+class ReglaComision(AgenciaMixinStubs):
     """ReglaComision."""
 
     class TipoCalculo(models.TextChoices):
@@ -402,7 +395,6 @@ class ReglaComision(models.Model):
     valor = models.DecimalField(max_digits=12, decimal_places=2)
     activo = models.BooleanField()
     fecha_creacion = models.DateTimeField()
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
     agente = models.ForeignKey("auth.User", models.DO_NOTHING)
 
     class Meta:
@@ -411,7 +403,7 @@ class ReglaComision(models.Model):
         unique_together = (("agencia", "agente"),)
 
 
-class ReporteProveedor(models.Model):
+class ReporteProveedor(AgenciaMixinStubs):
     """ReporteProveedor."""
 
     class EstadoReporte(models.TextChoices):
@@ -426,7 +418,6 @@ class ReporteProveedor(models.Model):
     total_registros = models.IntegerField()
     total_con_diferencia = models.IntegerField()
     notas = models.TextField()
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
     proveedor = models.ForeignKey("bookings.Proveedor", models.DO_NOTHING)
 
     class Meta:
@@ -434,7 +425,7 @@ class ReporteProveedor(models.Model):
         db_table = "finance_reporteproveedor"
 
 
-class ReporteReconciliacion(models.Model):
+class ReporteReconciliacion(AgenciaMixinStubs):
     """ReporteReconciliacion."""
 
     class Estados(models.TextChoices):
@@ -483,7 +474,11 @@ from apps.finance.models import RetencionISLR  # noqa: F401, E402
 
 
 class TasaCambio(models.Model):
-    """TasaCambio."""
+    """TasaCambio.
+
+    NOTA: NO hereda de AgenciaMixinStubs porque la tabla real
+    ``finance_tasacambio`` no tiene la columna ``agencia_id``.
+    """
 
     id = models.BigAutoField(primary_key=True)
     fecha = models.DateField()
@@ -497,7 +492,7 @@ class TasaCambio(models.Model):
         unique_together = (("fecha", "moneda"),)
 
 
-class TaxRefundOpportunity(models.Model):
+class TaxRefundOpportunity(AgenciaMixinStubs):
     """TaxRefundOpportunity."""
 
     class Estado(models.TextChoices):
@@ -514,7 +509,6 @@ class TaxRefundOpportunity(models.Model):
     tracking_code_proveedor = models.CharField(max_length=100, blank=True, null=True)
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING)
     boleto = models.OneToOneField("bookings.BoletoImportado", models.DO_NOTHING)
 
     class Meta:
@@ -523,7 +517,11 @@ class TaxRefundOpportunity(models.Model):
 
 
 class TipoCambio(models.Model):
-    """TipoCambio."""
+    """TipoCambio.
+
+    NOTA: NO hereda de AgenciaMixinStubs porque la tabla real
+    ``finance_tipocambio`` no tiene la columna ``agencia_id``.
+    """
 
     id_tipo_cambio = models.AutoField(primary_key=True)
     fecha_efectiva = models.DateField()
@@ -543,7 +541,7 @@ class TipoCambio(models.Model):
         unique_together = (("moneda_origen", "moneda_destino", "fecha_efectiva"),)
 
 
-class TransaccionPago(models.Model):
+class TransaccionPago(AgenciaMixinStubs):
     """TransaccionPago."""
 
     id_transaccion = models.AutoField(primary_key=True)
@@ -556,7 +554,6 @@ class TransaccionPago(models.Model):
     is_deleted = models.BooleanField()
     deleted_at = models.DateTimeField(blank=True, null=True)
     venta = models.ForeignKey("bookings.Venta", models.DO_NOTHING)
-    agencia = models.ForeignKey("core.Agencia", models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False

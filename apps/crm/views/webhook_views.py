@@ -4,6 +4,7 @@ import json
 import logging
 
 from django.conf import settings
+from django.core.cache import cache
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -184,10 +185,28 @@ class EvolutionWebhookView(View):
     Webhook para recibir eventos de Evolution API (mensajes entrantes,
     actualizaciones de estado, delivery/read receipts).
     Evolution API POSTea aquí cuando hay eventos configurados.
+
+    Autenticación: Requiere header 'apikey' con el mismo token configurado
+    en WHATSAPP_MICROSERVICE_TOKEN.
     """
+
+    def _verify_auth(self, request) -> bool:
+        """Verifica que el webhook venga de Evolution API."""
+        expected = getattr(settings, "WHATSAPP_MICROSERVICE_TOKEN", None)
+        if not expected:
+            logger.warning(
+                "WHATSAPP_MICROSERVICE_TOKEN no configurado — webhook Evolution sin auth"
+            )
+            return True
+        received = request.headers.get("apikey", "")
+        return received == expected
 
     def post(self, request, *args, **kwargs):
         """post."""
+        if not self._verify_auth(request):
+            logger.warning("Evolution webhook: apikey invalida")
+            return HttpResponse(status=401)
+
         try:
             body = json.loads(request.body)
         except json.JSONDecodeError:
@@ -207,6 +226,8 @@ class EvolutionWebhookView(View):
             self._handle_send_result(instance, data)
         elif event_type == "CONNECTION_UPDATE":
             self._handle_connection_update(instance, data)
+        elif event_type == "QRCODE_UPDATED":
+            self._handle_qrcode_updated(instance, data)
         else:
             logger.debug(f"Evolution webhook: evento no manejado {event_type}")
 
@@ -327,13 +348,37 @@ class EvolutionWebhookView(View):
         try:
             from apps.crm.models import MensajeWhatsApp
 
-            MensajeWhatsApp.objects.filter(message_id="").exclude(texto__exact="").order_by(
-                "-timestamp"
-            )[:1].update(message_id=message_id, estado=nuevo_estado)
+            MensajeWhatsApp.objects.filter(message_id=message_id).update(estado=nuevo_estado)
         except Exception as e:
-            logger.error(f"Error guardando message_id {message_id}: {e}")
+            logger.error(f"Error actualizando message_id {message_id}: {e}")
 
     def _handle_connection_update(self, instance: str, data: dict):
         """Procesa cambios en el estado de conexión de la instancia."""
         state = data.get("state", "")
         logger.info(f"Evolution instance '{instance}' connection state: {state}")
+        if state == "open":
+            try:
+                cache.delete(f"evo_qr:{instance}")
+            except Exception as e:
+                logger.warning(f"Error limpiando cache QR para instancia {instance}: {e}")
+
+    def _handle_qrcode_updated(self, instance: str, data: dict):
+        """Procesa evento QRCODE_UPDATED de Evolution API y cachea el QR en Redis."""
+        logger.info(f"Evolution QRCODE_UPDATED for instance '{instance}'")
+        qr_b64 = None
+        if isinstance(data, dict):
+            qrcode_data = data.get("qrcode", data)
+            if isinstance(qrcode_data, dict):
+                qr_b64 = qrcode_data.get("base64")
+                if not qr_b64:
+                    qr_b64 = qrcode_data.get("code")
+            else:
+                qr_b64 = data.get("base64") or data.get("code")
+        if qr_b64:
+            try:
+                cache.set(f"evo_qr:{instance}", qr_b64, 300)
+                logger.info(f"QR cacheado en Redis para instancia '{instance}' via webhook")
+            except Exception as e:
+                logger.error(f"Error cacheando QR en Redis: {e}")
+        else:
+            logger.warning(f"QRCODE_UPDATED sin base64 para '{instance}': {data}")

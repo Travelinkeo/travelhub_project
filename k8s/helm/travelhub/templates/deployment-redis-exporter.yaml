@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-redis-exporter
+  labels:
+    app: {{ .Release.Name }}-redis-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-redis-exporter
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-redis-exporter
+    spec:
+      containers:
+        - name: redis-exporter
+          image: "{{ .Values.exporters.redis.image }}"
+          args:
+            - "--redis.addr=redis://redis-cache:6379"
+            - "--redis.addr=redis://redis-broker:6379"
+            - "--redis.addr=redis://redis-evolution:6379"
+          ports:
+            - containerPort: 9121
+          resources:
+            {{- toYaml .Values.exporters.redis.resources | nindent 12 }}

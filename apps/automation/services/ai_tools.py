@@ -9,7 +9,7 @@ from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
 from apps.bookings.models import ItemVenta, Venta
-from apps.contabilidad.models import AsientoContable, DetalleAsiento, PlanContable
+from apps.contabilidad.models import AsientoContable, CuentaContable, MovimientoContable
 from apps.contabilidad.reportes import ReportesContables
 from apps.crm.models import Cliente
 from apps.finance.models import Factura
@@ -432,34 +432,40 @@ class AgentTools:
         """Consulta detalles y saldo actual de una cuenta del Plan Contable."""
         try:
             agencia = get_current_agency()
-            cuenta = PlanContable.objects.get(agencia=agencia, codigo_cuenta=codigo_cuenta)
+            cuenta = CuentaContable.objects.get(agencia=agencia, codigo=codigo_cuenta)
 
             # Calcular saldo desde el mayor acumulado
-            movimientos = DetalleAsiento.objects.filter(
-                cuenta_contable=cuenta, asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO
-            ).aggregate(debe=Sum("debe"), haber=Sum("haber"))
+            movimientos = MovimientoContable.objects.filter(
+                cuenta=cuenta, asiento__estado=AsientoContable.EstadoAsiento.CONTABILIZADO
+            ).aggregate(
+                debe=Sum("monto_usd", filter=Q(tipo="DEBITO")),
+                haber=Sum("monto_usd", filter=Q(tipo="CREDITO")),
+            )
 
             debe = movimientos["debe"] or Decimal("0")
             haber = movimientos["haber"] or Decimal("0")
 
             # Naturaleza Deudora: Debe - Haber. Naturaleza Acreedora: Haber - Debe.
-            if cuenta.naturaleza == "D":
+            if (
+                cuenta.tipo == CuentaContable.TipoCuenta.ACTIVO
+                or cuenta.tipo == CuentaContable.TipoCuenta.GASTO
+            ):
                 saldo = debe - haber
             else:
                 saldo = haber - debe
 
             return json.dumps(
                 {
-                    "nombre": cuenta.nombre_cuenta,
-                    "codigo": cuenta.codigo_cuenta,
-                    "naturaleza": cuenta.get_naturaleza_display(),
+                    "nombre": cuenta.nombre,
+                    "codigo": cuenta.codigo,
+                    "naturaleza": cuenta.tipo,
                     "saldo_actual": float(saldo),
                     "moneda": "USD",
                     "detalles": {"total_debe": float(debe), "total_haber": float(haber)},
                 },
                 indent=2,
             )
-        except PlanContable.DoesNotExist:
+        except CuentaContable.DoesNotExist:
             return f"Error: La cuenta {codigo_cuenta} no existe en esta agencia."
         except Exception as e:
             return f"Error consultando cuenta: {str(e)}"
@@ -597,8 +603,6 @@ class AgentTools:
             agencia = get_current_agency()
             if not agencia:
                 return "Error: No hay una agencia en el contexto actual."
-
-            import json
 
             try:
                 detalles_cuentas = json.loads(detalles_cuentas_json)

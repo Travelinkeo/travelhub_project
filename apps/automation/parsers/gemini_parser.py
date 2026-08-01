@@ -165,7 +165,7 @@ class GeminiParser(BaseTicketParser):
 
                         # Si hay segunda página y es ticket largo, tal vez necesitemos más, pero página 1 suele tener todo.
             except Exception as e:
-                logger.error(f"❌ Error renderizando PDF para Vision: {e}")
+                logger.error(f" Error renderizando PDF para Vision: {e}")
 
         try:
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
@@ -180,10 +180,10 @@ class GeminiParser(BaseTicketParser):
             data = json.loads(json_str)
             if use_vision:
                 data["vision_used"] = True
-                logger.info("✅ Parseo exitoso usando Gemini Vision.")
+                logger.info(" Parseo exitoso usando Gemini Vision.")
             return data
         except concurrent.futures.TimeoutError:
-            logger.error("⏰ Gemini timeout after 20s")
+            logger.error(" Gemini timeout after 20s")
             return {}
         except Exception as e:
             logger.error(f"Error parsing with Gemini: {e}")

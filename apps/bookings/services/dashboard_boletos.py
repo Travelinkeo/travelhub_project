@@ -24,19 +24,28 @@ def obtener_metricas_boletos():
     # Tasa de éxito por GDS
     tasas_gds = BoletoImportado.objects.values("formato_detectado").annotate(
         total=Count("id_boleto_importado"),
-        exitosos=Count("id_boleto_importado", filter=Q(estado_parseo="COM")),
+        exitosos=Count(
+            "id_boleto_importado", filter=Q(estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO)
+        ),
     )
 
     for tasa in tasas_gds:
         tasa["tasa_exito"] = (tasa["exitosos"] / tasa["total"] * 100) if tasa["total"] > 0 else 0
 
     # Tiempo promedio de procesamiento (estimado por estado)
-    pendientes = BoletoImportado.objects.filter(estado_parseo="PEN").count()
-    errores = BoletoImportado.objects.filter(estado_parseo="ERR").count()
+    pendientes = BoletoImportado.objects.filter(
+        estado_parseo=BoletoImportado.EstadoParseo.PENDIENTE
+    ).count()
+    errores = BoletoImportado.objects.filter(
+        estado_parseo=BoletoImportado.EstadoParseo.ERROR_PARSEO
+    ).count()
 
     # Top aerolíneas del mes
     top_aerolineas = (
-        BoletoImportado.objects.filter(fecha_emision_boleto__gte=inicio_mes, estado_parseo="COM")
+        BoletoImportado.objects.filter(
+            fecha_emision_boleto__gte=inicio_mes,
+            estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO,
+        )
         .values("aerolinea_emisora")
         .annotate(cantidad=Count("id_boleto_importado"))
         .order_by("-cantidad")[:5]

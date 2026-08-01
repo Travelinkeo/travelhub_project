@@ -7,6 +7,66 @@ from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
+# Prefijos IATA numéricos de aerolínea (los 3 primeros dígitos del boleto).
+# Solo se incluyen códigos verificados; si la aerolínea no está en el mapa,
+# NO se fabrica un prefijo (evita corromper números de boleto).
+AIRLINE_IATA_CODES = {
+    "TURKISH AIRLINES": "235",
+    "COPA AIRLINES": "230",
+    "AVIANCA": "134",
+    "IBERIA": "075",
+    "LATAM AIRLINES": "045",
+    "AIR EUROPA": "096",
+    "TAP AIR PORTUGAL": "047",
+    "AMERICAN AIRLINES": "001",
+}
+
+# Orden de detección: las más específicas primero para evitar falsos positivos.
+_AIRLINE_RULES = [
+    ("TURKISH AIRLINES", ("TURKISH",)),
+    ("LASER AIRLINES", ("LASER",)),
+    ("COPA AIRLINES", ("COPA",)),
+    ("AVIANCA", ("AVIANCA", "AEROVIAS DEL CONTINENTE")),
+    ("IBERIA", ("IBERIA",)),
+    ("LATAM AIRLINES", ("LATAM",)),
+    ("AIR EUROPA", ("AIR EUROPA",)),
+    ("CONVIASA", ("CONVIASA",)),
+    ("RUTACA AIRLINES", ("RUTACA",)),
+    ("AEROVÍAS ESTELAR", ("ESTELAR",)),
+    ("FLYBONDI", ("FLYBONDI",)),
+    ("JETSMART", ("JETSMART",)),
+    ("SKY AIRLINE", ("SKY AIRLINE", "SKYAIRLINE")),
+    ("TAP AIR PORTUGAL", ("TAP PORTUGAL", "TAP AIR")),
+    ("TURPIAL AIRLINES", ("TURPIAL",)),
+    (
+        "AMERICAN AIRLINES",
+        ("AMERICAN AIRLINES", "AMERICAN"),
+    ),
+]
+
+
+def _detect_airline(text_upper: str) -> str | None:
+    """Devuelve el nombre de la aerolínea detectada o None."""
+    for name, keywords in _AIRLINE_RULES:
+        if any(k in text_upper for k in keywords):
+            return name
+    return None
+
+
+# Importar métricas
+try:
+    from apps.automation.metrics.parser_metrics import track_parser_execution
+
+    METRICS_ENABLED = True
+except ImportError:
+    METRICS_ENABLED = False
+
+    def track_parser_execution(parser_type: str, feature: str = "generic"):
+        def decorator(func):
+            return func
+
+        return decorator
+
 
 def _get_solo_nombre_pasajero(nombre_completo: str) -> str:
     """Extrae el nombre (o nombres) de un formato APELLIDO/NOMBRE o similar, eliminando títulos de cortesía."""
@@ -39,6 +99,10 @@ class FastDeterministicParsers:
         """
         data = {"flights": []}
         text_upper = text.upper()
+
+        # 0. Detectar aerolínea una sola vez; se usa para el prefijo del boleto
+        #    y para el campo aerolinea_emisora.
+        airline = _detect_airline(text_upper)
 
         # 1. Extraer PNR / Localizador (GDS)
         # Soporta acentos (Ó) y el símbolo +
@@ -79,13 +143,19 @@ class FastDeterministicParsers:
                 data["airline_pnr"] = aggressive_match.group(1)
 
         # 2. Extraer Número de Boleto (13 dígitos)
+        #    Acepta prefijo opcional de aerolínea (3 dígitos IATA). Si el boleto
+        #    viene con 10 dígitos, se recompone con el prefijo de la aerolínea
+        #    detectada (solo si es un código IATA conocido; nunca se inventa).
         tkt_match = re.search(
-            r"(?:BOLETO|TICKET|ETKT|NUMERO|TKTN)[:\s]+(?:235-?)?([0-9]{10,13})", text_upper
+            r"(?:BOLETO|TICKET|ETKT|NUMERO|TKTN)[:\s]+(?:(\d{3})-?)?([0-9]{10,13})",
+            text_upper,
         )
         if tkt_match:
-            tkt = tkt_match.group(1)
+            tkt = tkt_match.group(2)
             if len(tkt) == 10:
-                tkt = "235" + tkt  # Turkish Prefix if missing
+                iata_prefix = AIRLINE_IATA_CODES.get(airline) if airline else None
+                if iata_prefix:
+                    tkt = iata_prefix + tkt
             data["numero_boleto"] = tkt
 
         # 3. Extraer Nombre del Pasajero y Documento
@@ -126,37 +196,9 @@ class FastDeterministicParsers:
                     data["foid"] = pax_id
                     data["passenger_id"] = pax_id
 
-        # 4. Extraer Aerolínea
-        if "TURKISH" in text_upper:
-            data["aerolinea_emisora"] = "TURKISH AIRLINES"
-        elif "LASER" in text_upper:
-            data["aerolinea_emisora"] = "LASER AIRLINES"
-        elif "COPA" in text_upper:
-            data["aerolinea_emisora"] = "COPA AIRLINES"
-        elif "AVIANCA" in text_upper or "AEROVIAS DEL CONTINENTE" in text_upper:
-            data["aerolinea_emisora"] = "AVIANCA"
-        elif "IBERIA" in text_upper:
-            data["aerolinea_emisora"] = "IBERIA"
-        elif "LATAM" in text_upper:
-            data["aerolinea_emisora"] = "LATAM AIRLINES"
-        elif "AIR EUROPA" in text_upper:
-            data["aerolinea_emisora"] = "AIR EUROPA"
-        elif "CONVIASA" in text_upper:
-            data["aerolinea_emisora"] = "CONVIASA"
-        elif "RUTACA" in text_upper:
-            data["aerolinea_emisora"] = "RUTACA AIRLINES"
-        elif "ESTELAR" in text_upper:
-            data["aerolinea_emisora"] = "AEROVÍAS ESTELAR"
-        elif "FLYBONDI" in text_upper:
-            data["aerolinea_emisora"] = "FLYBONDI"
-        elif "JETSMART" in text_upper:
-            data["aerolinea_emisora"] = "JETSMART"
-        elif "SKY AIRLINE" in text_upper or "SKYAIRLINE" in text_upper:
-            data["aerolinea_emisora"] = "SKY AIRLINE"
-        elif "TAP PORTUGAL" in text_upper or "TAP AIR" in text_upper:
-            data["aerolinea_emisora"] = "TAP AIR PORTUGAL"
-        elif "TURPIAL" in text_upper:
-            data["aerolinea_emisora"] = "TURPIAL AIRLINES"
+        # 4. Extraer Aerolínea (usando la detección centralizada del paso 0)
+        if airline:
+            data["aerolinea_emisora"] = airline
 
         # 5. Extraer Fecha de Emisión
         date_match = re.search(
@@ -165,8 +207,17 @@ class FastDeterministicParsers:
         if date_match:
             data["fecha_emision"] = date_match.group(1)
         else:
-            # Reintento para formato abreviado (29 ABR 26)
-            date_match = re.search(r"(\d{1,2}\s+[A-Z]{3}\s+\d{2})", text_upper)
+            # Reintento para formato abreviado (29 ABR 26). Se acota a la cabecera
+            # del boleto (antes del primer segmento de vuelo, incl. bloque multi-línea
+            # de Turkish) para no confundir la fecha de emisión con la fecha de un
+            # vuelo del itinerario (P2-29).
+            first_seg = re.search(
+                r"(?:\d+\s+)?(?:[A-Z0-9]{2}\s*\d{1,4}\s*[A-Z]?\s*\d{2}[A-Z]{3}\s+"
+                r"|\d{1,2}\s+[A-Z]{3}\s+\d{2,4}\s+TURKISH AIRLINES)",
+                text_upper,
+            )
+            header_region = text_upper[: first_seg.start()] if first_seg else text_upper
+            date_match = re.search(r"(\d{1,2}\s+[A-Z]{3}\s+\d{2})", header_region)
             if date_match:
                 data["fecha_emision"] = date_match.group(1)
 
@@ -303,6 +354,7 @@ class FastDeterministicParsers:
         return data
 
 
+@track_parser_execution("regex", "ticket_parsing")
 def extract_data_from_text(
     plain_text: str, html_text: str = "", pdf_path: str | None = None, bypass_cache: bool = False
 ) -> dict[str, Any]:
@@ -331,7 +383,7 @@ def extract_data_from_text(
         logger.info("Tentando extraer usando parsers robustos estructurados...")
         res_gds = parse_ticket_with_new_parsers(plain_text, html_text)
         if res_gds and not res_gds.get("error"):
-            logger.info("✅ Extracción exitosa con parser específico de GDS.")
+            logger.info(" Extracción exitosa con parser específico de GDS.")
             # Normalizar claves legacy esperadas por ticket_parser_service
             if "codigo_reserva" not in res_gds and "pnr" in res_gds:
                 res_gds["codigo_reserva"] = res_gds["pnr"]

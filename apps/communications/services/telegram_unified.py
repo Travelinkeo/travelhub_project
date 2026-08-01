@@ -136,7 +136,7 @@ class TelegramNotificationService:
                     document = resp_json["result"].get("document")
                     file_id = document.get("file_id") if document else None
                     if file_id:
-                        logger.info(f"✅ Documento enviado. File ID: {file_id}")
+                        logger.info(f" Documento enviado. File ID: {file_id}")
                         return file_id
             except Exception as e_json:
                 logger.warning(f"No se pudo extraer file_id de Telegram: {e_json}")
@@ -358,7 +358,7 @@ class TelegramStorageService:
                 )
 
             file_id = message.document.file_id
-            logger.info(f"✅ Archivo subido exitosamente. File ID: {file_id}")
+            logger.info(f" Archivo subido exitosamente. File ID: {file_id}")
             return file_id
 
         except Exception as e:
@@ -414,14 +414,14 @@ def upload_logo_to_telegram(file_obj, filename: str = "logo.png"):
         if result.get("ok"):
             photo_data = result["result"]["photo"][-1]
             file_id = photo_data["file_id"]
-            logger.info(f"✅ Logo subido a Telegram Storage. FileID: {file_id}")
+            logger.info(f" Logo subido a Telegram Storage. FileID: {file_id}")
             return file_id
         else:
-            logger.error(f"❌ Error subiendo a Telegram: {result.get('description')}")
+            logger.error(f" Error subiendo a Telegram: {result.get('description')}")
             return None
 
     except Exception as e:
-        logger.error(f"💥 Fallo crítico en telegram_storage: {e}")
+        logger.error(f" Fallo crítico en telegram_storage: {e}")
         return None
 
 

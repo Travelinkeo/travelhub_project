@@ -5,6 +5,7 @@ import os
 
 from celery import shared_task
 from django.conf import settings
+from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +115,6 @@ def fetch_evolution_qr_task(self, instance_name):
     """
 
     import requests
-    from django.core.cache import cache
 
     from apps.communications.services.evolution_api_service import EvolutionService
 
@@ -247,8 +247,6 @@ def process_scheduled_whatsapp_messages():
 @shared_task(name="apps.common.tasks.monitor_whatsapp_health_task", queue="default", time_limit=60)
 def monitor_whatsapp_health_task():
     """Monitor proactivo del flujo WhatsApp/Evolution. Alerta a Telegram si down/degraded."""
-    from django.core.cache import cache
-
     # 1. Llamar al endpoint interno en lugar de re-implementar la lógica
     # Calculamos el host Django correctamente desde settings.
     # Como esto corre en web container, apuntamos a localhost:8000.

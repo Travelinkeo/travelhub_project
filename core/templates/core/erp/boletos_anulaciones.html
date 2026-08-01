@@ -14,17 +14,17 @@
 {% endblock %}
 
 {% block content %}
-<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8">
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-4 md:p-8">
 
     <!-- Header & Action Bar -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-border-color">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 mb-6 sm:mb-10 pb-4 sm:pb-6 border-b border-border-color">
         <div>
-            <h1 class="text-3xl font-black text-text-main tracking-tight uppercase">Solicitud de Anulación</h1>
-            <p class="text-text-muted text-sm mt-1">Gestión de cancelaciones, reembolsos y penalidades.</p>
+            <h1 class="text-2xl sm:text-3xl font-black text-text-main tracking-tight uppercase">Solicitud de Anulación</h1>
+            <p class="text-text-muted text-xs sm:text-sm mt-1">Gestión de cancelaciones, reembolsos y penalidades.</p>
         </div>
-        <div class="flex gap-3">
-            <a href="{% url 'core:boletos_dashboard' %}" class="btn-secondary !h-12 !px-6">
-                <span class="material-symbols-outlined text-[20px]">close</span>
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <a href="{% url 'core:boletos_dashboard' %}" class="btn-secondary !h-10 sm:!h-12 !px-4 sm:!px-6 text-xs">
+                <span class="material-symbols-outlined text-[18px]">close</span>
                 <span>Cancelar</span>
             </a>
         </div>
@@ -33,7 +33,7 @@
     {% include 'core/erp/partials/boletos_nav.html' with active_tab='boletos_anulaciones' %}
 
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
-        
+
         <!-- ── Panel izquierdo: Formulario (span 3) ── -->
         <div class="lg:col-span-3 space-y-6">
             <div class="card-base p-8 space-y-8">
@@ -185,14 +185,14 @@
         try {
             const response = await fetch('/api/boletos/solicitar-anulacion/', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
                 body: JSON.stringify(data)
             });
             const result = await response.json();
-            
+
             if (response.ok) {
                 document.getElementById('resultado-exito').classList.remove('hidden');
                 document.getElementById('res-id').textContent = result.id_anulacion || '--';

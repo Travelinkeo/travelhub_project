@@ -47,7 +47,7 @@ class ResendInboundWebhookView(View):
             text_body = data.get("text", "")
             html_body = data.get("html", "")
 
-            logger.info(f"📧 Correo entrante detectado: {subject} desde {from_email}")
+            logger.info(f" Correo entrante detectado: {subject} desde {from_email}")
 
             # 1. CREAR REGISTRO DE IMPORTACION (Audit Point 3.2: Unificación de flujos)
             from django.core.files.base import ContentFile
@@ -81,7 +81,7 @@ class ResendInboundWebhookView(View):
             from apps.bookings.tasks import parsear_boleto_individual
 
             parsear_boleto_individual.delay(boleto_importado.pk)
-            logger.info(f"🧠 Tarea de parseo encolada para boleto {boleto_importado.pk}")
+            logger.info(f" Tarea de parseo encolada para boleto {boleto_importado.pk}")
 
             return JsonResponse(
                 {
@@ -92,5 +92,5 @@ class ResendInboundWebhookView(View):
             )
 
         except Exception as e:
-            logger.error(f"🔥 Error procesando webhook de Resend: {str(e)}")
+            logger.error(f" Error procesando webhook de Resend: {str(e)}")
             return HttpResponse(status=200)

@@ -27,7 +27,7 @@ def generar_pdf_factura(factura_id: int):
 
         agencia = factura.agencia
         if not agencia:
-            logger.error(f"❌ ERROR CRÍTICO: Factura {factura_id} no tiene agencia vinculada.")
+            logger.error(f" ERROR CRÍTICO: Factura {factura_id} no tiene agencia vinculada.")
             return None, None
 
         plantilla = agencia.plantilla_facturas if hasattr(agencia, "plantilla_facturas") else "m1"

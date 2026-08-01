@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
     bind=True,
     max_retries=5,
     name="apps.finance.tasks.emitir_factura_electronica_task",
-    queue="ia_heavy",
+    queue="celery",
     time_limit=300,
     soft_time_limit=270,
 )

@@ -19,7 +19,7 @@ def cleanup_temporary_storage_files(days=7):
     from django.core.files.storage import default_storage
     from django.utils import timezone
 
-    logger.info(f"🧹 Iniciando limpieza de archivos temporales (Antigüedad > {days} días)...")
+    logger.info(f" Iniciando limpieza de archivos temporales (Antigüedad > {days} días)...")
 
     prefixes = ["temp/", "tmp/", "vouchers_tmp/"]
     count = 0
@@ -41,12 +41,12 @@ def cleanup_temporary_storage_files(days=7):
                         default_storage.delete(filepath)
                         count += 1
                         deleted_size += size
-                        logger.debug(f"🗑️ Eliminado: {filepath} ({size} bytes)")
+                        logger.debug(f" Eliminado: {filepath} ({size} bytes)")
                 except Exception as e:
-                    logger.error(f"⚠️ No se pudo procesar/borrar {filepath}: {e}")
+                    logger.error(f" No se pudo procesar/borrar {filepath}: {e}")
 
         except Exception as e:
-            logger.warning(f"⚠️ Error accediendo al prefijo {prefix}: {e}")
+            logger.warning(f" Error accediendo al prefijo {prefix}: {e}")
 
     result = f"Limpieza completada. Se eliminaron {count} archivos ({deleted_size / 1024:.2f} KB)."
     logger.info(result)

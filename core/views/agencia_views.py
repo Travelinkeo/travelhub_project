@@ -87,7 +87,7 @@ class AgenciaSettingsView(AgencyRoleRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         """form_valid."""
-        logger.info(f"✅ form_valid called for agencia: {self.get_object().nombre}")
+        logger.info(f" form_valid called for agencia: {self.get_object().nombre}")
         logger.info(f"FILES received: {dict(self.request.FILES)}")
         logger.info(f"logo_light in cleaned_data: {form.cleaned_data.get('logo_light')}")
         logger.info(f"logo_dark in cleaned_data: {form.cleaned_data.get('logo_dark')}")
@@ -96,7 +96,7 @@ class AgenciaSettingsView(AgencyRoleRequiredMixin, UpdateView):
 
     def form_invalid(self, form):
         """form_invalid."""
-        logger.warning(f"❌ form_invalid for agencia settings. Errors: {form.errors}")
+        logger.warning(f" form_invalid for agencia settings. Errors: {form.errors}")
         logger.warning(f"FILES received in invalid form: {dict(self.request.FILES)}")
         messages.error(self.request, f"Error al guardar la configuración: {form.errors}")
         return super().form_invalid(form)
@@ -159,14 +159,14 @@ class WhatsAppStatusView(AgencyRoleRequiredMixin, View):
                 },
             )
 
-        # 3. Si no existe la instancia, crearla automáticamente
-        if estado_evolution == "disconnected":
+        # 3. Si la instancia está desconectada o no existe, crearla
+        if estado_evolution in ("close", "disconnected"):
             try:
                 result = EvolutionService.create_instance(session_name)
                 if result:
-                    logger.info(f"✅ Instancia '{session_name}' auto-creada en WhatsAppStatusView")
+                    logger.info(f"Instancia '{session_name}' auto-creada en WhatsAppStatusView")
             except Exception as e:
-                logger.error(f"Error auto-creando instancia '{session_name}': {e}")
+                logger.error(f"Error creando instancia '{session_name}': {e}")
 
         # 4. Intentar leer QR de Redis (Celery lo pone ahí periódicamente)
         cached_qr = cache.get(cache_key)
@@ -185,7 +185,34 @@ class WhatsAppStatusView(AgencyRoleRequiredMixin, View):
                 },
             )
 
-        # 5. Sin QR en Redis — encolar fetch y retornar "espera"
+        # 5. Sin QR en Redis — intentar fetchearlo SINCRONAMENTE para tener garantía
+        #    de devolver base64 inline (evita iframe con PNG-que-falla).
+        try:
+            sync_qr = EvolutionService.get_connection_qr_base64(session_name, timeout=12)
+            if sync_qr:
+                if not sync_qr.startswith("data:image"):
+                    sync_qr = f"data:image/png;base64,{sync_qr}"
+                return render(
+                    request,
+                    "dashboard/partials/whatsapp_qr_new.html",
+                    {
+                        "whatsapp_status": "connecting",
+                        "estado": "connecting",
+                        "qr_code": sync_qr,
+                        "whatsapp_qr": sync_qr,
+                        "instancia": session_name,
+                    },
+                )
+        except Exception as e:
+            logger.error(f"Error forzando fetch de QR para '{session_name}': {e}")
+
+        # 6. Último recurso: apuntar al endpoint que sirve PNG. NO al Manager UI proxy.
+        from django.urls import reverse
+
+        try:
+            manager_url = reverse("core:evolution_qr_image", kwargs={"instance_name": session_name})
+        except Exception:
+            manager_url = reverse("evolution_qr_image", kwargs={"instance_name": session_name})
         try:
             from apps.common.tasks import fetch_evolution_qr_task
 
@@ -199,8 +226,8 @@ class WhatsAppStatusView(AgencyRoleRequiredMixin, View):
             {
                 "whatsapp_status": "connecting",
                 "estado": "connecting",
-                "qr_code": None,
-                "whatsapp_qr": None,
+                "qr_code": manager_url,
+                "whatsapp_qr": manager_url,
                 "instancia": session_name,
             },
         )

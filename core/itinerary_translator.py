@@ -1,5 +1,6 @@
 # Archivo: core/itinerary_translator.py
 
+import html
 import json
 import logging
 import re
@@ -9,6 +10,10 @@ from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+# TTL del catálogo de aerolíneas (P2-36). Corto para reflejar altas/bajas de la BD.
+_AIRLINES_CACHE_KEY = "itinerary_translator:airlines"
+_AIRLINES_CACHE_TTL = 300
 
 
 class ItineraryTranslator:
@@ -24,16 +29,27 @@ class ItineraryTranslator:
         self.airports = self._load_airports_catalog()
 
     def _load_airlines_catalog(self) -> dict[str, str]:
-        """Carga el catálogo de aerolíneas desde JSON y BD."""
+        """Carga el catálogo de aerolíneas desde JSON y BD (con cache, P2-36)."""
+        from django.core.cache import cache
+
+        cached = cache.get(_AIRLINES_CACHE_KEY)
+        if cached is not None:
+            return cached
+
         airlines = {}
         try:
-            # 1. Cargar desde JSON (prioridad base)
+            # 1. Cargar desde JSON (prioridad base). El archivo puede venir como
+            #    dict {"AV": "Avianca"} o como lista [{"code": "AV", "name": ...}].
             airlines_file = Path(__file__).parent / "data" / "airlines.json"
             if airlines_file.exists():
                 with open(airlines_file, encoding="utf-8") as f:
                     airlines_data = json.load(f)
-                    for airline in airlines_data:
-                        airlines[airline["code"]] = airline["name"]
+                    if isinstance(airlines_data, dict):
+                        for code, name in airlines_data.items():
+                            airlines[code] = name
+                    else:
+                        for airline in airlines_data:
+                            airlines[airline["code"]] = airline["name"]
 
             # 2. Actualizar/Sobrescribir con BD (prioridad alta)
             from apps.common.models import Aerolinea
@@ -42,6 +58,7 @@ class ItineraryTranslator:
                 if airline.codigo_iata:
                     airlines[airline.codigo_iata] = airline.nombre
 
+            cache.set(_AIRLINES_CACHE_KEY, airlines, timeout=_AIRLINES_CACHE_TTL)
             return airlines
         except Exception as e:
             logger.error(f"Error cargando catálogo de aerolíneas: {e}")
@@ -126,7 +143,7 @@ class ItineraryTranslator:
                 if "error" not in ticket_data:
                     data = ticket_data
                 else:
-                    result["html"] = f'<div class="error">{data["error"]}</div>'
+                    result["html"] = f'<div class="error">{html.escape(data["error"])}</div>'
                     result["error"] = data["error"]
                     return result
 
@@ -136,6 +153,7 @@ class ItineraryTranslator:
             # Alerta de Tiempo Límite
             time_limit = data.get("time_limit")
             if time_limit:
+                h_time_limit = html.escape(time_limit)
                 output.append(f"""
                 <div class="mb-4 p-4 bg-orange-50 border-l-4 border-orange-500 rounded-r shadow-sm">
                     <div class="flex items-center">
@@ -144,7 +162,7 @@ class ItineraryTranslator:
                         </div>
                         <div class="ml-3">
                             <p class="text-sm font-bold text-orange-700">Tiempo Límite Detectado</p>
-                            <p class="text-sm text-orange-600">Este itinerario vence: <span class="font-mono bg-orange-100 px-1 rounded">{time_limit}</span></p>
+                            <p class="text-sm text-orange-600">Este itinerario vence: <span class="font-mono bg-orange-100 px-1 rounded">{h_time_limit}</span></p>
                         </div>
                     </div>
                 </div>
@@ -209,23 +227,34 @@ class ItineraryTranslator:
                         }
                     )
 
+                    h_nombre_aerolinea = html.escape(nombre_aerolinea)
+                    h_fecha = html.escape(fecha)
+                    h_hora_sal = html.escape(hora_sal)
+                    h_hora_lleg = html.escape(hora_lleg)
+                    h_origen = html.escape(origen)
+                    h_destino = html.escape(destino)
+                    h_origen_nombre = html.escape(origen_nombre)
+                    h_destino_nombre = html.escape(destino_nombre)
+                    h_numero_vuelo = html.escape(vuelo.get("numero_vuelo", ""))
+                    h_iata = html.escape(iata_code)
+
                     output.append(f"""
                     <div class="flight-result flex items-center p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200">
                         {logo_html}
                         <div class="flex-1">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="font-bold text-lg text-gray-800">{nombre_aerolinea} <span class="text-gray-500 text-base font-normal">{vuelo.get("numero_vuelo", "")}</span></span>
-                                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">{iata_code}</span>
+                                <span class="font-bold text-lg text-gray-800">{h_nombre_aerolinea} <span class="text-gray-500 text-base font-normal">{h_numero_vuelo}</span></span>
+                                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">{h_iata}</span>
                             </div>
                             <div class="flex items-center text-sm text-gray-700 mb-1">
-                                <span class="font-semibold mr-2">{fecha}</span>
+                                <span class="font-semibold mr-2">{h_fecha}</span>
                                 <span class="mx-2 text-gray-400">|</span>
-                                <span>{hora_sal} <span class="text-gray-400">➔</span> {hora_lleg}</span>
+                                <span>{h_hora_sal} <span class="text-gray-400">➔</span> {h_hora_lleg}</span>
                             </div>
                             <div class="flex items-center text-xs text-gray-500">
-                                <span class="truncate" title="{origen_nombre}">{origen_nombre} ({origen})</span>
+                                <span class="truncate" title="{h_origen_nombre}">{h_origen_nombre} ({h_origen})</span>
                                 <span class="mx-2">✈️</span>
-                                <span class="truncate" title="{destino_nombre}">{destino_nombre} ({destino})</span>
+                                <span class="truncate" title="{h_destino_nombre}">{h_destino_nombre} ({h_destino})</span>
                             </div>
                         </div>
                     </div>
@@ -242,7 +271,7 @@ class ItineraryTranslator:
                     iata_code = "XX"
                     flight_num = ""
 
-                    enriched_line = line
+                    enriched_line = html.escape(line)
 
                     if match:
                         iata_code = match.group(1)
@@ -264,15 +293,20 @@ class ItineraryTranslator:
                     words = re.findall(r"\b[A-Z]{3}\b", line)
                     for word in words:
                         if word in self.airports:
+                            airport_name = html.escape(self.airports[word])
+                            escaped_word = html.escape(word)
                             enriched_line = enriched_line.replace(
-                                word, f"<b>{self.airports[word]} ({word})</b>"
+                                word, f"<b>{airport_name} ({escaped_word})</b>"
                             )
+
+                    h_airline_name = html.escape(airline_name)
+                    h_flight_num = html.escape(flight_num)
 
                     output.append(f"""
                     <div class="flight-result-kiu p-4 border-b border-gray-100 font-mono text-sm flex items-center hover:bg-gray-50 transition-colors duration-200">
                         {logo_html}
                         <div class="flex-1">
-                            <div class="font-bold text-lg text-gray-800 mb-1">{airline_name} {flight_num}</div>
+                            <div class="font-bold text-lg text-gray-800 mb-1">{h_airline_name} {h_flight_num}</div>
                             <div class="text-gray-600 bg-gray-50 p-2 rounded border border-gray-200">{enriched_line}</div>
                         </div>
                     </div>

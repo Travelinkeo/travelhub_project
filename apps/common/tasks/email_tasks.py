@@ -48,7 +48,7 @@ def procesar_correo_individual_agencia(agencia_id):
             return f"Agencia {agencia_id} no configurada (falta usuario/contraseña de monitoreo)."
 
         with agency_context(agencia):
-            logger.info(f"🔄 Procesando agencia SaaS (individual): {agencia.nombre} ({email_user})")
+            logger.info(f" Procesando agencia SaaS (individual): {agencia.nombre} ({email_user})")
 
             monitor = EmailMonitorService(
                 agencia=agencia, notification_type="telegram", process_all=False, mark_as_read=True
@@ -62,7 +62,7 @@ def procesar_correo_individual_agencia(agencia_id):
 
             return f"Agencia {agencia.nombre} procesada con éxito. {cantidad} correos procesados."
     except Exception as e:
-        logger.error(f"❌ Error procesando agencia {agencia_id} en paralelo: {e}")
+        logger.error(f" Error procesando agencia {agencia_id} en paralelo: {e}")
         raise
 
 
@@ -105,9 +105,9 @@ def _notificar_operador_telegram(agencia, cantidad_correos):
         )
 
         send_telegram_task.delay(message=mensaje, chat_id=chat_id)
-        logger.info(f"✅ Telegram de monitoreo enviado a operador de {agencia.nombre}")
+        logger.info(f" Telegram de monitoreo enviado a operador de {agencia.nombre}")
     except Exception as e:
-        logger.warning(f"⚠️ No se pudo enviar Telegram al operador de {agencia.nombre}: {e}")
+        logger.warning(f" No se pudo enviar Telegram al operador de {agencia.nombre}: {e}")
 
 
 def _notificar_operador_whatsapp(agencia, cantidad_correos):
@@ -130,9 +130,9 @@ def _notificar_operador_whatsapp(agencia, cantidad_correos):
         )
 
         enviar_whatsapp(telefono, mensaje, agencia=agencia)
-        logger.info(f"✅ WhatsApp de monitoreo enviado a operador de {agencia.nombre}")
+        logger.info(f" WhatsApp de monitoreo enviado a operador de {agencia.nombre}")
     except Exception as e:
-        logger.warning(f"⚠️ No se pudo enviar WhatsApp al operador de {agencia.nombre}: {e}")
+        logger.warning(f" No se pudo enviar WhatsApp al operador de {agencia.nombre}: {e}")
 
 
 @shared_task(

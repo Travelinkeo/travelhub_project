@@ -20,6 +20,7 @@ from apps.bookings.services.hotel_booking_service import HotelBookingService
 from apps.communications.services.marketing_service import MarketingService
 from core.auth_helpers import InternalAPIAuthMixin
 from core.middleware import get_current_agency
+from core.security import get_object_tenant_or_404
 
 
 class HotelListView(LoginRequiredMixin, ListView):
@@ -150,14 +151,11 @@ class HotelDetailView(LoginRequiredMixin, DetailView):
 
 def download_story_view(request: HttpRequest, slug: str) -> HttpResponse:
     """Genera y descarga la Story de Instagram"""
-    hotel = HotelTarifario.objects.get(slug=slug)
+    agencia = getattr(request, "agencia", None)
+    hotel = get_object_tenant_or_404(HotelTarifario, agencia, slug=slug)
 
     # Intentar obtener agencia del usuario logueado (si es Vendedor)
-    agencia_id = None
-    if request.user.is_authenticated:
-        # Check if user belongs to an agency (via UsuarioAgencia or simple field)
-        # Assuming simple linkage or just pass None to use default fallback in service
-        pass
+    agencia_id = agencia.id if agencia else None
 
     img_io = MarketingService.generate_instagram_story(hotel.pk, agencia_id)
 

@@ -34,7 +34,7 @@ class OCRService:
         Returns:
             Dict estructurado según PasaporteOCRSchema o error.
         """
-        logger.info(f"📸 Iniciando OCR de Pasaporte con IA Multimodal (Mime: {mime_type})")
+        logger.info(f" Iniciando OCR de Pasaporte con IA Multimodal (Mime: {mime_type})")
 
         try:
             # 1. Preparar el contenido para Gemini (Formato Dict esperado por call_gemini)
@@ -76,7 +76,7 @@ class OCRService:
                     if pais_em:
                         resultado["pais_emision_id"] = pais_em.pk
             except Exception as db_err:
-                logger.warning(f"⚠️ Error al resolver IDs de países en OCR: {db_err}")
+                logger.warning(f" Error al resolver IDs de países en OCR: {db_err}")
 
             logger.info(
                 f"✅ OCR Completado con éxito para: {resultado.get('nombres')} {resultado.get('apellidos')}"

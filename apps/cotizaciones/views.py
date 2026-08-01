@@ -706,8 +706,6 @@ class MagicQuoterSaveView(SaaSMixin, LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         """post."""
-        import json
-
         from django.urls import reverse
 
         try:
@@ -991,7 +989,7 @@ def _enviar_cotizacion_whatsapp(cotizacion, request):
         )
 
         enviar_whatsapp(cliente.telefono_principal, mensaje, agencia=cotizacion.agencia)
-        logger.info(f"✅ WhatsApp de cotización enviado: {cotizacion.numero_cotizacion}")
+        logger.info(f" WhatsApp de cotización enviado: {cotizacion.numero_cotizacion}")
     except Exception as e:
         logger.warning(f"Error enviando cotización por WhatsApp: {e}")
 

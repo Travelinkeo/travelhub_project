@@ -247,7 +247,7 @@ class ExtractionService:
             f.seek(0)
             return f
         except Exception as e:
-            logger.error(f"❌ Error crítico abriendo archivo de boleto {boleto.pk}: {e}")
+            logger.error(f" Error crítico abriendo archivo de boleto {boleto.pk}: {e}")
             # Si falla el storage, intentamos un fallback desesperado si es local
             try:
                 if hasattr(boleto.archivo_boleto, "path") and os.path.exists(

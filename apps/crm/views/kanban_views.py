@@ -83,7 +83,7 @@ class UpdateLeadStageView(LoginRequiredMixin, View):
                 if new_stage in dict(OportunidadViaje.Etapa.choices):
                     lead.etapa = new_stage
                     lead.save()
-                    logger.info(f"🃏 Lead {lead_id} movido a la etapa {new_stage}")
+                    logger.info(f" Lead {lead_id} movido a la etapa {new_stage}")
 
                     # HTMX no necesita renderizar nada de vuelta porque
                     # Alpine.js ya movió la tarjeta visualmente (Optimistic UI)

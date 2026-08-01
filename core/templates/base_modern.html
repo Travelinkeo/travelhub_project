@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}TravelHub Pro{% endblock %}</title>
 
-    <link rel="stylesheet" href="{% static 'core/css/tailwind-built.css' %}?v=8">
-    <link rel="stylesheet" href="{% static 'core/css/responsive.css' %}?v=8">
+    <link rel="stylesheet" href="{% static 'core/css/tailwind-built.css' %}?v=10">
+    <link rel="stylesheet" href="{% static 'core/css/responsive.css' %}?v=10">
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/htmx_v2.js' %}"></script>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/alpine.min.js' %}" defer></script>
 
@@ -49,7 +49,6 @@
         .rounded-lg { border-radius: 0.5rem !important; }
         .rounded-xl { border-radius: 0.75rem !important; }
         .bg-surface-base { background-color: var(--surface-base) !important; }
-        .text-white { color: #ffffff !important; }
         .font-bold { font-weight: 700 !important; }
         .mx-auto { margin-left: auto !important; margin-right: auto !important; }
         img { max-width: 100%; height: auto; }

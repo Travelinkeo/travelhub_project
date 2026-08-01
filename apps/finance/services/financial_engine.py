@@ -81,7 +81,7 @@ class FinancialEngine:
 
         # Si el total es 0 pero la suma no lo es, confiamos en la suma
         if monto_total == 0 and suma_partes > 0:
-            logger.info(f"⚖️ Ajustando monto_total a suma_partes ({suma_partes}) porque era 0.")
+            logger.info(f" Ajustando monto_total a suma_partes ({suma_partes}) porque era 0.")
             monto_total = suma_partes
 
         discrepancia = abs(monto_total - suma_partes)
@@ -95,7 +95,7 @@ class FinancialEngine:
             )
             # En caso de discrepancia leve, forzamos la integridad ajustando 'otros impuestos'
             if discrepancia < Decimal("1.00"):
-                logger.info("🔧 Autocorrigiendo discrepancia menor (<1.00) en monto_otros_tax.")
+                logger.info(" Autocorrigiendo discrepancia menor (<1.00) en monto_otros_tax.")
                 monto_otros_tax += monto_total - suma_partes
                 es_integro = True
                 discrepancia = 0

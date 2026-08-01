@@ -13,6 +13,8 @@ import secrets
 from django.db import models
 from django.utils import timezone
 
+from core.models.base import AgenciaMixin
+
 logger = logging.getLogger(__name__)
 
 
@@ -32,7 +34,7 @@ class WebhookEvent(models.TextChoices):
     NOTIFICACION_ENVIADA = "notificacion.enviada", "Notificación Enviada"
 
 
-class Webhook(models.Model):
+class Webhook(AgenciaMixin, models.Model):
     """
     Endpoint webhook registrado por una agencia.
 
@@ -40,12 +42,6 @@ class Webhook(models.Model):
     y verificar la autenticidad.
     """
 
-    agencia = models.ForeignKey(
-        "core.Agencia",
-        on_delete=models.CASCADE,
-        related_name="webhooks",
-        help_text="Agencia propietaria del webhook",
-    )
     url = models.URLField(
         max_length=500,
         help_text="URL que recibirá las notificaciones POST",
@@ -151,7 +147,7 @@ class Webhook(models.Model):
         )
 
 
-class WebhookDelivery(models.Model):
+class WebhookDelivery(AgenciaMixin, models.Model):
     """
     Registro de cada intento de entrega de webhook.
     Útil para debugging y auditoría.

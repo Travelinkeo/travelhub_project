@@ -12,16 +12,16 @@ style_fixes = """/* Custom overrides for Swiss Light */
 .dark .bg-background-dark { background-color: #101922; }
 .dark .border-border-dark { border-color: #283039; }
 /* Input Fixes to match design */
-input[type="text"], input[type="number"], input[type="date"], select, textarea { 
-    width: 100%; border-radius: 0.25rem; border: 1px solid #e2e8f0; height: 3rem; padding-left: 1rem; padding-right: 1rem; 
+input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    width: 100%; border-radius: 0.25rem; border: 1px solid #e2e8f0; height: 3rem; padding-left: 1rem; padding-right: 1rem;
     background-color: #f8fafc; color: #0f172a; outline: none; transition: border-color 0.2s;
 }
 input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
     border-color: #258cf4;
 }
 textarea { height: auto; padding-top: 0.5rem; padding-bottom: 0.5rem; }
-.dark input[type="text"], .dark input[type="number"], .dark input[type="date"], .dark select, .dark textarea { 
-    border-color: #283039; background-color: #151a1f; color: white; 
+.dark input[type="text"], .dark input[type="number"], .dark input[type="date"], .dark select, .dark textarea {
+    border-color: #283039; background-color: #151a1f; color: white;
 }
 """
 html = re.sub(
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const taxTotal = tax * qty; // O (tax * qty) dependiendo del modelo de negocio, asumiendo tax = impuesto unitario
                     const total = subtotal + taxTotal;
                     totalDisplay.value = total.toFixed(2);
-                    
+
                     globalsubtotal += subtotal;
                     globaltax += taxTotal;
                 } else {
@@ -278,11 +278,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Update Global UI
         const globalTotal = globalsubtotal + globaltax;
-        
+
         let elSubtotal = document.getElementById('ui-subtotal');
         let elTax = document.getElementById('ui-tax');
         let elTotal = document.getElementById('ui-total');
-        
+
         if(elSubtotal) elSubtotal.innerText = globalsubtotal.toFixed(2);
         if(elTax) elTax.innerText = globaltax.toFixed(2);
         if(elTotal) elTotal.innerText = globalTotal.toFixed(2);
@@ -308,11 +308,11 @@ document.addEventListener('DOMContentLoaded', function () {
         addItemBtn.addEventListener('click', function () {
             const formIdx = totalFormsInput.value;
             const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, formIdx);
-            
+
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = newFormHtml;
             const newRow = tempDiv.firstElementChild;
-            
+
             itemsContainer.appendChild(newRow);
             attachListeners(newRow);
             totalFormsInput.value = parseInt(formIdx) + 1;

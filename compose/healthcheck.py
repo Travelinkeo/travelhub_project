@@ -1,20 +1,12 @@
-import socket
 import sys
+import urllib.request
 
-
-def check_tcp_connect():
-    """Healthcheck: verifica que gunicorn acepte conexiones TCP."""
-    HOST = "127.0.0.1"
-    PORT = 8000
-    try:
-        s = socket.socket()
-        s.settimeout(10)
-        s.connect((HOST, PORT))
-        s.close()
+try:
+    # Intenta hacer un request local al puerto 8000
+    response = urllib.request.urlopen("http://127.0.0.1:8000/health/", timeout=5)
+    if response.status == 200:
         sys.exit(0)
-    except Exception:
+    else:
         sys.exit(1)
-
-
-if __name__ == "__main__":
-    check_tcp_connect()
+except Exception:
+    sys.exit(1)

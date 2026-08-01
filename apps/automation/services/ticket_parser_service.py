@@ -16,6 +16,7 @@ from apps.automation.parsers.normalization import DataNormalizationService  # no
 from apps.automation.parsers.pdf_generation import PdfGenerationService  # noqa: E402
 from apps.automation.parsers.persistence import BoletoPersistenceService  # noqa: E402
 from apps.automation.parsers.ticket_parser import extract_data_from_text  # noqa: E402
+from apps.automation.services.ai_engine import QuotaExhaustedException  # noqa: E402
 from apps.automation.services.venta_automation import VentaAutomationService  # noqa: E402
 from apps.bookings.models import BoletoImportado  # noqa: E402
 
@@ -43,14 +44,24 @@ def _is_celery_available() -> bool:
 
 
 def _safe_concat_log(original_log, new_entry, max_len=4000) -> str:
-    """Concatena y trunca logs de parseo de forma segura para no exceder los limites de la DB."""
+    """Concatena y trunca logs de parseo sin perder las entradas antiguas."""
     orig = str(original_log or "").strip()
     entry = str(new_entry or "").strip()
-    if orig:
-        combined = f"{orig} | {entry}"
-    else:
-        combined = entry
-    return combined[-max_len:]
+    if not entry:
+        return orig[-max_len:]
+    combined = f"{orig} | {entry}" if orig else entry
+    if len(combined) <= max_len:
+        return combined
+    # No cabe todo: preservamos el inicio (logs antiguos) y el final (entrada nueva),
+    # truncando el centro para indicar que hubo más contenido.
+    marker = " ... [truncado] ... "
+    head_len = max_len * 3 // 4
+    tail_len = max_len - head_len - len(marker)
+    if tail_len < 10:
+        return combined[-max_len:]
+    head = combined[:head_len]
+    tail = combined[-tail_len:]
+    return f"{head}{marker}{tail}"
 
 
 def _generate_pdf_sync(boleto) -> None:
@@ -63,7 +74,7 @@ def _generate_pdf_sync(boleto) -> None:
 
     try:
         if boleto.archivo_pdf_generado:
-            logger.info(f"⏭️ [SYNC] PDF ya existe para boleto {boleto.pk}, omitiendo.")
+            logger.info(f" [SYNC] PDF ya existe para boleto {boleto.pk}, omitiendo.")
             return
         if not boleto.datos_parseados:
             logger.warning(
@@ -83,7 +94,7 @@ def _generate_pdf_sync(boleto) -> None:
         )
         if pdf_bytes and len(pdf_bytes) > 100:
             boleto.archivo_pdf_generado.save(fname, ContentFile(pdf_bytes), save=True)
-            logger.info(f"✅ [SYNC] PDF generado correctamente: {fname} ({len(pdf_bytes):,} bytes)")
+            logger.info(f" [SYNC] PDF generado correctamente: {fname} ({len(pdf_bytes):,} bytes)")
         else:
             # PDF vacío — WeasyPrint corrió pero no produjo bytes útiles
             logger.error(
@@ -97,7 +108,7 @@ def _generate_pdf_sync(boleto) -> None:
                 ),
             )
     except Exception as e:
-        logger.error(f"❌ [SYNC] Error generando PDF para boleto {boleto.pk}: {e}", exc_info=True)
+        logger.error(f" [SYNC] Error generando PDF para boleto {boleto.pk}: {e}", exc_info=True)
         # Registrar el error en el log del boleto para que sea visible en la UI
         try:
             BoletoImportado.all_objects.filter(pk=boleto.pk).update(
@@ -145,9 +156,13 @@ class TicketParserService:
         # 🛡️ Guardia Anti-Huérfano: Solo actúa si el boleto se quedó en 'PRO' (crash durante procesamiento)
         # _process_single_ticket ya gestiona COM/REV correctamente, NO sobreescribimos aquí
         try:
+            from apps.bookings.models import BoletoImportado
+
             boleto.refresh_from_db()
-            if boleto.estado_parseo == "PRO":  # Stuck in processing = crash happened
-                boleto.estado_parseo = "REV"
+            if (
+                boleto.estado_parseo == BoletoImportado.EstadoParseo.EN_PROCESO
+            ):  # Stuck in processing = crash happened
+                boleto.estado_parseo = BoletoImportado.EstadoParseo.REVISION_REQUERIDA
                 boleto.log_parseo = (
                     boleto.log_parseo or ""
                 ) + " | Estado huérfano detectado y corregido."
@@ -156,7 +171,7 @@ class TicketParserService:
                     f"⚠️ [SRE] process_boleto: Boleto {boleto.pk} estaba atascado en PRO. Corregido a REV."
                 )
         except Exception as e:
-            logger.error(f"❌ [SRE] Error en guardia anti-huérfano de process_boleto: {e}")
+            logger.error(f" [SRE] Error en guardia anti-huérfano de process_boleto: {e}")
 
         return res
 
@@ -202,7 +217,7 @@ class TicketParserService:
                     from apps.bookings.models import BoletoImportado
 
                     BoletoImportado.all_objects.filter(pk=boleto_id).update(
-                        estado_parseo="REV",  # REVISION_REQUERIDA (max_length=3)
+                        estado_parseo=BoletoImportado.EstadoParseo.REVISION_REQUERIDA,
                         log_parseo=f"Fallo Crítico/Timeout: {str(e)[:500]}",
                     )
                     logger.warning(
@@ -331,13 +346,13 @@ class TicketParserService:
 
                 # ⚡ PASO 1: INTENTAR REGEX/GDS LOCAL PRIMERO (Fast-First)
                 try:
-                    logger.info(f"⚡ Usando Motor Regex/GDS Local para Boleto {boleto_id}...")
+                    logger.info(f" Usando Motor Regex/GDS Local para Boleto {boleto_id}...")
                     regex_start = time.time()
                     datos_regex = extract_data_from_text(
                         texto, html_text=html_text, pdf_path=path_pdf, bypass_cache=bypass_cache
                     )
                     regex_duration = time.time() - regex_start
-                    logger.info(f"⏱️ [PROFILING] Regex parse duration: {regex_duration:.2f}s")
+                    logger.info(f" [PROFILING] Regex parse duration: {regex_duration:.2f}s")
 
                     # Validación de Contrato de Calidad Mínimo para evitar pasar a la IA
                     if datos_regex and not datos_regex.get("error"):
@@ -423,22 +438,38 @@ class TicketParserService:
                             "⚠️ Regex local no pudo parsear el archivo. Se requiere fallback a IA."
                         )
                 except Exception as e_reg:
-                    logger.error(f"❌ Error en motor de Regex: {e_reg}")
+                    logger.error(f" Error en motor de Regex: {e_reg}")
                     boleto.log_parseo = f"Error en Regex local: {str(e_reg)}. Intentando IA..."
                     boleto.save(update_fields=["log_parseo"])
 
                 # 🧠 PASO 2: FALLBACK A IA (Solo si el regex no fue suficiente o confiable)
                 if datos is None:
-                    # Verificar estado del Circuit Breaker de IA antes de llamar
+                    # Circuit breaker protege la llamada a IA
                     from apps.common.services.circuit_breaker import (
-                        CircuitState,
                         ai_circuit_breaker,
                     )
 
-                    if ai_circuit_breaker.state == CircuitState.OPEN:
+                    def _ai_fallback_call():
+                        from apps.automation.parsers.ai_universal_parser import (
+                            UniversalAIParser,
+                        )
+
+                        logger.info(
+                            f"🧠 Usando IA Primaria (Structured Outputs) de Fallback para Boleto {boleto_id}..."
+                        )
+                        ai_start = time.time()
+                        datos_ia = UniversalAIParser().parse(
+                            texto, pdf_path=path_pdf, bypass_cache=bypass_cache
+                        )
+                        ai_duration = time.time() - ai_start
+                        logger.info(f"⏱️ [PROFILING] IA Engine parse duration: {ai_duration:.2f}s")
+                        return datos_ia
+
+                    try:
+                        ai_result = ai_circuit_breaker.call(_ai_fallback_call)
+                    except QuotaExhaustedException:
                         logger.warning(
-                            f"🚫 Circuit Breaker de IA OPEN. Omitiendo fallback a IA para Boleto {boleto_id}. "
-                            "Usando datos parciales de Regex."
+                            f"🚨 Cuota de IA agotada para agencia {boleto.agencia.nombre}."
                         )
                         if (
                             "datos_regex" in locals()
@@ -448,72 +479,32 @@ class TicketParserService:
                             datos = datos_regex
                             datos["_requiere_revision"] = True
                             boleto.log_parseo = (
-                                "Circuit Breaker IA OPEN. Usando datos parciales de Regex. "
-                            )
+                                boleto.log_parseo or ""
+                            ) + " | Cuota IA agotada. Usando datos parciales de Regex."
                             boleto.save(update_fields=["log_parseo"])
                         else:
-                            msg_error = (
-                                "Parseo cancelado: Circuit Breaker IA abierto y sin datos de Regex."
+                            return self._finalize_error(
+                                boleto, "Cuota de IA agotada y sin datos de Regex."
                             )
-                            return self._finalize_error(boleto, msg_error)
+                    except Exception as e_ai:
+                        logger.error(f" Fallo crítico en motor de IA: {e_ai}")
+                        if (
+                            "datos_regex" in locals()
+                            and datos_regex
+                            and not datos_regex.get("error")
+                        ):
+                            datos = datos_regex
+                            datos["_requiere_revision"] = True
+                            boleto.log_parseo = (
+                                boleto.log_parseo or ""
+                            ) + f" | Error IA: {str(e_ai)}. Usando datos parciales de Regex."
+                            boleto.save(update_fields=["log_parseo"])
+                        else:
+                            return self._finalize_error(
+                                boleto, f"Error en motor de IA de Fallback: {str(e_ai)}"
+                            )
                     else:
-                        try:
-                            from apps.automation.parsers.ai_universal_parser import (
-                                UniversalAIParser,
-                            )
-                            from apps.automation.services.ai_engine import QuotaExhaustedException
-
-                            logger.info(
-                                f"🧠 Usando IA Primaria (Structured Outputs) de Fallback para Boleto {boleto_id}..."
-                            )
-                            ai_start = time.time()
-                            datos_ia = UniversalAIParser().parse(
-                                texto, pdf_path=path_pdf, bypass_cache=bypass_cache
-                            )
-                            ai_duration = time.time() - ai_start
-                            logger.info(
-                                f"⏱️ [PROFILING] IA Engine parse duration: {ai_duration:.2f}s"
-                            )
-
-                            if datos_ia and "error" not in datos_ia:
-                                datos = datos_ia
-                                logger.info("✅ IA de Fallback procesó el boleto exitosamente.")
-                                boleto.log_parseo = (
-                                    boleto.log_parseo or ""
-                                ) + " | IA de Fallback exitosa."
-                                boleto.save(update_fields=["log_parseo"])
-                            else:
-                                error_detail = (
-                                    datos_ia.get("status_detail") or datos_ia.get("error")
-                                    if datos_ia
-                                    else "Unknown Error"
-                                )
-                                logger.warning(
-                                    f"⚠️ IA devolvió error o datos vacíos: {error_detail}"
-                                )
-                                if (
-                                    "datos_regex" in locals()
-                                    and datos_regex
-                                    and not datos_regex.get("error")
-                                ):
-                                    datos = datos_regex
-                                    datos["_requiere_revision"] = True
-                                    logger.info(
-                                        "⚠️ Recuperando datos parciales de Regex ante fallo de IA."
-                                    )
-                                    boleto.log_parseo = (
-                                        (boleto.log_parseo or "")
-                                        + f" | IA Falló: {error_detail}. Usando datos parciales de Regex."
-                                    )
-                                    boleto.save(update_fields=["log_parseo"])
-                                else:
-                                    msg_error = f"Parseo Inteligente falló: {error_detail}"
-                                    return self._finalize_error(boleto, msg_error)
-
-                        except QuotaExhaustedException:
-                            logger.warning(
-                                f"🚨 Cuota de IA agotada para agencia {boleto.agencia.nombre}."
-                            )
+                        if isinstance(ai_result, dict) and "error" in ai_result:
                             if (
                                 "datos_regex" in locals()
                                 and datos_regex
@@ -523,14 +514,24 @@ class TicketParserService:
                                 datos["_requiere_revision"] = True
                                 boleto.log_parseo = (
                                     boleto.log_parseo or ""
-                                ) + " | Cuota IA agotada. Usando datos parciales de Regex."
+                                ) + f" | Circuit Breaker/IA: {ai_result['error']}. Usando Regex."
                                 boleto.save(update_fields=["log_parseo"])
                             else:
                                 return self._finalize_error(
-                                    boleto, "Cuota de IA agotada y sin datos de Regex."
+                                    boleto, f"IA no disponible: {ai_result['error']}"
                                 )
-                        except Exception as e_ai:
-                            logger.error(f"❌ Fallo crítico en motor de IA: {e_ai}")
+                        elif ai_result and "error" not in ai_result:
+                            datos = ai_result
+                            logger.info(" IA de Fallback procesó el boleto exitosamente.")
+                            boleto.log_parseo = (
+                                boleto.log_parseo or ""
+                            ) + " | IA de Fallback exitosa."
+                            boleto.save(update_fields=["log_parseo"])
+                        else:
+                            error_detail = (
+                                ai_result.get("status_detail") if ai_result else "Unknown Error"
+                            )
+                            logger.warning(f" IA devolvió error o datos vacíos: {error_detail}")
                             if (
                                 "datos_regex" in locals()
                                 and datos_regex
@@ -540,12 +541,11 @@ class TicketParserService:
                                 datos["_requiere_revision"] = True
                                 boleto.log_parseo = (
                                     boleto.log_parseo or ""
-                                ) + f" | Error IA: {str(e_ai)}. Usando datos parciales de Regex."
+                                ) + f" | IA Falló: {error_detail}. Usando datos parciales de Regex."
                                 boleto.save(update_fields=["log_parseo"])
                             else:
-                                return self._finalize_error(
-                                    boleto, f"Error en motor de IA de Fallback: {str(e_ai)}"
-                                )
+                                msg_error = f"Parseo Inteligente falló: {error_detail}"
+                                return self._finalize_error(boleto, msg_error)
 
                 # 4c. Guardar en caché Redis el resultado final (sea IA o Regex)
                 if datos and "error" not in datos:
@@ -555,7 +555,7 @@ class TicketParserService:
                             f"💾 Resultado guardado en caché Redis (Hash: {texto_hash[:8]}...)"
                         )
                     except Exception as e_cache:
-                        logger.warning(f"⚠️ Error guardando en caché: {e_cache}")
+                        logger.warning(f" Error guardando en caché: {e_cache}")
 
             # 5. Normalización y Procesamiento (Multi-Pax Aware)
             if isinstance(datos, dict) and datos.get("is_multi_pax"):
@@ -685,7 +685,7 @@ class TicketParserService:
                     if not boleto.archivo_pdf_generado:
                         pdf_sync_failed = True
             except Exception as e_pdf_gen:
-                logger.error(f"❌ Error en generación de PDF para Boleto {boleto.pk}: {e_pdf_gen}")
+                logger.error(f" Error en generación de PDF para Boleto {boleto.pk}: {e_pdf_gen}")
                 pdf_sync_failed = True
                 # Último recurso: intentar generación síncrona
                 try:
@@ -704,7 +704,7 @@ class TicketParserService:
                 if pdf_sync_failed:
                     boleto.estado_parseo = BoletoImportado.EstadoParseo.REVISION_REQUERIDA
                     boleto.log_parseo = "PDF no generado. Revisa los datos y usa 'Reintentar PDF'."
-                    logger.warning(f"⚠️ Boleto {boleto.pk} cerrado como REV (PDF falló).")
+                    logger.warning(f" Boleto {boleto.pk} cerrado como REV (PDF falló).")
                 elif bool(data.get("_requiere_revision", False)):
                     boleto.estado_parseo = BoletoImportado.EstadoParseo.REVISION_REQUERIDA  # 'REV'
                     boleto.log_parseo = "Datos parciales (sin segmentos de vuelo). PDF generado. Revisa el itinerario."
@@ -731,7 +731,7 @@ class TicketParserService:
             return venta
 
         except Exception as e:
-            logger.error(f"🔥 Error crítico en _process_single_ticket: {e}", exc_info=True)
+            logger.error(f" Error crítico en _process_single_ticket: {e}", exc_info=True)
             return self._finalize_error(boleto, f"Error en procesamiento final: {e}")
 
     def _trigger_whatsapp(self, venta, boleto):
@@ -772,23 +772,27 @@ class TicketParserService:
 
             transaction.on_commit(enqueue_whatsapp)
         except Exception as e_ws:
-            logger.error(f"❌ Error encolando WhatsApp en on_commit: {e_ws}")
+            logger.error(f" Error encolando WhatsApp en on_commit: {e_ws}")
 
     def _finalize_error(self, boleto, error_msg):
         """_finalize_error."""
-        logger.error(f"❌ Error Boleto {boleto.pk}: {error_msg}")
+        logger.error(f" Error Boleto {boleto.pk}: {error_msg}")
         # Si ya está marcado como REV (Revisión Requerida), lo mantenemos
         # De lo contrario, marcamos como ERR
-        if boleto.estado_parseo not in ("REV", "ERR"):
-            boleto.estado_parseo = "REV"  # Preferimos REV para que el usuario pueda corregir
+        if boleto.estado_parseo not in (
+            BoletoImportado.EstadoParseo.REVISION_REQUERIDA,
+            BoletoImportado.EstadoParseo.ERROR_PARSEO,
+        ):
+            boleto.estado_parseo = BoletoImportado.EstadoParseo.REVISION_REQUERIDA
         boleto.log_parseo = _safe_concat_log(boleto.log_parseo, error_msg)
         try:
             boleto.save(update_fields=["estado_parseo", "log_parseo"])
         except Exception as e_save:
-            logger.error(f"❌ Error guardando estado de error en boleto {boleto.pk}: {e_save}")
+            logger.error(f" Error guardando estado de error en boleto {boleto.pk}: {e_save}")
             try:
                 BoletoImportado.all_objects.filter(pk=boleto.pk).update(
-                    estado_parseo="ERR", log_parseo=str(error_msg)[:200]
+                    estado_parseo=BoletoImportado.EstadoParseo.ERROR_PARSEO,
+                    log_parseo=str(error_msg)[:200],
                 )
             except Exception as e_final:
                 logger.error(f"Error final en boleto {boleto.pk}: {e_final}")

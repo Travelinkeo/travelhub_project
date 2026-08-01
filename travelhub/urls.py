@@ -20,6 +20,7 @@ from core.views.auditoria_views import api_audit_logs
 from core.views.auth_views import MagicLinkRequestView, MagicLinkVerifyView, TokenLogoutView
 from core.views.dev_portal_views import developer_portal
 from core.views.docs_views import docs_index, docs_page, public_manual
+from core.views.evolution_proxy_views import evolution_manager_proxy
 from core.views.health_views import health_check
 from core.views.marketing_views import (
     demo_page,
@@ -64,8 +65,8 @@ urlpatterns = [
     path("admin/custom/finance/", include("apps.finance.urls_admin")),
     path("admin/custom/bookings/", include("apps.bookings.urls_admin")),
     path("admin/custom/core/", include("core.urls_admin")),
-    path("admin/", admin.site.urls),  # <-- Faltaba tu panel de admin
-    path("accounts/", include("django.contrib.auth.urls")),  # <-- Faltaban las rutas base de auth
+    path("admin/", admin.site.urls),
+    path("accounts/", include("django.contrib.auth.urls")),
     path("login/", ensure_csrf_cookie(auth_views.LoginView.as_view()), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("api/auth/jwt/obtain/", TokenObtainPairView.as_view(), name="jwt_obtain_pair"),
@@ -77,7 +78,7 @@ urlpatterns = [
     path("onboarding/", SaaSOnboardingView.as_view(), name="onboarding_start"),
     path("onboarding/agency/", OnboardingAgencyView.as_view(), name="onboarding_agency"),
     path("onboarding/", include("apps.common.urls_onboarding")),
-    # --- INCLUSIÓN DE MÓDULOS (ESTO SOLUCIONA EL ERROR NOREVERSEMATCH) ---
+    # --- INCLUSIÓN DE MÓDULOS ---
     path("bookings/", include("apps.bookings.urls")),
     path("finance/", include("apps.finance.urls")),
     path("crm/", include("apps.crm.urls")),
@@ -89,10 +90,9 @@ urlpatterns = [
     path("tasks/", include("apps.tasks.urls")),
     path("marketing/", include("apps.marketing.urls")),
     path("cotizaciones/", include("apps.cotizaciones.urls")),
+    # --- API UNIFICADA (DRY: una sola inclusión) ---
     path("api/", include("travelhub.urls_api")),
-    path("api/v1/", include("travelhub.urls_api")),
-    path("core/api/", include("travelhub.urls_api")),
-    # --- INLINE API ROUTES (disponibles bajo /api/ y /api/v1/) ---
+    # --- INLINE API ROUTES ---
     path("api/schema/", _protect_docs(SpectacularAPIView.as_view()), name="schema"),
     path(
         "api/docs/",
@@ -109,22 +109,6 @@ urlpatterns = [
     path("api/lead-magnet/", lead_magnet_download, name="lead_magnet_download"),
     path("api/push/subscribe/", push_subscribe, name="push_subscribe"),
     path("api/push/unsubscribe/", push_unsubscribe, name="push_unsubscribe"),
-    path("api/v1/schema/", _protect_docs(SpectacularAPIView.as_view()), name="schema_v1"),
-    path(
-        "api/v1/docs/",
-        _protect_docs(SpectacularSwaggerView.as_view(url_name="schema_v1")),
-        name="swagger-ui-v1",
-    ),
-    path(
-        "api/v1/redoc/",
-        _protect_docs(SpectacularRedocView.as_view(url_name="schema_v1")),
-        name="redoc-v1",
-    ),
-    path("api/v1/audit-logs/", api_audit_logs, name="api_audit_logs_v1"),
-    path("api/v1/parse-demo/", parse_demo, name="parse_demo_v1"),
-    path("api/v1/lead-magnet/", lead_magnet_download, name="lead_magnet_download_v1"),
-    path("api/v1/push/subscribe/", push_subscribe, name="push_subscribe_v1"),
-    path("api/v1/push/unsubscribe/", push_unsubscribe, name="push_unsubscribe_v1"),
     # Public routes (no /api/ prefix) for external consumers
     path("schema/", _protect_docs(SpectacularAPIView.as_view()), name="schema_root"),
     path(
@@ -133,7 +117,6 @@ urlpatterns = [
     # Developer Portal
     path("developers/", developer_portal, name="developer_portal"),
     # --- DASHBOARD PRINCIPAL ---
-    # Landing page pública — si autenticado, redirige al dashboard
     path("", public_landing, name="home"),
     path(
         "dashboard/",
@@ -152,10 +135,17 @@ urlpatterns = [
     path("manifest.json", manifest, name="pwa_manifest"),
     path("service-worker.js", service_worker, name="service_worker"),
     path("offline/", offline, name="offline"),
+    # Proxy para Evolution Manager (requiere estar en la raíz para que React Router funcione)
+    path("manager/qr/<str:instance_name>/", evolution_manager_proxy, name="evolution_manager_root"),
+    path(
+        "manager/qr/<str:instance_name>/<path:extra>",
+        evolution_manager_proxy,
+        name="evolution_manager_assets",
+    ),
     # Status Page (solo staff)
     path("status/", _protect_docs(status_page), name="status_page"),
     path("status/api/", _protect_docs(status_api), name="status_api"),
-    # Knowledge Base — documentación técnica (solo staff)
+    # Knowledge Base
     path("docs/", _protect_docs(docs_index), name="docs_index"),
     path("docs/<path:path>/", _protect_docs(docs_page), name="docs_page"),
     # Manual de usuario público
@@ -168,7 +158,7 @@ urlpatterns = [
     path("sso/login/<int:provider_id>/", sso_login, name="sso_login"),
     path("sso/callback/<int:provider_id>/", sso_callback, name="sso_callback"),
     # --- INTERNACIONALIZACIÓN (i18n) ---
-    path("i18n/", include("django.conf.urls.i18n")),  # Provee /i18n/set_language/
+    path("i18n/", include("django.conf.urls.i18n")),
 ]
 
 

@@ -179,6 +179,12 @@ fix_produccion_*.sh
 _para_revisar/
 scratch_scripts/
 
+# Terraform state (nunca commitear)
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
 boletos_importados/
 boletos_generados/
 /boletos_importados/

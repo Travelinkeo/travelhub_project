@@ -16,7 +16,7 @@ from django.core.exceptions import ValidationError
 from django.db import DatabaseError, DataError, IntegrityError
 from django.db.models import ProtectedError
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
@@ -29,7 +29,7 @@ from apps.automation.services.ticket_parser_service import TicketParserService
 from apps.automation.services.ticket_review_service import StudioFormData, TicketReviewService
 from apps.bookings.models import BoletoImportado
 from apps.crm.models import Cliente
-from core.security import get_agencia_from_request
+from core.security import get_agencia_from_request, get_object_tenant_or_404
 
 logger = logging.getLogger(__name__)
 
@@ -123,18 +123,14 @@ class ReviewBoletoView(View):
 
     def get(self, request, pk, *args, **kwargs):
         """get."""
-        manager = getattr(BoletoImportado, "all_objects", BoletoImportado.objects)
-        boleto = get_object_or_404(manager, pk=pk)
-
         agencia = getattr(request, "agencia", None)
-        if not request.user.is_superuser and boleto.agencia != agencia:
-            return HttpResponse("Acceso Denegado", status=403)
+        boleto = get_object_tenant_or_404(BoletoImportado, agencia, pk=pk)
 
         force = request.GET.get("force") == "1"
 
         # 🚀 RE EXTRAER SÍNCRONO MANUAL
         if force:
-            logger.info(f"🔄 Re-extracción forzada (bypass_cache + ignore_manual) Boleto {pk}")
+            logger.info(f" Re-extracción forzada (bypass_cache + ignore_manual) Boleto {pk}")
             boleto.estado_parseo = BoletoImportado.EstadoParseo.EN_PROCESO
             if boleto.archivo_pdf_generado:
                 try:
@@ -158,9 +154,17 @@ class ReviewBoletoView(View):
 
         # 🤖 AUTO-RECUPERACIÓN
         estado_str = str(boleto.estado_parseo)
-        if estado_str in ["PEN", "PRO", "QUE", "COLA_LLENA", "EN_PROCESO", "PENDIENTE"]:
+        estados_en_espera = {
+            str(BoletoImportado.EstadoParseo.PENDIENTE),
+            str(BoletoImportado.EstadoParseo.EN_PROCESO),
+            str(BoletoImportado.EstadoParseo.COLA_LLENA),
+        }
+        estados_procesando = {
+            str(BoletoImportado.EstadoParseo.EN_PROCESO),
+        }
+        if estado_str in estados_en_espera:
             debe_procesar = True
-            if estado_str in ["PRO", "EN_PROCESO"]:
+            if estado_str in estados_procesando:
                 import datetime
 
                 from django.utils import timezone
@@ -229,12 +233,8 @@ class ReviewBoletoView(View):
         """post."""
         try:
             next_url = request.GET.get("next") or request.POST.get("next")
-            manager = getattr(BoletoImportado, "all_objects", BoletoImportado.objects)
-            boleto = manager.get(pk=pk)
-
             agencia = getattr(request, "agencia", None)
-            if not request.user.is_superuser and boleto.agencia != agencia:
-                return HttpResponse("Acceso Denegado", status=403)
+            boleto = get_object_tenant_or_404(BoletoImportado, agencia, pk=pk)
 
             form_data = StudioFormData.from_post(request.POST)
             resultado = TicketReviewService().apply_and_reprocess(
@@ -289,12 +289,8 @@ class BoletoPdfStatusView(View):
 
     def get(self, request, pk, *args, **kwargs):
         """get."""
-        manager = getattr(BoletoImportado, "all_objects", BoletoImportado.objects)
-        boleto = get_object_or_404(manager, pk=pk)
-
         agencia = getattr(request, "agencia", None)
-        if not request.user.is_superuser and boleto.agencia != agencia:
-            return HttpResponse("Acceso Denegado", status=403)
+        boleto = get_object_tenant_or_404(BoletoImportado, agencia, pk=pk)
 
         poll_count = int(request.GET.get("poll", "0"))
         if poll_count > self.MAX_POLLS:
@@ -311,7 +307,7 @@ class BoletoPdfStatusView(View):
 
             if boleto.updated_at and (tz.now() - boleto.updated_at).total_seconds() > 120:
                 BoletoImportado.all_objects.filter(pk=boleto.pk).update(
-                    estado_parseo="REV",
+                    estado_parseo=BoletoImportado.EstadoParseo.REVISION_REQUERIDA,
                     log_parseo="Estado PRO expirado por timeout (>120s). Reintenta el parseo.",
                 )
                 boleto.refresh_from_db()
@@ -324,7 +320,7 @@ class BoletoPdfStatusView(View):
                 # Ahora se genera directamente con WeasyPrint en este mismo request (~1-5s).
                 from apps.automation.services.ticket_parser_service import _generate_pdf_sync
 
-                logger.info(f"🔄 Re-generando PDF síncronamente para Boleto {boleto.pk}")
+                logger.info(f" Re-generando PDF síncronamente para Boleto {boleto.pk}")
 
                 # Limpiar PDF corrupto o vacío previo para forzar regeneración
                 if boleto.archivo_pdf_generado:
@@ -338,9 +334,9 @@ class BoletoPdfStatusView(View):
                 # Regenerar de inmediato — mismo mecanismo que usa el pipeline internamente
                 boleto.refresh_from_db()
                 _generate_pdf_sync(boleto)
-                logger.info(f"✅ PDF re-generado síncronamente para Boleto {boleto.pk}")
+                logger.info(f" PDF re-generado síncronamente para Boleto {boleto.pk}")
             except Exception as e_pdf_queue:
-                logger.error(f"❌ Error al re-generar PDF síncronamente: {e_pdf_queue}")
+                logger.error(f" Error al re-generar PDF síncronamente: {e_pdf_queue}")
 
         if boleto.archivo_pdf_generado:
             # Verificar que el archivo exista físicamente (FileSystemStorage) o en R2
@@ -405,7 +401,11 @@ class BoletoPdfStatusView(View):
         # Boleto ya completó parseo (COM/REV) pero no tiene PDF → regenerar síncronamente ahora
         # Esto evita que la UI quede en bucle infinito de "Generando..."
         estado_final = str(boleto.estado_parseo)
-        if estado_final in ("COM", "REV", "COMPLETADO", "REVISION_REQUERIDA"):
+        estados_finales = {
+            str(BoletoImportado.EstadoParseo.COMPLETADO),
+            str(BoletoImportado.EstadoParseo.REVISION_REQUERIDA),
+        }
+        if estado_final in estados_finales:
             logger.info(
                 f"⚡ [PDF-STATUS] Boleto {boleto.pk} completó parseo ({estado_final}) pero no tiene PDF. "
                 "Regenerando síncronamente..."
@@ -483,14 +483,12 @@ class DesasociarVentaView(View):
 
     def post(self, request, pk):
         """post."""
-        boleto = get_object_or_404(BoletoImportado, pk=pk)
         agencia = getattr(request, "agencia", None)
-        if not request.user.is_superuser and boleto.agencia != agencia:
-            return HttpResponse("Acceso Denegado", status=403)
+        boleto = get_object_tenant_or_404(BoletoImportado, agencia, pk=pk)
 
         if boleto.venta_asociada:
             boleto.venta_asociada = None
-            boleto.estado_parseo = "REV"  # REVISION_REQUERIDA (max_length=3)
+            boleto.estado_parseo = BoletoImportado.EstadoParseo.REVISION_REQUERIDA
             boleto.save()
             messages.info(request, _("Boleto desasociado de la venta."))
 
@@ -500,13 +498,8 @@ class DesasociarVentaView(View):
 @login_required
 def eliminar_boleto(request, pk):
     """eliminar_boleto."""
-    manager = getattr(BoletoImportado, "all_objects", BoletoImportado.objects)
-    boleto = get_object_or_404(manager, pk=pk)
-
-    if not request.user.is_superuser and hasattr(request, "agencia"):
-        if boleto.agencia != request.agencia:
-            messages.error(request, _("Acceso Denegado."))
-            return redirect("core:boletos_importar")
+    agencia = getattr(request, "agencia", None)
+    boleto = get_object_tenant_or_404(BoletoImportado, agencia, pk=pk)
     try:
         try:
             if boleto.archivo_boleto:

@@ -61,7 +61,7 @@ class SabreParser(BaseTicketParser):
         es_remision = False
         if re.search(r"\b(?:EXCH|EXCHANGE|REEMISION|RE-ISSUE)\b", text, re.IGNORECASE):
             es_remision = True
-            logger.info("🎯 Detectado marcador de reemisión en Sabre.")
+            logger.info(" Detectado marcador de reemisión en Sabre.")
 
         # 2. Extraer datos básicos (Regex)
         # Extracción del nombre del pasajero con lógica robusta
@@ -293,7 +293,7 @@ class SabreParser(BaseTicketParser):
             try:
                 if float(str(fare_amount)) > float(str(total_amount)):
                     es_remision = True
-                    logger.info("🎯 Detectada remisión por montos en Sabre.")
+                    logger.info(" Detectada remisión por montos en Sabre.")
             except Exception as e:
                 logger.warning(f"No se pudo comparar montos para detectar remision: {e}")
 

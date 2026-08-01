@@ -14,17 +14,31 @@ class KIUParser(BaseTicketParser):
     def can_parse(self, text: str) -> bool:
         """Detecta si es un boleto KIU"""
         purified = self.purify_text_for_detection(text)
-        return (
+        if (
             "KIUSYS.COM" in purified
             or "PASSENGER ITINERARY RECEIPT" in purified
             or ("ISSUE AGENT/AGENTE EMISOR" in purified and "FROM/TO" in purified)
-        )
+        ):
+            return True
+        # Avianca/STC e-ticket receipt format
+        if (
+            "RECIBO DE BOLETO ELECTRÓNICO" in purified or "RECIBO DE BOLETO ELECTRONICO" in purified
+        ) and ("AVIANCA" in purified or "AEROVIAS DEL CONTINENTE" in purified):
+            return True
+        return False
 
     def parse(self, text: str, html_text: str = "") -> ParsedTicketData:
         """Parsea boleto KIU"""
 
         # 0. Limpieza PREVIA
         text = re.sub(r"<[^>]+>", " ", text)
+
+        # Detectar Avianca/STC receipt format
+        purified = self.purify_text_for_detection(text)
+        if (
+            "RECIBO DE BOLETO ELECTRÓNICO" in purified or "RECIBO DE BOLETO ELECTRONICO" in purified
+        ) and ("AVIANCA" in purified or "AEROVIAS DEL CONTINENTE" in purified):
+            return self._parse_avianca_receipt(text, html_text)
 
         # 1. Intentar parsear como líneas crudas primero
         raw_kiu_pattern = r"^\s*\d+\s+[A-Z0-9]{2}\d+\s+[A-Z]\s+\d{2}[A-Z]{3}"
@@ -174,6 +188,178 @@ class KIUParser(BaseTicketParser):
             raw_data={"ItinerarioFinalLimpio": text},
         )
 
+    def _parse_avianca_receipt(self, text: str, html_text: str = "") -> ParsedTicketData:
+        """Parsea el formato de recibo electrónico Avianca/STC."""
+        lines = text.splitlines()
+        dep_time = arr_time = None
+        for i, line in enumerate(lines):
+            if re.match(r"^\s*Hora\s*$", line, re.IGNORECASE):
+                if i + 1 < len(lines):
+                    time_val = lines[i + 1].strip()
+                    if re.match(r"^\d{2}:\d{2}$", time_val):
+                        if dep_time is None:
+                            dep_time = time_val
+                        else:
+                            arr_time = time_val
+
+        passenger_name = self._extract_passenger_name(text)
+        if passenger_name == "No encontrado":
+            m = re.search(
+                r"Preparado para\s+([A-ZÁÉÍÓÚÑ /,()\-.]+?)(?:\s*\[|$)",
+                text,
+                re.IGNORECASE | re.MULTILINE,
+            )
+            if m:
+                passenger_name = m.group(1).strip()
+
+        pnr = self.extract_field(
+            text,
+            [
+                r"CÓDIGO DE RESERVACIÓN\s*:?\s*([A-Z0-9]{6})",
+                r"CODIGO DE RESERVACION\s*:?\s*([A-Z0-9]{6})",
+                r"RESERVATION CODE\s*:?\s*([A-Z0-9]{6})",
+            ],
+        )
+        if pnr == "No encontrado":
+            pnr = self._extract_pnr(text)
+
+        ticket_number = self._extract_ticket_number(text)
+        issue_date = self._extract_issue_date(text)
+        # Extract document from [DOC] after passenger name
+        foid_match = re.search(r"\[(\d{6,10})\]", text)
+        foid = foid_match.group(1) if foid_match else "No encontrado"
+
+        airline_pnr = self.extract_field(
+            text,
+            [
+                r"Código de reservación de la aerolínea\s+([A-Z0-9]{6})",
+                r"CÓDIGO DE RESERVACIÓN DE LA AEROLÍNEA\s+([A-Z0-9]{6})",
+                r"CODIGO DE RESERVACION DE LA AEROLINEA\s+([A-Z0-9]{6})",
+            ],
+        )
+
+        # Extract flights from the Avianca receipt format
+        flights = []
+        in_flight_section = False
+        i = 0
+        lines_len = len(lines)
+        while i < lines_len:
+            line = lines[i]
+            ls = line.strip()
+            if (
+                "INFORMACION DE VUELO" in ls.upper()
+                or "INFORMACIÓN DE VUELO" in ls.upper()
+                or "FLIGHT INFORMATION" in ls.upper()
+            ):
+                in_flight_section = True
+                i += 1
+                continue
+            if not in_flight_section or not ls:
+                i += 1
+                continue
+            # Skip table headers
+            if ls.upper() in (
+                "FECHA",
+                "AEROLÍNEA",
+                "AEROLINEA",
+                "SALIDA",
+                "LLEGADA",
+                "OTRAS NOTAS",
+            ):
+                i += 1
+                continue
+
+            # Look for date line: "05 ago 26" or "05 AGO 26"
+            date_match = re.match(r"^(\d{1,2}\s+[A-Za-z]{3}\s+\d{2,4})$", ls)
+            if not date_match or i + 4 >= lines_len:
+                i += 1
+                continue
+
+            flight_date = date_match.group(1)
+
+            # Collect airline info (may span multiple lines until we hit a city with comma)
+            j = i + 1
+            while j < lines_len and not lines[j].strip():
+                j += 1
+            airline_parts = []
+            while j < lines_len and "," not in lines[j]:
+                airline_parts.append(lines[j].strip())
+                j += 1
+            full_airline_line = " ".join(airline_parts)
+
+            # Next non-empty line = origin city
+            while j < lines_len and not lines[j].strip():
+                j += 1
+            origin_line = lines[j].strip() if j < lines_len else ""
+
+            # Next non-empty line = destination city
+            j += 1
+            while j < lines_len and not lines[j].strip():
+                j += 1
+            dest_line = lines[j].strip() if j < lines_len else ""
+
+            # Parse airline code + flight number from anywhere in the collected parts
+            flight_match = re.search(r"\b([A-Z]{2})\s*(\d{3,4})\b", full_airline_line)
+            flight_code = flight_match.group(1) if flight_match else ""
+            flight_num = flight_match.group(2) if flight_match else ""
+
+            airline = self.normalize_airline_name(
+                raw_name=full_airline_line,
+                flight_code=flight_code + flight_num if flight_code and flight_num else "",
+            )
+
+            origen = re.sub(r",\s*.+$", "", origin_line).strip()
+            destino = re.sub(r",\s*.+$", "", dest_line).strip()
+
+            flights.append(
+                {
+                    "aerolinea": flight_code or airline,
+                    "numero_vuelo": flight_num,
+                    "fecha_salida": flight_date,
+                    "origen": {"ciudad": origen, "pais": None},
+                    "destino": {"ciudad": destino, "pais": None},
+                    "hora_salida": dep_time or "00:00",
+                    "hora_llegada": arr_time or "00:00",
+                    "aerolinea_nombre": airline,
+                    "clase": "",
+                    "equipaje": "N/A",
+                }
+            )
+            i = j
+
+        solo_nombre = (
+            self._get_solo_nombre(passenger_name)
+            if hasattr(self, "_get_solo_nombre")
+            else passenger_name.split("/")[-1].split()[0].title()
+            if "/" in passenger_name
+            else passenger_name.split()[0].title()
+        )
+
+        raw_data = {
+            "ItinerarioFinalLimpio": "\n".join(
+                f"{f.get('origen', {}).get('ciudad', '') if isinstance(f.get('origen'), dict) else f.get('origen', '')} -> {f.get('destino', {}).get('ciudad', '') if isinstance(f.get('destino'), dict) else f.get('destino', '')}"
+                for f in flights
+            ),
+            "SOLO_NOMBRE_PASAJERO": solo_nombre,
+            "airline_name": "AVIANCA",
+            "passenger_name": passenger_name,
+        }
+        if airline_pnr and airline_pnr != "No encontrado":
+            raw_data["airline_pnr"] = airline_pnr
+
+        return ParsedTicketData(
+            source_system="KIU",
+            pnr=pnr,
+            passenger_name=passenger_name,
+            ticket_number=ticket_number,
+            issue_date=issue_date,
+            passenger_document=foid,
+            flights=flights,
+            fares={},
+            agency={},
+            raw_data=raw_data,
+        )
+
     def _heuristic_extract_total_and_currency(self, text: str) -> tuple[Decimal, str]:
         """_heuristic_extract_total_and_currency."""
         # 1. Determinar Moneda Globalmente
@@ -262,7 +448,7 @@ class KIUParser(BaseTicketParser):
                 raw_iva = iva_match.group(1).replace(",", ".")  # Simple fix
                 iva_amt = Decimal(raw_iva)
             except Exception as e:
-                logger.warning(f"⚠️ Error al convertir IVA '{raw_iva}': {e}")
+                logger.warning(f" Error al convertir IVA '{raw_iva}': {e}")
 
         other_taxes = Decimal("0.00")
         if tax_amt >= iva_amt:
@@ -318,6 +504,9 @@ class KIUParser(BaseTicketParser):
                 r"BOOKING REFERENCE\s*[:\s]*([A-Z0-9]{6})",
                 r"PNR\s*[:\s]*([A-Z0-9]{6})",
                 r"LOCALIZADOR\s*[:\s]*([A-Z0-9]{6})",
+                r"C[OÓ]DIGO DE RESERVACI[OÓ]N\s*[:\s]*([A-Z0-9]{6})",
+                r"CODIGO DE RESERVACION\s*[:\s]*([A-Z0-9]{6})",
+                r"RESERVATION CODE\s*[:\s]*([A-Z0-9]{6})",
             ],
         )
 
@@ -649,22 +838,11 @@ class KIUParser(BaseTicketParser):
                     year = reference_date.year
                 dt_obj = dt.datetime.strptime(date_upper + str(year), "%d%b%Y")
 
-                # Ajuste de año nuevo
                 if reference_date:
-                    if (
-                        reference_date - dt_obj
-                    ).days > 300:  # Vuelo pasado (Ene) vs Emision Futuro (Dic)? No.
-                        # Si emision es Dic 2025 y vuelo Ene 2025 (parseado), vuelo real es 2026.
-                        # Diff = +330 dias aprox.
-                        pass  # No, dt_obj es Ene 2025. ref es Dic 2025.
-                        # dt_obj < ref.
-
-                    # Logica simple:
-                    # Si mes vuelo < mes emision Y diferencia > 6 meses, sumar 1 año.
-                    if (
-                        dt_obj.month < reference_date.month
-                        and (reference_date.month - dt_obj.month) > 6
-                    ):
+                    delta = (dt_obj - reference_date).days
+                    if delta > 180:
+                        dt_obj = dt_obj.replace(year=year - 1)
+                    elif delta < -180:
                         dt_obj = dt_obj.replace(year=year + 1)
 
             if dt_obj:

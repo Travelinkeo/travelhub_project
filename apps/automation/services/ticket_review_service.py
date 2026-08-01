@@ -191,7 +191,7 @@ class TicketReviewService:
                 venta = boleto.venta_asociada
 
             if isinstance(venta, Venta):
-                logger.info(f"Boleto {boleto.pk} reprocesado exitosamente → Venta {venta.pk}")
+                logger.info(f"Boleto {boleto.pk} reprocesado exitosamente  Venta {venta.pk}")
                 return ReviewResult(success=True, venta=venta)
 
             error_msg = boleto.log_parseo or "Error desconocido al reprocesar."

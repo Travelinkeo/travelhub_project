@@ -13,14 +13,7 @@ logger = logging.getLogger(__name__)
 
 def _get_admin_users(agencia):
     """Get admin users for an agency to receive in-app notifications"""
-    if not agencia:
-        return User.objects.filter(is_staff=True, is_active=True)[:5]
-    from apps.common.models import UserProfile
-
-    profiles = UserProfile.objects.filter(
-        agencia=agencia, role__in=["ADMIN", "GERENTE", "AGENTE"]
-    ).select_related("user")
-    return [p.user for p in profiles if p.user.is_active]
+    return User.objects.filter(is_staff=True, is_active=True)[:5]
 
 
 def notificar_confirmacion_venta(venta):

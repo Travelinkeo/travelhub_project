@@ -17,13 +17,38 @@ from apps.finance.models_stubs import TransaccionPago
 logger = logging.getLogger(__name__)
 
 
+class WebhookSignatureError(Exception):
+    """Error de verificación de firma con status code HTTP asociado."""
+
+    def __init__(self, message: str, status_code: int = status.HTTP_401_UNAUTHORIZED):
+        """__init__."""
+        self.message = message
+        self.status_code = status_code
+        super().__init__(message)
+
+
 class WebhookPagoBaseView(APIView):
-    """WebhookPagoBaseView."""
+    """WebhookPagoBaseView.
+
+    Fail-closed por defecto: requiere que la subclase implemente
+    verify_signature(). Cualquier webhook sin verificación de firma
+    es rechazado con 401.
+    """
 
     permission_classes = [AllowAny]
 
+    def verify_signature(self, request) -> None:
+        """Debe implementarse en cada subclase. Fail-closed: rechaza por defecto."""
+        raise WebhookSignatureError("Signature verification required")
+
     def post(self, request, *args, **kwargs):
         """post."""
+        try:
+            self.verify_signature(request)
+        except WebhookSignatureError as e:
+            logger.error(f"{self.__class__.__name__} webhook rechazado: {e.message}")
+            return Response({"error": e.message}, status=e.status_code)
+
         provider_data = request.data
 
         webhook_id = provider_data.get("bizId") or provider_data.get("id")
@@ -104,30 +129,28 @@ class BinanceWebhookView(WebhookPagoBaseView):
         """get_provider_key."""
         return "BIN"
 
-    def post(self, request, *args, **kwargs):
-        """post."""
+    def verify_signature(self, request) -> None:
+        """Valida firma HMAC-SHA256 de Binance."""
         webhook_secret = getattr(settings, "BINANCE_WEBHOOK_SECRET", None)
         if not webhook_secret:
             logger.error(
                 "Binance webhook: BINANCE_WEBHOOK_SECRET no configurado - rechazando (fail-closed)"
             )
-            return Response(
-                {"error": "Webhook not configured"}, status=status.HTTP_503_SERVICE_UNAVAILABLE
+            raise WebhookSignatureError(
+                "Webhook not configured", status_code=status.HTTP_503_SERVICE_UNAVAILABLE
             )
 
         signature = request.headers.get("X-Binance-Signature") or request.headers.get("X-Signature")
         if not signature:
             logger.error("Binance webhook sin firma HMAC")
-            return Response({"error": "Missing signature"}, status=status.HTTP_401_UNAUTHORIZED)
+            raise WebhookSignatureError("Missing signature")
 
         payload = request.body
         expected = hmac.new(webhook_secret.encode("utf-8"), payload, hashlib.sha256).hexdigest()
 
         if not hmac.compare_digest(signature, expected):
             logger.error("Binance webhook: firma HMAC invalida")
-            return Response({"error": "Invalid signature"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        return super().post(request, *args, **kwargs)
+            raise WebhookSignatureError("Invalid signature")
 
 
 class StripeWebhookView(WebhookPagoBaseView):
@@ -137,21 +160,21 @@ class StripeWebhookView(WebhookPagoBaseView):
         """get_provider_key."""
         return "STR"
 
-    def post(self, request, *args, **kwargs):
-        """post."""
+    def verify_signature(self, request) -> None:
+        """Valida firma Stripe-Signature."""
         webhook_secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", None)
         if not webhook_secret:
             logger.error(
                 "Stripe webhook: STRIPE_WEBHOOK_SECRET no configurado - rechazando (fail-closed)"
             )
-            return Response(
-                {"error": "Webhook not configured"}, status=status.HTTP_503_SERVICE_UNAVAILABLE
+            raise WebhookSignatureError(
+                "Webhook not configured", status_code=status.HTTP_503_SERVICE_UNAVAILABLE
             )
 
         sig_header = request.headers.get("Stripe-Signature", "")
         if not sig_header:
             logger.error("Stripe webhook sin Stripe-Signature header")
-            return Response({"error": "Missing signature"}, status=status.HTTP_401_UNAUTHORIZED)
+            raise WebhookSignatureError("Missing signature")
 
         try:
             import stripe
@@ -160,9 +183,7 @@ class StripeWebhookView(WebhookPagoBaseView):
             request.data["_stripe_verified_event"] = event
         except stripe.SignatureVerificationError:
             logger.error("Stripe webhook: firma invalida")
-            return Response({"error": "Invalid signature"}, status=status.HTTP_401_UNAUTHORIZED)
+            raise WebhookSignatureError("Invalid signature") from None
         except Exception as e:
             logger.error(f"Stripe webhook: error verificando firma: {e}")
-            return Response({"error": "Verification failed"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        return super().post(request, *args, **kwargs)
+            raise WebhookSignatureError("Verification failed") from e

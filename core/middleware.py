@@ -81,8 +81,23 @@ def system_context(reason: str = "unspecified", max_seconds: float = 60.0):
         with system_context(reason="retry_queued_boletos"):
             BoletoImportado.all_objects.filter(...).update(...)
     """
+    # 1. Requerir variable de entorno para permitir system_context (opt-in safety)
+    import os
+
+    if os.environ.get("ALLOW_SYSTEM_CONTEXT", "").lower() not in ("1", "true", "yes"):
+        audit_logger = logging.getLogger("core.security.audit")
+        audit_logger.critical(
+            f"🚨 [SYSTEM_CONTEXT BLOCKED] reason={reason!r} caller={_get_caller_info()} — "
+            "ALLOW_SYSTEM_CONTEXT env var no está configurada. "
+            "system_context() SOLO permitido con ALLOW_SYSTEM_CONTEXT=1"
+        )
+        raise PermissionError(
+            "system_context() requiere ALLOW_SYSTEM_CONTEXT=1 en variables de entorno. "
+            "Esto es una medida de seguridad para evitar bypasses accidentales de multi-tenancy."
+        )
+
     audit_logger = logging.getLogger("core.security.audit")
-    audit_logger.warning(f"🔓 [SYSTEM_CONTEXT OPEN] reason={reason!r} caller={_get_caller_info()}")
+    audit_logger.warning(f" [SYSTEM_CONTEXT OPEN] reason={reason!r} caller={_get_caller_info()}")
     token = system_context_var.set(True)
     start = time.monotonic()
     try:
@@ -100,6 +115,23 @@ def system_context(reason: str = "unspecified", max_seconds: float = 60.0):
             audit_logger.info(
                 f"🔒 [SYSTEM_CONTEXT CLOSED] reason={reason!r} elapsed={elapsed:.2f}s"
             )
+
+        # 2. Enviar alerta a Sentry si está disponible (auditoría de uso)
+        try:
+            import sentry_sdk
+
+            with sentry_sdk.push_scope() as scope:
+                scope.set_tag("component", "system_context")
+                scope.set_tag("reason", reason)
+                scope.set_extra("elapsed_seconds", elapsed)
+                scope.set_extra("caller", _get_caller_info())
+                sentry_sdk.capture_message(
+                    f"system_context used: {reason} ({elapsed:.2f}s)",
+                    level="warning",
+                )
+        except Exception:  # noqa: S110
+            # Sentry no disponible, silencioso
+            pass
 
 
 def _get_caller_info() -> str:
@@ -368,6 +400,14 @@ class SecurityHeadersMiddleware:
 
         response = self.get_response(request)
 
+        # Skip CSP injection for Evolution API Proxy to allow its own UI to load without strict-dynamic blocks
+        if request.path_info.startswith("/system/whatsapp/qr/"):
+            if "X-Frame-Options" in response:
+                del response["X-Frame-Options"]
+            if "Content-Security-Policy" in response:
+                del response["Content-Security-Policy"]
+            return response
+
         try:
             static_domain = getattr(dj_settings, "AWS_S3_CUSTOM_DOMAIN", "")
             static_origin = f"https://{static_domain}" if static_domain else ""
@@ -423,7 +463,7 @@ class SecurityHeadersMiddleware:
                                     csp_dict[directive] = f"{existing} {extra}"
                                 elif isinstance(values, str) and values:
                                     csp_dict[directive] = f"{existing} {values}"
-                            elif isinstance(values, (list, str)):
+                            elif isinstance(values, list | str):
                                 val = " ".join(values) if isinstance(values, list) else values
                                 csp_dict[directive] = val
                 except Exception:

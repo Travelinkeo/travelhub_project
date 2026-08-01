@@ -477,18 +477,18 @@ class SmartReconciliationService:
         """
         from django.apps import apps
 
-        PlanContable = apps.get_model("contabilidad", "PlanContable")
+        CuentaContable = apps.get_model("contabilidad", "CuentaContable")
 
         codigo = agencia.configuracion_contable.get(config_key, fallback_codigo)
 
         try:
-            return PlanContable.objects.get(codigo_cuenta=codigo)
-        except PlanContable.DoesNotExist:
+            return CuentaContable.objects.get(codigo=codigo)
+        except CuentaContable.DoesNotExist:
             logger.warning(
                 f"Cuenta {codigo} (key: {config_key}) no encontrada para agencia {agencia.nombre}. Usando fallback por tipo {tipo_cuenta_fallback}."
             )
-            cuenta = PlanContable.objects.filter(
-                tipo_cuenta=tipo_cuenta_fallback, acepta_movimientos=True
+            cuenta = CuentaContable.objects.filter(
+                tipo=tipo_cuenta_fallback, acepta_movimientos=True
             ).first()
             if not cuenta:
                 logger.error(
@@ -507,8 +507,8 @@ class SmartReconciliationService:
         from django.apps import apps
 
         AsientoContable = apps.get_model("contabilidad", "AsientoContable")
-        DetalleAsiento = apps.get_model("contabilidad", "DetalleAsiento")
-        from apps.finance.models_stubs import Moneda
+        MovimientoContable = apps.get_model("contabilidad", "MovimientoContable")
+        CuentaContable = apps.get_model("contabilidad", "CuentaContable")
 
         if (
             conciliacion.estado != ConciliacionBoleto.EstadosCruce.DISCREPANCIA
@@ -518,11 +518,6 @@ class SmartReconciliationService:
 
         try:
             agencia = conciliacion.reporte.agencia
-            # Placeholder de moneda. Asumimos USD para la lógica base.
-            moneda_usd = Moneda.objects.filter(codigo_iso="USD").first()
-            if not moneda_usd:
-                logger.warning("No se encontró la moneda USD para el asiento de ajuste.")
-                return
 
             tipo = (
                 "Pérdida (Sobrecobro Proveedor)"
@@ -547,23 +542,20 @@ class SmartReconciliationService:
             tasa_bcv = ContabilidadService.obtener_tasa_bcv(timezone.now().date())
 
             asiento = AsientoContable.objects.create(
-                descripcion_general=f"Ajuste automático de Reconciliación. Boleto: {boleto}. {tipo}.",
+                glosa=f"Ajuste automático de Reconciliación. Boleto: {boleto}. {tipo}.",
                 tipo_asiento=AsientoContable.TipoAsiento.AJUSTE,
                 estado=AsientoContable.EstadoAsiento.BORRADOR,
-                moneda=moneda_usd,
-                referencia_documento=f"REC-{conciliacion.reporte.id_reporte.hex[:6]}",
-                tasa_cambio_aplicada=tasa_bcv,
             )
 
             # Obtener cuentas dinámicamente
             cuenta_proveedor = cls._get_cuenta_contable(
-                agencia, "CUENTA_PROVEEDOR_USD", "2.1.01.02", "PA"
+                agencia, "CUENTA_PROVEEDOR_USD", "2.1.01.02", CuentaContable.TipoCuenta.PASIVO
             )
 
             if conciliacion.diferencia_total > 0:
                 # PÉRDIDA: Debit Gasto, Credit Proveedor (le debemos más al proveedor)
                 cuenta_ajuste = cls._get_cuenta_contable(
-                    agencia, "CUENTA_GASTO_DEFAULT", "6.1.01", "GA"
+                    agencia, "CUENTA_GASTO_DEFAULT", "6.1.01", CuentaContable.TipoCuenta.GASTO
                 )
 
                 if not cuenta_ajuste or not cuenta_proveedor:
@@ -572,27 +564,25 @@ class SmartReconciliationService:
                     )
 
                 # Línea 1: DEUDORA (Gasto)
-                DetalleAsiento.objects.create(
+                MovimientoContable.objects.create(
                     asiento=asiento,
-                    linea=1,
-                    cuenta_contable=cuenta_ajuste,
-                    debe=monto_abs,
-                    debe_bsd=monto_abs * tasa_bcv,
-                    descripcion_linea=f"Gasto por discrepancia en boleto {boleto}",
+                    cuenta=cuenta_ajuste,
+                    tipo=MovimientoContable.TipoMovimiento.DEBITO,
+                    monto_usd=monto_abs,
+                    monto_ves=monto_abs * tasa_bcv,
                 )
                 # Línea 2: ACREEDORA (Proveedor)
-                DetalleAsiento.objects.create(
+                MovimientoContable.objects.create(
                     asiento=asiento,
-                    linea=2,
-                    cuenta_contable=cuenta_proveedor,
-                    haber=monto_abs,
-                    haber_bsd=monto_abs * tasa_bcv,
-                    descripcion_linea="Ajuste cuenta por pagar (Sobrecobro)",
+                    cuenta=cuenta_proveedor,
+                    tipo=MovimientoContable.TipoMovimiento.CREDITO,
+                    monto_usd=monto_abs,
+                    monto_ves=monto_abs * tasa_bcv,
                 )
             else:
                 # GANANCIA: Debit Proveedor (le debemos menos), Credit Ingreso
                 cuenta_ajuste = cls._get_cuenta_contable(
-                    agencia, "CUENTA_INGRESO_DEFAULT", "4.1.01", "IN"
+                    agencia, "CUENTA_INGRESO_DEFAULT", "4.1.01", CuentaContable.TipoCuenta.INGRESO
                 )
 
                 if not cuenta_ajuste or not cuenta_proveedor:
@@ -601,31 +591,27 @@ class SmartReconciliationService:
                     )
 
                 # Línea 1: DEUDORA (Proveedor)
-                DetalleAsiento.objects.create(
+                MovimientoContable.objects.create(
                     asiento=asiento,
-                    linea=1,
-                    cuenta_contable=cuenta_proveedor,
-                    debe=monto_abs,
-                    debe_bsd=monto_abs * tasa_bcv,
-                    descripcion_linea="Ajuste cuenta por pagar (Ahorro)",
+                    cuenta=cuenta_proveedor,
+                    tipo=MovimientoContable.TipoMovimiento.DEBITO,
+                    monto_usd=monto_abs,
+                    monto_ves=monto_abs * tasa_bcv,
                 )
                 # Línea 2: ACREEDORA (Ingreso)
-                DetalleAsiento.objects.create(
+                MovimientoContable.objects.create(
                     asiento=asiento,
-                    linea=2,
-                    cuenta_contable=cuenta_ajuste,
-                    haber=monto_abs,
-                    haber_bsd=monto_abs * tasa_bcv,
-                    descripcion_linea=f"Ingreso por discrepancia a favor en boleto {boleto}",
+                    cuenta=cuenta_ajuste,
+                    tipo=MovimientoContable.TipoMovimiento.CREDITO,
+                    monto_usd=monto_abs,
+                    monto_ves=monto_abs * tasa_bcv,
                 )
 
-            asiento.calcular_totales()
-
-            conciliacion.sugerencia_asiento = asiento
-            conciliacion.save(update_fields=["sugerencia_asiento"])
+            conciliacion.sugerencia_asiento_id = asiento.pk
+            conciliacion.save(update_fields=["sugerencia_asiento_id"])
 
             logger.info(
-                f"Asiento borrador {asiento.id_asiento} (con detalles) propuesto para la Conciliación {conciliacion.id_conciliacion}"
+                f"Asiento borrador {asiento.pk} (con movimientos) propuesto para la Conciliación {conciliacion.id_conciliacion}"
             )
 
         except Exception as e:

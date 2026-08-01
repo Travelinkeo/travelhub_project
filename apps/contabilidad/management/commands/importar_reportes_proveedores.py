@@ -84,7 +84,7 @@ class Command(BaseCommand):
                             if fn and fn.lower().endswith(".pdf"):
                                 pdf_bytes = part.get_payload(decode=True)
                                 if pdf_bytes:
-                                    reporte = SupplierReportProcessorService.procesar_pdf_reporte(
+                                    reporte = SupplierReportProcessorService.process_pdf_report(
                                         pdf_bytes=pdf_bytes,
                                         filename=fn,
                                         subject=subject,
@@ -110,7 +110,7 @@ class Command(BaseCommand):
                         with open(filepath, "rb") as f:
                             pdf_bytes = f.read()
 
-                        reporte = SupplierReportProcessorService.procesar_pdf_reporte(
+                        reporte = SupplierReportProcessorService.process_pdf_report(
                             pdf_bytes=pdf_bytes,
                             filename=filename,
                             subject=filename,

@@ -165,7 +165,9 @@ class AnalyticsService:
         from django.apps import apps
 
         BoletoImportado = apps.get_model("bookings", "BoletoImportado")
-        qs = BoletoImportado.objects.filter(agencia=agencia, estado_parseo="COM")
+        qs = BoletoImportado.objects.filter(
+            agencia=agencia, estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO
+        )
 
         if fecha_inicio:
             qs = qs.filter(fecha_emision_boleto__gte=fecha_inicio)
@@ -313,7 +315,9 @@ class AnalyticsService:
 
             # 3. Listado Detallado (Aquí exportamos todos, no solo los últimos 100)
             # Re-calculamos el QS para tener todos los datos sin el slice de 100
-            qs = BoletoImportado.objects.filter(agencia=agencia, estado_parseo="COM")
+            qs = BoletoImportado.objects.filter(
+                agencia=agencia, estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO
+            )
             if fecha_inicio:
                 qs = qs.filter(fecha_emision_boleto__gte=fecha_inicio)
             if fecha_fin:
@@ -353,7 +357,9 @@ class AnalyticsService:
         from django.apps import apps
 
         BoletoImportado = apps.get_model("bookings", "BoletoImportado")
-        qs = BoletoImportado.objects.filter(agencia=agencia, estado_parseo="COM")
+        qs = BoletoImportado.objects.filter(
+            agencia=agencia, estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO
+        )
 
         if fecha_inicio:
             qs = qs.filter(fecha_emision_boleto__gte=fecha_inicio)

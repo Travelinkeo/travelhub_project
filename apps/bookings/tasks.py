@@ -1,3 +1,4 @@
+import json
 import logging
 
 import requests
@@ -281,7 +282,7 @@ def parsear_boleto_individual(boleto_id, **kwargs):
     try:
         from apps.automation.services.ticket_parser_service import TicketParserService
 
-        logger.info(f"🧩 Iniciando tarea de parseo para Boleto {boleto_id} (Params: {kwargs})")
+        logger.info(f" Iniciando tarea de parseo para Boleto {boleto_id} (Params: {kwargs})")
         service = TicketParserService()
         resultado = service.procesar_boleto(
             boleto_id,
@@ -289,13 +290,13 @@ def parsear_boleto_individual(boleto_id, **kwargs):
             bypass_cache=kwargs.get("bypass_cache", False),
         )
         if resultado:
-            logger.info(f"✅ Tarea de parseo completada para Boleto {boleto_id}")
+            logger.info(f" Tarea de parseo completada para Boleto {boleto_id}")
             return f"Boleto {boleto_id} procesado exitosamente."
         else:
-            logger.warning(f"⚠️ Tarea de parseo finalizó sin resultados para Boleto {boleto_id}")
+            logger.warning(f" Tarea de parseo finalizó sin resultados para Boleto {boleto_id}")
             return f"Fallo al procesar Boleto {boleto_id}"
     except Exception as e:
-        logger.error(f"❌ Error en parsear_boleto_individual: {e}")
+        logger.error(f" Error en parsear_boleto_individual: {e}")
         return f"Error: {e}"
 
 
@@ -321,7 +322,9 @@ def retry_queued_boletos(agencia_id=None):
     total_reencolados = 0
     for agencia in agencias:
         with agency_context(agencia):
-            boletos_en_espera = BoletoImportado.objects.filter(estado_parseo="QUE")
+            boletos_en_espera = BoletoImportado.objects.filter(
+                estado_parseo=BoletoImportado.EstadoParseo.COLA_LLENA
+            )
             for boleto in boletos_en_espera.iterator(chunk_size=200):
                 task = safe_delay(parsear_boleto_individual, boleto.id_boleto_importado)
                 if task:
@@ -356,7 +359,7 @@ def send_ticket_notification(boleto_id, **kwargs):
             id_boleto_importado=boleto_id
         )
         if hasattr(boleto, "notificacion_enviada") and boleto.notificacion_enviada:
-            logger.info(f"⏭️ Notificación ya enviada para Boleto {boleto_id}. Omitiendo.")
+            logger.info(f" Notificación ya enviada para Boleto {boleto_id}. Omitiendo.")
             return f"Notificación ya enviada para boleto {boleto_id}."
     except BoletoImportado.DoesNotExist:
         return f"Boleto con ID {boleto_id} no encontrado."
@@ -430,7 +433,6 @@ def send_ticket_notification(boleto_id, **kwargs):
 )
 def check_upcoming_flights():
     """check_upcoming_flights."""
-    import json
     from datetime import timedelta
 
     from django.conf import settings
@@ -444,7 +446,7 @@ def check_upcoming_flights():
     from core.middleware import agency_context
     from core.models.agencia import Agencia
 
-    logger.info("🔍 Buscando vuelos próximos para Check-in...")
+    logger.info(" Buscando vuelos próximos para Check-in...")
 
     now = timezone.now()
     tomorrow_start = now + timedelta(hours=23)
@@ -548,8 +550,6 @@ def enviar_recordatorios_vuelo_task():
                     try:
                         datos = boleto.datos_parseados
                         if isinstance(datos, str):
-                            import json
-
                             datos = json.loads(datos)
 
                         normalized = datos.get("normalized", datos)
@@ -617,15 +617,15 @@ def generar_pdf_ticket_async_task(boleto_id, **kwargs):
     from apps.automation.parsers.pdf_generation import PdfGenerationService
     from apps.bookings.models import BoletoImportado
 
-    logger.info(f"🚀 Iniciando tarea asíncrona para generar PDF de Boleto {boleto_id}")
+    logger.info(f" Iniciando tarea asíncrona para generar PDF de Boleto {boleto_id}")
     try:
         boleto = BoletoImportado.objects.select_related("agencia").get(pk=boleto_id)
     except BoletoImportado.DoesNotExist:
-        logger.error(f"❌ Boleto {boleto_id} no encontrado para generar PDF.")
+        logger.error(f" Boleto {boleto_id} no encontrado para generar PDF.")
         return f"Boleto {boleto_id} no encontrado."
 
     if boleto.archivo_pdf_generado:
-        logger.info(f"⏭️ El boleto {boleto_id} ya tiene PDF generado. Omitiendo.")
+        logger.info(f" El boleto {boleto_id} ya tiene PDF generado. Omitiendo.")
         return f"PDF ya generado para boleto {boleto_id}."
 
     if not boleto.datos_parseados:
@@ -635,18 +635,18 @@ def generar_pdf_ticket_async_task(boleto_id, **kwargs):
         return f"Sin datos parseados para boleto {boleto_id}."
 
     try:
-        logger.info(f"📄 Generando TKT PDF asíncrono para Boleto {boleto.pk}")
+        logger.info(f" Generando TKT PDF asíncrono para Boleto {boleto.pk}")
         pdf_start = time.time()
         datos_norm = DataNormalizationService.normalize_ticket_data(boleto.datos_parseados)
         pdf_bytes, fname = PdfGenerationService.generate_ticket(
             datos_norm, agencia_obj=boleto.agencia, boleto_obj=boleto
         )
         pdf_duration = time.time() - pdf_start
-        logger.info(f"⏱️ [PROFILING] PDF Generation duration (asíncrono): {pdf_duration:.2f}s")
+        logger.info(f" [PROFILING] PDF Generation duration (asíncrono): {pdf_duration:.2f}s")
 
         if pdf_bytes and len(pdf_bytes) > 100:
             boleto.archivo_pdf_generado.save(fname, ContentFile(pdf_bytes), save=True)
-            logger.info(f"✅ PDF guardado (asíncrono): {fname} ({len(pdf_bytes)} bytes)")
+            logger.info(f" PDF guardado (asíncrono): {fname} ({len(pdf_bytes)} bytes)")
 
             if boleto.estado_parseo == BoletoImportado.EstadoParseo.ERROR_PARSEO:
                 es_parcial = bool(datos_norm.get("_requiere_revision", False))
@@ -697,7 +697,7 @@ def retry_queued_boletos_task():
     from core.api import parsear_boleto_individual
     from core.middleware import system_context
 
-    logger.info("⏳ Iniciando reintento de boletos encolados en estado QUE (Cola Llena)...")
+    logger.info(" Iniciando reintento de boletos encolados en estado QUE (Cola Llena)...")
 
     # 🔓 system_context obligatorio con motivo para bypassear RLS
     with system_context(reason="retry_queued_boletos"):
@@ -707,7 +707,7 @@ def retry_queued_boletos_task():
 
         count = 0
         for boleto in boletos_stuck:
-            logger.info(f"🔄 Re-encolando boleto stuck ID={boleto.pk} (Agencia: {boleto.agencia})")
+            logger.info(f" Re-encolando boleto stuck ID={boleto.pk} (Agencia: {boleto.agencia})")
             # Cambiar a PRO para que no sea seleccionado de nuevo en la siguiente iteración
             BoletoImportado.all_objects.filter(pk=boleto.pk).update(
                 estado_parseo=BoletoImportado.EstadoParseo.EN_PROCESO,
@@ -717,8 +717,8 @@ def retry_queued_boletos_task():
             count += 1
 
         if count > 0:
-            logger.info(f"✅ Se re-encolaron {count} boletos que estaban en cola de espera.")
+            logger.info(f" Se re-encolaron {count} boletos que estaban en cola de espera.")
         else:
-            logger.info("ℹ️ No se encontraron boletos en estado QUE (Cola Llena).")
+            logger.info(" No se encontraron boletos en estado QUE (Cola Llena).")
 
         return count

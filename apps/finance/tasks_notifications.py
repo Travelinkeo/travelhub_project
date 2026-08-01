@@ -48,9 +48,9 @@ def enviar_reporte_gerencia_task(self, reporte_id, user_id, email_destino, agenc
                 agencia=user.agencia, email_destino=email_destino, pdf_bytes=pdf_bytes, kpis=stats
             )
 
-            logger.info(f"📬 Reporte de Recon. {reporte_id} enviado exitosamente a {email_destino}")
+            logger.info(f" Reporte de Recon. {reporte_id} enviado exitosamente a {email_destino}")
             return f"Enviado a {email_destino}"
 
     except Exception as exc:
-        logger.error(f"❌ Fallo enviando reporte {reporte_id} a {email_destino}: {exc}")
+        logger.error(f" Fallo enviando reporte {reporte_id} a {email_destino}: {exc}")
         raise self.retry(exc=exc) from exc

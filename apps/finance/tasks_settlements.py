@@ -32,7 +32,7 @@ def generar_liquidaciones_mensuales_task(anio=None, mes=None, agencia_id=None):
         else:
             mes = referencia.month - 1
 
-    logger.info(f"🏁 Iniciando cierre de mes para agentes: Periodo {mes}/{anio}")
+    logger.info(f" Iniciando cierre de mes para agentes: Periodo {mes}/{anio}")
 
     if agencia_id:
         agencias = [Agencia.objects.get(pk=agencia_id)]
@@ -108,7 +108,7 @@ Puedes revisar el detalle descargando el PDF desde tu portal de agente.
 Gracias por tu excelente desempeño en {agencia.nombre}.
 """
                             send_mail(asunto, mensaje, settings.DEFAULT_FROM_EMAIL, [agente.email])
-                            logger.info(f"📧 Notificación enviada a {agente.email}")
+                            logger.info(f" Notificación enviada a {agente.email}")
 
                         except Exception as e:
                             logger.error(f"Fallo al enviar correo a {agente.email}: {e}")
@@ -118,5 +118,5 @@ Gracias por tu excelente desempeño en {agencia.nombre}.
                 except Exception as e:
                     logger.exception(f"Error liquidando al agente {agente_id}: {e}")
 
-    logger.info(f"✅ Proceso completo: {liquidaciones_creadas} agentes liquidados exitosamente.")
+    logger.info(f" Proceso completo: {liquidaciones_creadas} agentes liquidados exitosamente.")
     return True

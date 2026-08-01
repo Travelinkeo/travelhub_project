@@ -58,7 +58,7 @@ def send_ticket_to_client(venta_id, pdf_content, filename="boleto.pdf"):
                 ],
             }
             resend.Emails.send(params)
-            logger.info(f"✨ Boleto enviado vía Resend API a {cliente.email}")
+            logger.info(f" Boleto enviado vía Resend API a {cliente.email}")
         else:
             # Fallback a Django SMTP (que también puede estar configurado con Resend)
             email_msg = EmailMessage(
@@ -69,7 +69,7 @@ def send_ticket_to_client(venta_id, pdf_content, filename="boleto.pdf"):
             )
             email_msg.attach(filename, pdf_content, "application/pdf")
             email_msg.send(fail_silently=False)
-            logger.info(f"📧 Boleto enviado vía Django SMTP a {cliente.email}")
+            logger.info(f" Boleto enviado vía Django SMTP a {cliente.email}")
 
         return True
 

@@ -250,13 +250,6 @@ class ProductoTerrestre(AgenciaMixin, SoftDeleteModel, models.Model):
         PAQUETE = "PACK", _("Paquete Dinámico")
         SEGURO = "INS", _("Seguro de Viaje")
 
-    agencia = models.ForeignKey(
-        "core.Agencia",
-        on_delete=models.CASCADE,
-        related_name="productos_terrestres",
-        null=True,
-        blank=True,
-    )
     tipo_servicio = models.CharField(
         _("Tipo de Servicio"),
         max_length=10,

@@ -129,7 +129,7 @@ class UniversalAIParser:
                     import fitz
                     from PIL import Image
 
-                    logger.info(f"👁️ Usando Visión para PDF: {pdf_path}")
+                    logger.info(f" Usando Visión para PDF: {pdf_path}")
                     with fitz.open(pdf_path) as pdf:
                         if len(pdf) > 0:
                             pix = pdf[0].get_pixmap(matrix=fitz.Matrix(2, 2))
@@ -167,7 +167,7 @@ class UniversalAIParser:
                 }
             except Exception as e_api:
                 # 🚨 FALLO CRÍTICO DE API (Timeout, 500, Rate Limit)
-                logger.error(f"❌ Gemini API Failure (Switching to Fallback): {str(e_api)}")
+                logger.error(f" Gemini API Failure (Switching to Fallback): {str(e_api)}")
                 return {
                     "error": f"API_FAILURE: {str(e_api)}",
                     "requires_manual_review": True,
@@ -187,7 +187,7 @@ class UniversalAIParser:
             res_dict = get_dict(res)
 
             if res_dict and "error" in res_dict:
-                logger.warning(f"⚠️ Gemini returned logic error: {res_dict.get('error')}")
+                logger.warning(f" Gemini returned logic error: {res_dict.get('error')}")
                 res_dict["requires_manual_review"] = True
                 res_dict["status_detail"] = "Parseo Inteligente falló y requiere revisión manual"
                 return res_dict
@@ -199,7 +199,7 @@ class UniversalAIParser:
             )
 
             if itinerario_vacio and "error" not in res_dict:
-                logger.warning("🔄 Itinerario vacío detectado. Ejecutando RETRY dirigido...")
+                logger.warning(" Itinerario vacío detectado. Ejecutando RETRY dirigido...")
                 retry_prompt = (
                     f"RE-ANALIZA EL SIGUIENTE DOCUMENTO. El intento anterior no encontró vuelos.\n"
                     f"ENFÓCATE EXCLUSIVAMENTE EN ENCONTRAR SEGMENTOS DE VUELO, NÚMEROS DE VUELO Y CIUDADES.\n"
@@ -300,7 +300,7 @@ class UniversalAIParser:
             return final_result
 
         except Exception as top_level_e:
-            logger.error(f"🔥 Error Crítico en UniversalAIParser.parse: {str(top_level_e)}")
+            logger.error(f" Error Crítico en UniversalAIParser.parse: {str(top_level_e)}")
             logger.error(traceback.format_exc())
             return {"error": f"Error interno en UniversalAIParser: {str(top_level_e)}"}
 

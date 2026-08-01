@@ -70,7 +70,7 @@ class CopaParser(BaseTicketParser):
             decoded = decoded.replace("\u0026amp;", "&")
             return decoded
         except Exception as e:
-            logger.warning(f"⚠️ Error decodificando quoted-printable: {e}")
+            logger.warning(f" Error decodificando quoted-printable: {e}")
             return text
 
     def _get_html_soup(self, text: str, html_text: str = "") -> BeautifulSoup:

@@ -128,7 +128,7 @@ class MigrationCheckerService:
         cached_result = cache.get(cache_key)
 
         if cached_result:
-            logger.info(f"✅ Usando resultado en cache para {nationality_code} → {destino}")
+            logger.info(f" Usando resultado en cache para {nationality_code}  {destino}")
             validation_result = MigrationValidationResult(**cached_result)
             used_ai = False
         else:
@@ -136,14 +136,14 @@ class MigrationCheckerService:
             local_rule = MIGRATION_RULES_DB.get((nationality_code, destino))
 
             if local_rule and not transitos:
-                logger.info(f"📚 Usando regla local para {nationality_code} → {destino}")
+                logger.info(f" Usando regla local para {nationality_code}  {destino}")
                 validation_result = self._build_result_from_local_rule(
                     local_rule, passport_validity_ok
                 )
                 used_ai = False
             else:
                 # Consultar Gemini AI
-                logger.info(f"🤖 Consultando Gemini AI para {nationality_code} → {destino}")
+                logger.info(f" Consultando Gemini AI para {nationality_code}  {destino}")
                 validation_result = self.gemini_validator.validate_visa_requirements(
                     nationality=nationality_code,
                     destination=destino,

@@ -236,6 +236,32 @@ class AgenciaMixin(models.Model):
     class Meta:
         abstract = True
 
+
+class AgenciaMixinStubs(AgenciaMixin):
+    """
+    Variante de AgenciaMixin para modelos unmanaged (stubs) que mapean tablas
+    legacy donde la FK ``agencia`` está declarada con ``on_delete=DO_NOTHING``
+    y la columna ``agencia_id`` ya existe en la tabla (sin migraciones Django).
+
+    Hereda toda la lógica de AgenciaMixin (AgenciaManager + save() + delete())
+    pero usa ``DO_NOTHING`` para no romper las constraints existentes en BD.
+
+    USO: Solo para ``apps/finance/models_stubs.py`` y similares donde Django
+    no gestiona el esquema (managed=False).
+    """
+
+    agencia = models.ForeignKey(
+        "core.Agencia",
+        on_delete=models.DO_NOTHING,
+        related_name="%(class)s_stub_items",
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+
+    class Meta:
+        abstract = True
+
     def save(self, *args, **kwargs):
         """
         Asegura que la agencia se asigne automáticamente al guardar si no está presente.

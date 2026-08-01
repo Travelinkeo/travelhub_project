@@ -1,7 +1,7 @@
 {% load static %}
 
 <div class="flex flex-col items-center justify-center space-y-6 p-8 bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 transition-all duration-500 animate-in fade-in zoom-in duration-700">
-    
+
     <!-- Header with Modern Badge -->
     <div class="flex flex-col items-center space-y-2">
         <h3 class="text-xl font-bold text-gray-800 dark:text-white tracking-tight">WhatsApp Business</h3>
@@ -35,19 +35,16 @@
                 <p class="text-green-800 dark:text-green-300 font-medium text-lg leading-tight">Sesión vinculada correctamente</p>
                 <button hx-post="{% url 'bookings:whatsapp_qr' %}?action=logout" hx-target="#whatsapp-qr-container" class="mt-6 text-sm text-red-500 hover:text-red-700 font-semibold transition-colors duration-200 underline decoration-2 underline-offset-4">Desconectar dispositivo</button>
             </div>
-        {% elif qr_code and qr_code|slice:":4" == "http" %}
-            <div class="bg-white p-4 rounded-2xl shadow-2xl border-4 border-gray-50 dark:border-gray-700 ring-1 ring-black/5">
-                <img src="{{ qr_code }}" alt="WhatsApp QR Code" class="w-64 h-64 rounded-lg">
-                <div class="mt-4 text-center">
-                    <p class="text-sm text-gray-500 font-medium animate-pulse">Escanea desde tu telefono</p>
-                </div>
-            </div>
         {% elif qr_code %}
-            <div class="bg-white p-4 rounded-2xl shadow-2xl border-4 border-gray-50 dark:border-gray-700 ring-1 ring-black/5">
-                <img src="{{ qr_code }}" alt="WhatsApp QR Code" class="w-64 h-64 rounded-lg">
-                <div class="mt-4 text-center">
-                    <p class="text-sm text-gray-500 font-medium animate-pulse">Escanea desde tu telefono</p>
-                </div>
+            <div class="bg-white p-2 rounded-2xl shadow-2xl border-4 border-gray-50 dark:border-gray-700 ring-1 ring-black/5 overflow-hidden relative" style="width: 360px; height: 360px;">
+                {% if "data:image" in qr_code %}
+                    <img src="{{ qr_code }}" class="w-full h-full object-contain" alt="QR Code WhatsApp">
+                {% else %}
+                    <iframe src="{{ qr_code }}" class="w-full h-full border-0" scrolling="no" loading="lazy" data-iframe-qr="true" title="WhatsApp QR"></iframe>
+                {% endif %}
+            </div>
+            <div class="mt-4 text-center">
+                <p class="text-sm text-gray-500 font-medium animate-pulse">Escanea desde tu telefono</p>
             </div>
         {% else %}
             <div class="w-64 h-64 flex flex-col items-center justify-center rounded-2xl bg-gray-50 dark:bg-gray-900/50 border-2 border-dashed border-gray-200 dark:border-gray-700 p-8 text-center">
@@ -68,10 +65,10 @@
         </ol>
     </div>
 
-    <!-- Polling Trigger -->
-    <div hx-get="{% url 'bookings:whatsapp_qr' %}" 
-         hx-trigger="{% if estado == 'connected' %}every 60s{% else %}every 5s{% endif %}" 
-         hx-target="#whatsapp-qr-container" 
+    <!-- Polling Trigger: menos frecuente si es iframe (Manager UI se actualiza solo) -->
+    <div hx-get="{% url 'bookings:whatsapp_qr' %}"
+         hx-trigger="{% if estado == 'connected' %}every 60s{% elif qr_code and 'data:image' not in qr_code %}every 30s{% else %}every 30s{% endif %}"
+         hx-target="#whatsapp-qr-container"
          hx-swap="innerHTML"
          class="hidden"></div>
 </div>

@@ -1,9 +1,12 @@
 # core/cache.py
 import hashlib
 import json
+import logging
 from functools import wraps
 
 from django.core.cache import cache
+
+logger = logging.getLogger(__name__)
 
 
 def cache_api_response(timeout=300, key_prefix="api"):
@@ -61,14 +64,22 @@ def invalidate_cache_pattern(pattern):
     """
     Invalida todas las claves de caché que coincidan con un patrón.
     Requiere Redis como backend.
+    Usa SCAN en lugar de KEYS para no bloquear Redis en producción.
     """
     try:
         from django_redis import get_redis_connection
 
         conn = get_redis_connection("default")
-        keys = conn.keys(f"*{pattern}*")
-        if keys:
-            conn.delete(*keys)
+        cursor = 0
+        deleted = 0
+        while True:
+            cursor, keys = conn.scan(cursor, match=f"*{pattern}*", count=100)
+            if keys:
+                conn.delete(*keys)
+                deleted += len(keys)
+            if cursor == 0:
+                break
+        logger.info(f"Invalidated {deleted} cache keys matching pattern: {pattern}")
     except ImportError:
         # Si no está Redis, limpiar todo el caché
         cache.clear()

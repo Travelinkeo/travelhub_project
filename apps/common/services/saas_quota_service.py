@@ -6,6 +6,17 @@ from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
+# Lua script for atomic increment with TTL
+_INCR_WITH_TTL_SCRIPT = """
+local key = KEYS[1]
+local ttl = tonumber(ARGV[1])
+local current = redis.call('INCR', key)
+if current == 1 then
+    redis.call('EXPIRE', key, ttl)
+end
+return current
+"""
+
 
 class SaaSQuotaService:
     """
@@ -106,11 +117,15 @@ class SaaSQuotaService:
     def increment_usage(cls, agencia_id, resource_type):
         """
         Incrementa el contador en caché tras una creación exitosa.
+        Usa Lua script para atomicidad (INCR + EXPIRE en una operación).
         """
         current_month = timezone.now().strftime("%Y-%m")
         cache_key = f"quota_{agencia_id}_{resource_type}_{current_month}"
         try:
-            cache.incr(cache_key)
-        except (ValueError, TypeError):
-            # Si no existe, se recalculará en el próximo GET
-            pass
+            # TTL = 30 days in seconds
+            ttl = 30 * 24 * 3600
+            client = cache.client.get_client()
+            client.eval(_INCR_WITH_TTL_SCRIPT, 1, cache_key, ttl)
+        except Exception as e:
+            # Si falla, se recalculará en el próximo GET
+            logger.warning(f"Error incrementando cuota cache para {cache_key}: {e}")

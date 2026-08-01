@@ -39,7 +39,7 @@ class ContabilidadReconciliationService:
         """
         Escanea y repara inconsistencias entre Facturas/Pagos y sus asientos contables correspondientes.
         """
-        logger.info("🔎 Iniciando auditoría y reconciliación contable automática...")
+        logger.info(" Iniciando auditoría y reconciliación contable automática...")
         facturas_arregladas = 0
         pagos_arreglados = 0
 

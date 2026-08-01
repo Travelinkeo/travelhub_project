@@ -14,6 +14,7 @@ from django.dispatch import receiver
 from apps.bookings.models import PagoVenta
 from apps.finance.models import Factura
 from core.api import are_signals_blocked
+from core.signals import reporte_proveedor_pdf_recibido
 
 from .services import ContabilidadService
 
@@ -45,7 +46,11 @@ def generar_asiento_desde_factura_signal(sender, instance, created, **kwargs):
             logger.debug(f"Factura {instance.numero_factura} sin items, omitiendo asiento")
             return
     except Exception:
-        logger.warning("Error verificando items_factura para factura %s", instance.numero_factura, exc_info=True)
+        logger.warning(
+            "Error verificando items_factura para factura %s",
+            instance.numero_factura,
+            exc_info=True,
+        )
         return
 
     _on_commit(_generar_asiento_contable, instance.pk)
@@ -92,3 +97,28 @@ def _registrar_pago_contable(pago_id):
             logger.info(f"Asiento de pago {asiento.id} generado para pago {pago_id}")
     except Exception as e:
         logger.error(f"Error registrando pago {pago_id}: {e}")
+
+
+@receiver(reporte_proveedor_pdf_recibido)
+def procesar_reporte_proveedor_pdf(sender, **kwargs):
+    """
+    Procesa un PDF de reporte de ventas de proveedor recibido por email.
+    Escucha la señal reporte_proveedor_pdf_recibido (emitida por communications).
+    Devuelve el ReporteVentaProveedor creado o None si no aplica.
+    """
+    try:
+        from apps.contabilidad.supplier_report_service import SupplierReportProcessorService
+
+        reporte = SupplierReportProcessorService.process_pdf_report(
+            agencia=kwargs.get("agencia"),
+            pdf_bytes=kwargs.get("pdf_bytes"),
+            filename=kwargs.get("filename", ""),
+            subject=kwargs.get("subject", ""),
+            sender_email=kwargs.get("sender_email", ""),
+        )
+        return reporte
+    except ValueError:
+        return None
+    except Exception as e:
+        logger.error(f"Error procesando reporte de proveedor PDF: {e}", exc_info=True)
+        return None

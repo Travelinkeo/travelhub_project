@@ -76,7 +76,7 @@ class TextExtractionService:
                             tmp_pdf.write(pdf_payload)
                             tmp_pdf_path = tmp_pdf.name
 
-                        logger.info("📄 PDF adjunto encontrado en el EML. Extrayendo...")
+                        logger.info(" PDF adjunto encontrado en el EML. Extrayendo...")
                         with open(tmp_pdf_path, "rb") as f_pdf:
                             texto_extraido += "\n--- TEXTO ADJUNTO PDF ---\n"
                             texto_extraido += TextExtractionService.extract_from_pdf(f_pdf)

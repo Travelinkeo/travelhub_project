@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Propuesta de Viaje | TravelHub</title>
+    <title>Propuesta de Viaje | {{ current_agency.nombre_comercial|default:current_agency.nombre|default:"TravelHub" }}</title>
     <script src="https://cdn.tailwindcss.com" nonce="{{ request.csp_nonce }}"></script>
     <script defer src="{% static 'vendor/alpine_v2.js' %}" nonce="{{ request.csp_nonce }}"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800;900&display=swap" rel="stylesheet">
@@ -13,11 +13,11 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
         /* Ocultar scrollbar pero permitir scroll */
         ::-webkit-scrollbar { display: none; }
-        
+
         .glass-header {
             background: linear-gradient(to bottom, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 0) 100%);
         }
-        
+
         .floating-bar {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(16px);
@@ -30,21 +30,25 @@
 
     <!-- Contenedor Mobile-First -->
     <div class="max-w-md mx-auto bg-slate-50 min-h-screen relative pb-32 shadow-[0_0_50px_rgba(0,0,0,0.1)] overflow-hidden">
-        
+
         <!-- HERO SECTION (IMAGEN DEL DESTINO) -->
         <div class="relative h-[400px] w-full">
             <!-- Imagen extraída por la IA -->
-            <img src="{{ quote.image_url|default:'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=800' }}" 
+            <img src="{{ quote.image_url|default:'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=800' }}"
                  class="w-full h-full object-cover animate-[pulse_1s_ease-in-out_1] origin-center shadow-inner" alt="{{ quote.destino }}">
-            
+
             <!-- Gradiente Oscuro -->
             <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/30 to-transparent"></div>
             <div class="absolute inset-0 glass-header h-32 pointer-events-none"></div>
-            
+
             <!-- Top Nav -->
             <div class="absolute top-0 w-full p-6 flex justify-between items-center z-10">
                 <div class="bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-white font-bold text-[10px] flex items-center gap-1.5 shadow-lg max-w-[200px] overflow-hidden">
-                    <span class="material-symbols-outlined text-[14px] text-emerald-400 shrink-0">verified</span> 
+                    {% if current_agency and current_agency.logo %}
+                        <img src="{{ current_agency.logo.url }}" alt="Logo" class="h-4 w-4 object-contain rounded-full shrink-0 bg-white p-[1px]">
+                    {% else %}
+                        <span class="material-symbols-outlined text-[14px] text-emerald-400 shrink-0">verified</span>
+                    {% endif %}
                     <span class="truncate">{{ current_agency.nombre_comercial|default:current_agency.nombre|default:"TravelHub Agency" }}</span>
                 </div>
                 <!-- Botón Compartir dinámico con Web Share API o Fallback -->
@@ -62,7 +66,7 @@
                     Viaja a<br>{{ quote.destino|title }}
                 </h1>
                 <p class="text-sm font-medium mt-2 flex items-center gap-1.5 opacity-90 drop-shadow-md">
-                    <span class="material-symbols-outlined text-[16px]">calendar_month</span> 
+                    <span class="material-symbols-outlined text-[16px]">calendar_month</span>
                     {{ quote.metadata_ia.outboundDate }} {% if quote.metadata_ia.returnDate %} - {{ quote.metadata_ia.returnDate }}{% endif %}
                 </p>
             </div>
@@ -70,15 +74,15 @@
 
         <!-- CONTENIDO DE LA COTIZACIÓN -->
         <div class="relative z-20 -mt-6 bg-slate-50 rounded-t-[2rem] px-6 pt-8">
-            
+
             <p class="text-slate-600 text-base mb-6 leading-relaxed italic">
                 "{{ quote.metadata_ia.destination_description|default:"Hemos preparado esta propuesta exclusiva para usted basada en sus preferencias de viaje." }}"
             </p>
-            
+
             <!-- TARJETA DE PRECIO -->
             <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-200/60 mb-8 relative overflow-hidden">
                 <div class="absolute -right-6 -top-6 w-32 h-32 bg-blue-50 rounded-full blur-2xl"></div>
-                
+
                 <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1 relative z-10">Inversión Total Estimada</p>
                 <div class="flex items-end gap-2 mb-3 relative z-10">
                     <p class="text-6xl font-black text-slate-900 tracking-tighter drop-shadow-sm">
@@ -86,9 +90,9 @@
                     <span class="text-xs text-slate-400 font-bold ml-1 uppercase">USD</span>
                 </p>
                 </div>
-                
+
                 <div class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-2 w-max border border-emerald-100 relative z-10">
-                    <span class="material-symbols-outlined text-[16px]">task_alt</span> 
+                    <span class="material-symbols-outlined text-[16px]">task_alt</span>
                     Impuestos y tasas operativas incluidas
                 </div>
             </div>
@@ -97,7 +101,7 @@
             <h3 class="text-lg font-black text-slate-800 mb-4 flex items-center gap-2">
                 <span class="material-symbols-outlined text-blue-500">flight_takeoff</span> Itinerario de Vuelos
             </h3>
-            
+
             <div class="space-y-3">
                 {% for flight in quote.metadata_ia.flights %}
                 <!-- Tarjeta de Vuelo Optimizada (Compacta) -->
@@ -108,7 +112,7 @@
                         </span>
                         <span class="text-[10px] font-bold text-slate-500">{{ flight.departureDate|default:quote.metadata_ia.outboundDate }}</span>
                     </div>
-                    
+
                     <div class="flex items-center justify-between px-1">
                         <!-- Origen -->
                         <div class="text-left w-20">
@@ -116,7 +120,7 @@
                             <p class="text-[10px] text-slate-400 font-bold truncate mt-1">{{ flight.departureCity|default:"" }}</p>
                             <p class="text-[13px] text-slate-950 font-black mt-1">{{ flight.departureTime|default:"--:--" }}</p>
                         </div>
-                        
+
                         <!-- Conexión/Icono -->
                         <div class="flex-1 flex flex-col items-center px-2">
                             <div class="w-full h-px bg-slate-200 relative mb-1">
@@ -124,7 +128,7 @@
                             </div>
                             <span class="text-[8px] font-black text-slate-300 uppercase tracking-tighter">{{ flight.stops }}</span>
                         </div>
-                        
+
                         <!-- Destino -->
                         <div class="text-right w-20">
                             <p class="text-2xl font-black text-slate-900 tracking-tighter leading-none">{{ flight.arrivalCode|default:"???" }}</p>
@@ -137,7 +141,7 @@
                 <p class="text-center text-slate-400 py-8 text-sm italic">Detalles del itinerario en proceso...</p>
                 {% endfor %}
             </div>
-            
+
             <!-- Perfil del Asesor -->
             <div class="mt-10 py-8 border-y border-slate-200/60">
                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] text-center mb-4 leading-none">Consultor Experto Asignado</p>
@@ -169,16 +173,16 @@
 
         <!-- 🌟 FLOATING ACTION BAR (STICKY BOTTOM) 🌟 -->
         <div class="fixed bottom-0 left-0 right-0 floating-bar border-t border-slate-200/50 p-4 pb-8 flex gap-3 z-50 max-w-md mx-auto shadow-[0_-15px_40px_rgba(0,0,0,0.06)] px-6">
-            
+
             <!-- Botón WhatsApp (Dudas) -->
-            <a href="https://wa.me/?text=Hola,%20tengo%20dudas%20sobre%20mi%20propuesta%20a%20{{ quote.destino }}%20(Ref:%20{{ quote.numero_cotizacion }})" 
+            <a href="https://wa.me/?text=Hola,%20tengo%20dudas%20sobre%20mi%20propuesta%20a%20{{ quote.destino }}%20(Ref:%20{{ quote.numero_cotizacion }})"
                target="_blank"
                class="w-14 shrink-0 bg-white border border-slate-200 hover:bg-slate-50 text-emerald-500 rounded-2xl flex items-center justify-center transition-all shadow-sm active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" class="w-6 h-6"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zM223.9 413.2c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 334.3l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184-186.6 184zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
             </a>
-            
+
             <!-- Botón Aprobar (Primario) -->
-            <button @click="approveQuote()" class="flex-1 bg-slate-950 hover:bg-slate-900 text-white font-black py-4.5 rounded-2x shadow-2xl shadow-slate-900/20 transition-all active:scale-[0.98] flex justify-center items-center gap-2 text-sm">
+            <button @click="approveQuote()" class="flex-1 bg-slate-950 hover:bg-slate-900 text-white font-black py-4.5 rounded-2xl shadow-2xl shadow-slate-900/20 transition-all active:scale-[0.98] flex justify-center items-center gap-2 text-sm">
                 Aprobar Propuesta <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
             </button>
         </div>
@@ -195,8 +199,8 @@
                 shareQuote() {
                     if (navigator.share) {
                         navigator.share({
-                            title: 'Propuesta de Viaje: {{ quote.destino }}',
-                            text: 'Mira la propuesta que TravelHub preparó para ti.',
+                            title: 'Propuesta de Viaje',
+                            text: 'Mira la propuesta que {{ current_agency.nombre_comercial|default:current_agency.nombre|default:"TravelHub" }} preparó para ti.',
                             url: window.location.href
                         }).catch(console.error);
                     } else {

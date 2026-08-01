@@ -44,7 +44,6 @@ _SERIALIZER_MAPPINGS = {
     "ItinerarioSegmentoSerializer": "apps.bookings.serializers",
     "GeminiBoletoParseadoSerializer": "apps.bookings.serializers",
     # apps.contabilidad.serializers
-    "DetalleAsientoSerializer": "apps.contabilidad.serializers",
     "AsientoContableSerializer": "apps.contabilidad.serializers",
 }
 

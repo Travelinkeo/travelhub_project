@@ -61,6 +61,18 @@ if not os.getenv("EVOLUTION_INSTANCE_TOKEN"):
 
     raise ImproperlyConfigured("EVOLUTION_INSTANCE_TOKEN debe configurarse en producción")
 
+# JWT debe usar una clave separada de SECRET_KEY en producción.
+# Si no se configura, un atacante con SECRET_KEY podría forjar JWTs.
+from .base import _JWT_SIGNING_KEY  # noqa: E402
+
+if not os.getenv("JWT_SIGNING_KEY") or _JWT_SIGNING_KEY == SECRET_KEY:
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured(
+        "JWT_SIGNING_KEY debe configurarse separada de SECRET_KEY en producción. "
+        'Genera una con: python -c "import secrets; print(secrets.token_urlsafe(64))"'
+    )
+
 # ---------------------------------------------------------------------------
 # Sentry — inicialización no bloqueante
 # ---------------------------------------------------------------------------

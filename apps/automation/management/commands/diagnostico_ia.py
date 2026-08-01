@@ -114,7 +114,10 @@ class Command(BaseCommand):
                 f" - Datos Parseados: {bool(boleto.datos_parseados)} (Campos: {list(boleto.datos_parseados.keys()) if boleto.datos_parseados else 'Vacío'})"
             )
             self.stdout.write(f" - Log de Parseo Final: {boleto.log_parseo or 'Sin logs/Vacío.'}")
-            if str(boleto.estado_parseo) in ["ERR", "REV"]:
+            if str(boleto.estado_parseo) in [
+                str(BoletoImportado.EstadoParseo.ERROR_PARSEO),
+                str(BoletoImportado.EstadoParseo.REVISION_REQUERIDA),
+            ]:
                 self.stdout.write(
                     self.style.ERROR(
                         f" ❌ Processing finished with parsing status: {boleto.estado_parseo}"

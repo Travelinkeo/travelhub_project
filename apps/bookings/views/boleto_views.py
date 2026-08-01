@@ -74,12 +74,14 @@ class BoletoUploadAPIView(InternalAPIAuthMixin, APIView):
 
         # 2. Crear el registro en estado 'PRO' (Procesando)
         try:
-            boleto_importado = BoletoImportado.objects.create(
+            boleto_importado = BoletoImportado(
                 archivo_boleto=archivo_subido,
                 agencia=agencia_usuario,
                 estado_parseo="PRO",
                 log_parseo="Iniciando procesamiento...",
             )
+            boleto_importado.full_clean()
+            boleto_importado.save()
 
             # Detectar si Celery está disponible
             from apps.common.utils.celery_utils import _is_celery_available
@@ -107,7 +109,7 @@ class BoletoUploadAPIView(InternalAPIAuthMixin, APIView):
                 )
 
             # MODO SYNC: Procesar inline (desarrollo / Celery offline)
-            logger.info(f"⚡ [SYNC MODE] Procesando boleto {boleto_importado.pk} síncronamente...")
+            logger.info(f" [SYNC MODE] Procesando boleto {boleto_importado.pk} síncronamente...")
             from core.api import parsear_boleto_individual
 
             parsear_boleto_individual.apply(args=[boleto_importado.id_boleto_importado])
@@ -196,7 +198,7 @@ class BoletoRetryParseAPIView(InternalAPIAuthMixin, APIView):
                 return Response({"status": "QUEUED"}, status=202)
             else:
                 # MODO SYNC: Procesar inline (desarrollo / Celery offline)
-                logger.info(f"⚡ [SYNC MODE] Re-procesando boleto {pk} síncronamente...")
+                logger.info(f" [SYNC MODE] Re-procesando boleto {pk} síncronamente...")
                 boleto.estado_parseo = "PRO"
                 boleto.archivo_pdf_generado = None  # Limpiar PDF anterior para regenerar
                 boleto.save(update_fields=["estado_parseo", "archivo_pdf_generado"])
@@ -288,7 +290,7 @@ class BoletoMassActionAPIView(InternalAPIAuthMixin, APIView):
             )
 
             if task_id:
-                logger.info(f"✅ Facturación masiva encolada con éxito. TaskID: {task_id}")
+                logger.info(f" Facturación masiva encolada con éxito. TaskID: {task_id}")
                 return Response(
                     {
                         "mensaje": "Facturación masiva encolada con éxito. El procesamiento se realizará en segundo plano.",

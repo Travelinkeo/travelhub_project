@@ -34,7 +34,9 @@ logger = logging.getLogger(__name__)
 def boletos_sin_venta(request):
     """Lista de boletos parseados sin venta asociada. 🔐 Filtrado por agencia."""
     agencia = get_agencia_from_request(request)
-    boletos = BoletoImportado.objects.filter(estado_parseo="COM", venta_asociada__isnull=True)
+    boletos = BoletoImportado.objects.filter(
+        estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO, venta_asociada__isnull=True
+    )
     boletos = filter_queryset_by_tenant(boletos, agencia).order_by("-fecha_subida")
     serializer = BoletoImportadoSerializer(boletos, many=True)
     return Response(serializer.data)
@@ -68,7 +70,7 @@ def reintentar_parseo(request, boleto_id):
     from apps.common.utils.celery_utils import safe_delay
     from core.tasks import parsear_boleto_individual
 
-    boleto.estado_parseo = "QUE"
+    boleto.estado_parseo = BoletoImportado.EstadoParseo.COLA_LLENA
     boleto.log_parseo = "Reintentando parseo manualmente..."
     boleto.save()
 
@@ -192,17 +194,35 @@ def dashboard_stats(request):
 
     stats = boletos_qs.aggregate(
         total=Count("pk"),
-        procesados_total=Count("pk", filter=Q(estado_parseo="COM")),
-        procesados_hoy=Count("pk", filter=Q(fecha_subida__date=hoy, estado_parseo="COM")),
+        procesados_total=Count(
+            "pk", filter=Q(estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO)
+        ),
+        procesados_hoy=Count(
+            "pk",
+            filter=Q(
+                fecha_subida__date=hoy,
+                estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO,
+            ),
+        ),
         procesados_semana=Count(
-            "pk", filter=Q(fecha_subida__date__gte=inicio_semana, estado_parseo="COM")
+            "pk",
+            filter=Q(
+                fecha_subida__date__gte=inicio_semana,
+                estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO,
+            ),
         ),
         procesados_mes=Count(
-            "pk", filter=Q(fecha_subida__date__gte=inicio_mes, estado_parseo="COM")
+            "pk",
+            filter=Q(
+                fecha_subida__date__gte=inicio_mes,
+                estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO,
+            ),
         ),
-        pendientes=Count("pk", filter=Q(estado_parseo="PEN")),
-        errores=Count("pk", filter=Q(estado_parseo="ERR")),
-        revision=Count("pk", filter=Q(estado_parseo="REV")),
+        pendientes=Count("pk", filter=Q(estado_parseo=BoletoImportado.EstadoParseo.PENDIENTE)),
+        errores=Count("pk", filter=Q(estado_parseo=BoletoImportado.EstadoParseo.ERROR_PARSEO)),
+        revision=Count(
+            "pk", filter=Q(estado_parseo=BoletoImportado.EstadoParseo.REVISION_REQUERIDA)
+        ),
     )
     total = stats["total"]
     procesados_total = stats["procesados_total"]
@@ -214,7 +234,7 @@ def dashboard_stats(request):
     revision = stats["revision"]
 
     top_aerolineas = list(
-        boletos_qs.filter(estado_parseo="COM")
+        boletos_qs.filter(estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO)
         .values("aerolinea_emisora")
         .annotate(cantidad=Count("id_boleto_importado"))
         .order_by("-cantidad")[:5]
@@ -376,7 +396,7 @@ def reporte_comisiones(request):
     if fecha_fin:
         qs = qs.filter(fecha_emision_boleto__lte=fecha_fin)
 
-    qs = qs.filter(estado_parseo="COM")
+    qs = qs.filter(estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO)
 
     totales = qs.aggregate(
         total_boletos=Count("id_boleto_importado"),

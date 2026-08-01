@@ -12,7 +12,12 @@ from apps.common.utils.celery_utils import idempotent_task
 logger = logging.getLogger(__name__)
 
 
-@shared_task(time_limit=600, soft_time_limit=540)
+@shared_task(
+    time_limit=600,
+    soft_time_limit=540,
+    max_retries=3,
+    default_retry_delay=3600,
+)
 @idempotent_task(timeout=7200, key_prefix="celery_cierre_mensual")
 def cierre_mensual_task(agencia_id=None):
     """cierre_mensual_task."""

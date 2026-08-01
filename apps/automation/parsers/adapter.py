@@ -4,7 +4,10 @@ Permite usar los nuevos parsers sin romper el código existente.
 """
 
 import logging
+import time
 from typing import Any
+
+from apps.automation.metrics.parser_metrics import ParserMetrics, ParserMetricsCollector
 
 from .kiu_parser import KIUParser
 from .legacy.amadeus_parser import AmadeusParser
@@ -18,27 +21,27 @@ from .registry import registry
 
 logger = logging.getLogger(__name__)
 
-# Registrar parsers al importar el módulo
+
 _parsers_registered = False
 
 
 def _register_parsers():
-    """Registra todos los parsers disponibles"""
     global _parsers_registered
     if _parsers_registered:
         return
-
-    registry.register(KIUParser())
-    registry.register(WebReceiptParser())
-    registry.register(CopaParser())
-    registry.register(WingoParser())
-    registry.register(TKConnectParser())
-    registry.register(SabreParser())
-    registry.register(AmadeusParser())
-    registry.register(TravelportParser())
-
+    parsers = [
+        AmadeusParser(),
+        CopaParser(),
+        SabreParser(),
+        TKConnectParser(),
+        TravelportParser(),
+        WebReceiptParser(),
+        WingoParser(),
+        KIUParser(),
+    ]
+    for parser in parsers:
+        registry.register(parser)
     _parsers_registered = True
-    logger.info("Todos los parsers refactorizados registrados (8/8)")
 
 
 def parse_ticket_with_new_parsers(text: str, html_text: str = "") -> dict[str, Any]:
@@ -53,6 +56,7 @@ def parse_ticket_with_new_parsers(text: str, html_text: str = "") -> dict[str, A
     Returns:
         Diccionario en formato legacy
     """
+    start_time = time.time()
     _register_parsers()
 
     parser = registry.find_parser(text)
@@ -77,7 +81,24 @@ def parse_ticket_with_new_parsers(text: str, html_text: str = "") -> dict[str, A
             )
 
         try:
-            return parsed_data.to_dict()
+            result = parsed_data.to_dict()
+
+            # Track metrics
+            try:
+                parser_type = parser.__class__.__name__.lower().replace("parser", "")
+                metrics = ParserMetrics(
+                    parser_type=f"gds_{parser_type}",
+                    success=True,
+                    duration_ms=int((time.time() - start_time) * 1000),
+                    fields_extracted=sum(1 for v in result.values() if v),
+                    fields_expected=len(ParserMetricsCollector.EXPECTED_FIELDS),
+                )
+                metrics.feature = "gds_parsing"
+                ParserMetricsCollector.record_execution(metrics)
+            except Exception as e:
+                logger.warning(f"Error recording metrics: {e}")
+
+            return result
         except Exception as e_dict:
             # 🛡️ BULLETPROOF: to_dict() puede fallar en normalize_ticket_data
             # (consultas DB de Ciudad/Pais, IATA ambiguo, RLS multi-tenant, etc.).
@@ -92,6 +113,19 @@ def parse_ticket_with_new_parsers(text: str, html_text: str = "") -> dict[str, A
             return _build_minimal_dict(parsed_data)
     except Exception as e:
         logger.exception(f"Error al parsear con {parser.__class__.__name__}")
+        # Track failed metrics
+        try:
+            parser_type = parser.__class__.__name__.lower().replace("parser", "")
+            metrics = ParserMetrics(
+                parser_type=f"gds_{parser_type}",
+                success=False,
+                duration_ms=int((time.time() - start_time) * 1000),
+                error=str(e),
+            )
+            metrics.feature = "gds_parsing"
+            ParserMetricsCollector.record_execution(metrics)
+        except Exception:
+            logger.exception("Error registrando métricas de parser fallido")
         return {"error": f"Error en parseo: {str(e)}"}
 
 
@@ -184,6 +218,7 @@ def _build_minimal_dict(parsed_data) -> dict[str, Any]:
         "codigo_reservacion": parsed_data.pnr,
         "preparado_para": parsed_data.passenger_name,
         "documento_identidad": parsed_data.passenger_document,
+        "passenger_name": parsed_data.passenger_name,
         # Señal al pipeline: los datos están pero faltó normalización de catálogo.
         # El orquestador podrá marcar _requiere_revision=True si está incompleto.
         "_normalization_partial": True,

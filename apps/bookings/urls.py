@@ -311,6 +311,12 @@ urlpatterns = [
         dynamic_view("apps.bookings.views.itinerary_interactive.ItineraryMapDataView"),
         name="itinerary_map_data",
     ),
+    # --- BOLETO STATUS API ---
+    path(
+        "api/boletos/<int:pk>/status/",
+        dynamic_view("apps.bookings.views.boleto_status_api.BoletoStatusAPIView"),
+        name="boleto_status",
+    ),
     # API
     path("api/", include(router.urls)),
     path("api/v1/gds/ingest-pnr/", api_ingest_pnr_view, name="api_gds_ingest_pnr"),

@@ -122,115 +122,144 @@ class Agencia(models.Model):
 
     @property
     def logo(self):
-        return self.branding.logo if self.branding else None
+        b = self._safe_branding()
+        return b.logo if b else None
 
     @property
     def logo_pdf_base64(self):
-        return self.branding.logo_pdf_base64 if self.branding else None
+        b = self._safe_branding()
+        return b.logo_pdf_base64 if b else None
 
     @property
     def logo_dark(self):
-        return self.branding.logo_dark if self.branding else None
+        b = self._safe_branding()
+        return b.logo_dark if b else None
 
     @property
     def logo_light(self):
-        return self.branding.logo_light if self.branding else None
+        b = self._safe_branding()
+        return b.logo_light if b else None
 
     @property
     def logo_telegram_url(self):
-        return self.branding.logo_telegram_url if self.branding else None
+        b = self._safe_branding()
+        return b.logo_telegram_url if b else None
 
     @property
     def logo_base64(self):
-        return self.branding.logo_base64 if self.branding else None
+        b = self._safe_branding()
+        return b.logo_base64 if b else None
 
     @property
     def logo_pdf_dark_base64(self):
-        return self.branding.logo_pdf_dark_base64 if self.branding else None
+        b = self._safe_branding()
+        return b.logo_pdf_dark_base64 if b else None
+
+    def _safe_branding(self):
+        try:
+            return self.branding
+        except Exception:
+            return None
+
+    def _safe_config(self):
+        try:
+            return self.configuracion
+        except Exception:
+            return None
 
     @property
     def subdominio_slug(self):
-        return self.configuracion.subdominio_slug if self.configuracion else None
+        cfg = self._safe_config()
+        return cfg.subdominio_slug if cfg else None
 
     @subdominio_slug.setter
     def subdominio_slug(self, value):
         """subdominio_slug."""
-        if not self.configuracion:
+        cfg = self._safe_config()
+        if not cfg:
             from core.models.agencia import AgenciaConfiguracion
 
-            self.configuracion = AgenciaConfiguracion.objects.create()
-        self.configuracion.subdominio_slug = value
-        self.configuracion.save(update_fields=["subdominio_slug"])
+            cfg = AgenciaConfiguracion.objects.create(agencia=self)
+            self.configuracion = cfg
+        cfg.subdominio_slug = value
+        cfg.save(update_fields=["subdominio_slug"])
 
     @property
     def moneda_principal(self):
-        return self.configuracion.moneda_principal if self.configuracion else "USD"
+        cfg = self._safe_config()
+        return cfg.moneda_principal if cfg else "USD"
 
     @property
     def color_primario(self):
-        return self.branding.color_primario if self.branding else "#1976d2"
+        b = self._safe_branding()
+        return b.color_primario if b else "#1976d2"
 
     @property
     def email_monitor_active(self):
-        return self.configuracion.email_monitor_active if self.configuracion else False
+        cfg = self._safe_config()
+        return cfg.email_monitor_active if cfg else False
 
     @property
     def telegram_bot_token(self):
-        return self.configuracion.telegram_bot_token if self.configuracion else None
+        cfg = self._safe_config()
+        return cfg.telegram_bot_token if cfg else None
 
     @property
     def telegram_chat_id(self):
-        return self.configuracion.telegram_chat_id if self.configuracion else None
+        cfg = self._safe_config()
+        return cfg.telegram_chat_id if cfg else None
 
     @property
     def correo_emisiones(self):
-        return self.configuracion.correo_emisiones if self.configuracion else None
+        cfg = self._safe_config()
+        return cfg.correo_emisiones if cfg else None
 
     @property
     def password_app_correo(self):
-        return self.configuracion.password_app_correo if self.configuracion else None
+        cfg = self._safe_config()
+        return cfg.password_app_correo if cfg else None
 
     @property
     def gemini_api_key(self):
-        return self.configuracion.gemini_api_key if self.configuracion else None
+        cfg = self._safe_config()
+        return cfg.gemini_api_key if cfg else None
 
     @gemini_api_key.setter
     def gemini_api_key(self, value):
         """gemini_api_key."""
-        if not self.configuracion:
+        cfg = self._safe_config()
+        if not cfg:
             from core.models.agencia import AgenciaConfiguracion
 
-            self.configuracion = AgenciaConfiguracion.objects.create(agencia=self)
-        self.configuracion.gemini_api_key = value
-        self.configuracion.save(update_fields=["gemini_api_key"])
+            cfg = AgenciaConfiguracion.objects.create(agencia=self)
+            self.configuracion = cfg
+        cfg.gemini_api_key = value
+        cfg.save(update_fields=["gemini_api_key"])
 
     @property
     def ui_theme(self):
-        if self.branding:
-            return self.branding.ui_theme
-        return "obsidian"
+        b = self._safe_branding()
+        return b.ui_theme if b else "obsidian"
 
     @property
     def plantilla_boletos(self):
-        if self.branding:
-            return self.branding.plantilla_boletos
-        return "m1"
+        b = self._safe_branding()
+        return b.plantilla_boletos if b else "m1"
 
     @property
     def plantilla_vouchers(self):
-        if self.branding:
-            return self.branding.plantilla_vouchers
-        return "m1"
+        b = self._safe_branding()
+        return b.plantilla_vouchers if b else "v1"
 
     @property
     def plantilla_facturas(self):
-        if self.branding:
-            return self.branding.plantilla_facturas
-        return "m1"
+        b = self._safe_branding()
+        return b.plantilla_facturas if b else "m1"
 
     @property
     def configuracion_api(self):
-        return self.configuracion.configuracion_api if self.configuracion else {}
+        cfg = self._safe_config()
+        return cfg.configuracion_api if cfg else {}
 
     @property
     def configuracion_correo(self):
@@ -358,7 +387,7 @@ class Agencia(models.Model):
 
             transaction.on_commit(_provision_whatsapp)
         except Exception as e:
-            logger.error(f"❌ Error al provisionar instancia WhatsApp para {self.nombre}: {e}")
+            logger.error(f" Error al provisionar instancia WhatsApp para {self.nombre}: {e}")
 
         # 4. Mantenimiento de logos (Legacy logic adaptada)
         try:
@@ -368,7 +397,7 @@ class Agencia(models.Model):
 
             transaction.on_commit(lambda: migrar_logos_agencia_task.delay(self.pk))
         except Exception as e:
-            logger.error(f"❌ Error al disparar migrar_logos_agencia_task: {e}")
+            logger.error(f" Error al disparar migrar_logos_agencia_task: {e}")
 
 
 class UsuarioAgencia(models.Model):

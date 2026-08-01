@@ -9,6 +9,7 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
+        exclude: ^k8s/helm/.*\.ya?ml$
       - id: check-added-large-files
         args: [--maxkb=1024]
       - id: check-merge-conflict
@@ -24,6 +25,7 @@ repos:
       # Ejecuta el linter de ruff y intenta arreglar errores automáticamente
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
+        exclude: ^\.agents/
       # Ejecuta el formateador de ruff
       - id: ruff-format
 

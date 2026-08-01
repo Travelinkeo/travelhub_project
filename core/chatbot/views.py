@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 @api_view(["POST"])
 @internal_auth  # CSRF exempt: secured by token-based internal_auth + IsAuthenticated
 @permission_classes([IsAuthenticated])
-@csrf_exempt
+@csrf_exempt  # CSRF exempt: autenticado por internal_auth (Token/Session) + IsAuthenticated (P3-71)
 def chat_message(request):
     """
     API para enviar mensajes al chatbot.

@@ -5,6 +5,7 @@ import logging
 import time
 
 import qrcode
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.http import HttpResponse, JsonResponse
@@ -26,7 +27,7 @@ def start_qr_fetcher(instance_name):
 @csrf_exempt  # CSRF exempt: secured by @login_required + session-based auth
 @login_required
 def evolution_qr_proxy(request, instance_name):
-    """Sirve el QR como PNG (obtenido síncronamente y cacheado por 40s si no está en Redis)."""
+    """Sirve el QR como PNG (obtenido síncronamente y cacheado por 120s si no está en Redis)."""
     import requests
 
     from apps.communications.services.evolution_api_service import EvolutionService
@@ -58,14 +59,13 @@ def evolution_qr_proxy(request, instance_name):
         headers = headers.copy()
         headers.pop("Content-Type", None)
 
-        # Si el estado es 'close', recreamos la instancia para limpiar sesiones Baileys corruptas
+        # Si el estado es 'close', intentar reconectar vía create_instance (idempotente en Evolution v2.2)
         try:
             estado_evolution = EvolutionService.get_instance_state(instance_name)
             if estado_evolution == "close":
                 logger.info(
-                    f"Instancia '{instance_name}' en estado 'close'. Recreando para limpiar sesión corrupta..."
+                    f"Instancia '{instance_name}' en estado 'close'. Intentando reconectar..."
                 )
-                EvolutionService.delete_instance(instance_name)
                 EvolutionService.create_instance(instance_name)
         except Exception as e:
             logger.error(f"Error verificando o limpiando estado para '{instance_name}': {e}")
@@ -82,10 +82,14 @@ def evolution_qr_proxy(request, instance_name):
 
         if response.status_code == 200:
             data = response.json()
-            if isinstance(data, dict) and data.get("base64"):
-                qr_b64 = data["base64"]
-                # Guardar en caché con un TTL muy corto de 40 segundos para garantizar frescura
-                cache.set(cache_key, qr_b64, 40)
+            qr_b64_new = data.get("base64")
+            if not qr_b64_new and isinstance(data.get("qrcode"), dict):
+                qr_b64_new = data["qrcode"].get("base64")
+
+            if qr_b64_new:
+                qr_b64 = qr_b64_new
+                # TTL 120s — Alineado con el refresh del Beat para que cache esté siempre lleno
+                cache.set(cache_key, qr_b64, 120)
                 logger.info(f"Evolution QR fetched synchronously and cached for {instance_name}")
     except Exception as e:
         logger.error(f"Failed to fetch Evolution QR synchronously for {instance_name}: {e}")
@@ -101,7 +105,15 @@ def evolution_qr_proxy(request, instance_name):
         except Exception as e:
             logger.error(f"Error decoding fetched QR base64: {e}")
 
-    # Fallback: Si no se pudo obtener, generar un código QR que no sea un QR de sesión falso de WhatsApp
+    # Fallback: ya intentamos obtener QR de Evolution directamente arriba.
+    # Si aún no hay, devolvemos el QR de error rojo en vez de redirigir al
+    # Evolution Manager UI proxy (que da 404 con atendai/evolution-api:latest).
+    logger.warning(
+        "Evolution QR no disponible para %s — devolviendo placeholder de error.",
+        instance_name,
+    )
+
+    # Último recurso: QR de error rojo
     buf = io.BytesIO()
     qr = qrcode.QRCode(box_size=8, border=2)
     qr.add_data(
@@ -134,16 +146,23 @@ def evolution_qr_proxy(request, instance_name):
 #
 
 
-@csrf_exempt
+@csrf_exempt  # CSRF exempt: health-check interno, autenticado por header 'apikey' (P3-71)
 def whatsapp_qr_health(request, instance_name=None):
     """Health-check del flujo WhatsApp/Evolution.
 
-    Sin auth. Devuelve JSON con el estado en detalle.
+    Autenticación vía header 'apikey' con WHATSAPP_MICROSERVICE_TOKEN.
+    Sin auth solo en DEBUG=True.
 
     Soporta 2 modos:
       * GET /system/whatsapp/health/             — evalúa TODAS las agencias activas
       * GET /system/whatsapp/health/<instance>/   — evalúa una agencia específica
     """
+    if not settings.DEBUG:
+        expected = getattr(settings, "WHATSAPP_MICROSERVICE_TOKEN", None)
+        received = request.headers.get("apikey", "")
+        if not expected or received != expected:
+            return JsonResponse({"error": "Unauthorized"}, status=401)
+
     started = time.monotonic()
     result = {
         "service": "whatsapp-baileys",
@@ -197,7 +216,7 @@ def whatsapp_qr_health(request, instance_name=None):
     return JsonResponse(result, json_dumps_params={"ensure_ascii": False})
 
 
-@csrf_exempt
+@csrf_exempt  # CSRF exempt: webhook de monitores externos (UptimeRobot/etc.), sin sesión (P3-71)
 def whatsapp_health_alert_webhook(request, instance_name=None):
     """Webhook endpoint para recibir alertas de monitores externos.
 

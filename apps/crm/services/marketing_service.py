@@ -233,7 +233,7 @@ class MarketingAIEngine:
     def generar_campana(prompt_agente: str) -> dict:
         """Genera una campaña de correo segmentada a clientes de la BD."""
         try:
-            logger.info(f"📧 Procesando campaña de clientes: {prompt_agente}")
+            logger.info(f" Procesando campaña de clientes: {prompt_agente}")
 
             resultado_ia = _get_ai_engine().parse_structured_data(
                 text=prompt_agente,
@@ -321,7 +321,7 @@ class MarketingAIEngine:
         - 'creativo': generación de branding/copy/social sin clientes
         """
         modo = MarketingAIEngine._clasificar_intencion(prompt_agente)
-        logger.info(f"🎯 Modo detectado: {modo}")
+        logger.info(f" Modo detectado: {modo}")
 
         if modo == "campana":
             return MarketingAIEngine.generar_campana(prompt_agente)

@@ -2,7 +2,7 @@
 Rate limiter por plan usando Redis.
 
 Implementa un sliding window counter por API key.
-Si Redis no está disponible, permite el request (fail-open).
+Si Redis no está disponible, DENIEGA el request (fail-closed).
 """
 
 import logging
@@ -30,7 +30,7 @@ def _get_redis():
         _redis_client.ping()
         return _redis_client
     except Exception as e:
-        logger.debug(f"Redis no disponible para rate limiting: {e}")
+        logger.error(f"Redis no disponible para rate limiting (fail-closed): {e}")
         _redis_client = False  # Marcar como no disponible
         return None
 
@@ -45,8 +45,9 @@ def check_rate_limit(api_key) -> tuple[bool, int]:
     """
     redis_client = _get_redis()
     if redis_client is None or redis_client is False:
-        # Fail-open: si Redis no está disponible, permitir
-        return True, api_key.rate_limit
+        # Fail-closed: si Redis no está disponible, DENIEGA el request
+        logger.error("Rate limit check failed - Redis unavailable, denying request")
+        return False, 0
 
     try:
         key = f"rate_limit:api:{api_key.key_hash[:16]}"
@@ -81,8 +82,8 @@ def check_rate_limit(api_key) -> tuple[bool, int]:
         return allowed, remaining
 
     except Exception as e:
-        logger.debug(f"Error en rate limiting: {e}")
-        return True, api_key.rate_limit
+        logger.error(f"Error en rate limiting (fail-closed): {e}")
+        return False, 0
 
 
 def get_rate_limit_headers(api_key) -> dict:

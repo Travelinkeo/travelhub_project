@@ -53,7 +53,7 @@ class VentaAutomationService:
             # --- 1. Aislamiento de Agencia ---
             agencia_owner = instance.agencia
             if not agencia_owner:
-                logger.error(f"🚫 CRÍTICO: BoletoImportado {instance.pk} sin agencia. ABORTANDO.")
+                logger.error(f" CRÍTICO: BoletoImportado {instance.pk} sin agencia. ABORTANDO.")
                 return None
 
             # --- 2. Gestión de Pasajero ---
@@ -151,7 +151,7 @@ class VentaAutomationService:
             instance.venta_asociada = venta
             instance.save(update_fields=["venta_asociada"])
 
-            logger.info(f"✅ Automatización exitosa: Venta {venta.localizador}")
+            logger.info(f" Automatización exitosa: Venta {venta.localizador}")
 
             # --- 7. Validación Migratoria (Opcional) ---
             try:
@@ -185,7 +185,7 @@ class VentaAutomationService:
                         venta_id=venta.id_venta,
                     )
             except Exception as e_mig:
-                logger.error(f"⚠️ Error migratorio: {e_mig}")
+                logger.error(f" Error migratorio: {e_mig}")
 
             return venta
 

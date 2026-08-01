@@ -54,5 +54,5 @@ def despachar_campana_masiva_task(
                 logger.error(f"Fallo enviando campaña a {cliente.email}: {e}")
                 fallidos += 1
 
-    logger.info(f"🚀 Campaña Finalizada: {enviados} enviados, {fallidos} fallidos.")
+    logger.info(f" Campaña Finalizada: {enviados} enviados, {fallidos} fallidos.")
     return f"Campaña '{asunto[:20]}...': {enviados} envíos exitosos."

@@ -14,7 +14,7 @@ def procesar_boleto_importado_automatico(boleto):
     Función Puente: Delega el trabajo al TicketParserService moderno.
     """
     boleto_id = boleto.pk
-    logger.info(f"🚀 Iniciando orquestación para Boleto PK: {boleto_id}")
+    logger.info(f" Iniciando orquestación para Boleto PK: {boleto_id}")
 
     try:
         # Instanciamos el servicio nuevo
@@ -48,9 +48,11 @@ def procesar_boleto_importado_automatico(boleto):
             return False, msg
 
     except Exception as e:
-        logger.error(f"💥 Error en parsing.py: {e}", exc_info=True)
+        logger.error(f" Error en parsing.py: {e}", exc_info=True)
         try:
-            boleto.estado_parseo = "ERR"
+            from apps.bookings.models import BoletoImportado
+
+            boleto.estado_parseo = BoletoImportado.EstadoParseo.ERROR_PARSEO
             boleto.log_parseo = f"Error de sistema: {str(e)}"
             boleto.save()
         except Exception as e:

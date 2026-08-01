@@ -1,12 +1,12 @@
 # Default values for travelhub.
-# Sobreescribir en producción con: helm upgrade --set image.tag=abc123 ...
+# Sobreescribir en producción con: helm upgrade --set image.tag=v1.2.3 ...
 
 replicaCount: 2
 
 image:
-  repository: myregistry/travelhub
+  repository: ghcr.io/Travelinkeo/travelhub_project
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "v1.0.0"  # Usar semver tag, no "latest"
 
 service:
   type: ClusterIP
@@ -77,8 +77,43 @@ celery:
       requests:
         cpu: 200m
         memory: 384Mi
+    queue: "celery,notifications,ia_heavy"
+    concurrency: 4
+    maxTasksPerChild: 1000
+    maxMemoryPerChild: 512000
   beat:
     replicaCount: 1   # Beat SIEMPRE 1 réplica (scheduler no puede duplicarse)
+
+# --- Exporters para Prometheus ---
+exporters:
+  redis:
+    enabled: true
+    image: oliver006/redis_exporter:v1.61.0
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+  postgres:
+    enabled: true
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+  nginx:
+    enabled: true
+    image: nginx/nginx-prometheus-exporter:1.3.0
+    resources:
+      limits:
+        cpu: 50m
+        memory: 64Mi
+  node:
+    enabled: true
+    image: prometheus/node-exporter:v1.8.2
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
 
 # --- Variables de entorno (el resto via Secret) ---
 env:

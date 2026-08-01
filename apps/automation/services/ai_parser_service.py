@@ -27,7 +27,7 @@ class AIParserService:
         """
         Envía el texto crudo a Gemini usando el motor unificado de UniversalAIParser.
         """
-        logger.info(f"🤖 Preparando extracción de IA unificada ({len(raw_text)} chars)")
+        logger.info(f" Preparando extracción de IA unificada ({len(raw_text)} chars)")
 
         try:
             from apps.automation.parsers.ai_universal_parser import UniversalAIParser
@@ -37,7 +37,7 @@ class AIParserService:
             return UniversalAIParser().parse(raw_text, bypass_cache=bypass_cache)
 
         except Exception as e:
-            logger.error(f"🔥 Fallo crítico en AIParserService (Delegación): {str(e)}")
+            logger.error(f" Fallo crítico en AIParserService (Delegación): {str(e)}")
             return {"error": str(e)}
 
     @classmethod

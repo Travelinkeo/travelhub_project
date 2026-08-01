@@ -84,12 +84,12 @@ class CatalogNormalizationService:
                     with open(path, encoding="utf-8") as f:
                         loaded = json.load(f)
                     cls._airports_master = loaded if isinstance(loaded, dict) else {}
-                    logger.info(f"✅ Master IATA loaded: {len(cls._airports_master)} airports.")
+                    logger.info(f" Master IATA loaded: {len(cls._airports_master)} airports.")
                 else:
-                    logger.warning(f"⚠️ Master IATA file not found at {path}")
+                    logger.warning(f" Master IATA file not found at {path}")
                     cls._airports_master = {}
             except Exception as e:
-                logger.error(f"❌ Error loading airports master: {str(e)}")
+                logger.error(f" Error loading airports master: {str(e)}")
                 cls._airports_master = {}
 
             # Construir índices secundarios ahora para evitar iterar 29k entradas
@@ -160,7 +160,7 @@ class CatalogNormalizationService:
                     break
 
         if not info:
-            logger.warning(f"🕵️ IATA {iata_code} no encontrado en el maestro.")
+            logger.warning(f" IATA {iata_code} no encontrado en el maestro.")
             # Fallback histórico: buscar por nombre aproximado
             try:
                 return Ciudad.objects.filter(nombre__icontains=iata_code).first()
@@ -201,7 +201,7 @@ class CatalogNormalizationService:
                 ciudad_obj.save(update_fields=["codigo_iata"])
 
             if created:
-                logger.info(f"✨ Ciudad creada desde Maestro: {city_name} ({iata_code})")
+                logger.info(f" Ciudad creada desde Maestro: {city_name} ({iata_code})")
 
             return ciudad_obj
         except Exception as e_db:

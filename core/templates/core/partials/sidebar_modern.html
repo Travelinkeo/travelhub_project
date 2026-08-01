@@ -1,6 +1,6 @@
 {% load i18n %}
 <aside
-    class="fixed inset-y-0 left-0 z-[60] bg-surface-1 border-r border-border-color flex flex-col overflow-hidden transform transition-all duration-300 ease-in-out md:relative md:z-30 md:translate-x-0"
+    class="fixed inset-y-0 left-0 z-[60] bg-surface-1 border-r border-border-color flex flex-col transform transition-all duration-300 ease-in-out md:relative md:z-30 md:translate-x-0"
     :class="[
         mobileMenuOpen ? 'translate-x-0 w-[85vw] max-w-[320px] md:w-60' : '-translate-x-full md:translate-x-0',
         sidebarOpen ? 'md:w-60' : 'md:w-[64px]'
@@ -267,8 +267,8 @@
             <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Facturación" %}</span>
         </a>
 
-        <a href="{% url 'finance:supplier_reconciliation_ui' %}"
-            class="nav-item {% if 'liquidaciones' in request.path or 'supplier-reconciliation' in request.path %}nav-active{% endif %}"
+        <a href="{% url 'finance:liquidacion_dashboard' %}"
+            class="nav-item {% if 'liquidaciones' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">
             <span class="material-symbols-outlined text-[20px] shrink-0">account_balance_wallet</span>
             <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Liquidaciones" %}</span>

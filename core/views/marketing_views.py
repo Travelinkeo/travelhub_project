@@ -11,7 +11,6 @@ import logging
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from apps.automation.parsers.ticket_parser import extract_data_from_text
@@ -191,7 +190,6 @@ def public_pricing(request):
 
 
 @require_POST
-@csrf_exempt
 def parse_demo(request):
     """
     Endpoint HTMX para demo interactiva de parsing de boletos.
@@ -271,7 +269,6 @@ def demo_page(request):
 
 
 @require_POST
-@csrf_exempt
 def demo_request(request):
     """
     Endpoint HTMX para solicitar una demo.
@@ -332,7 +329,6 @@ def demo_request(request):
 
 
 @require_POST
-@csrf_exempt
 def lead_magnet_download(request):
     """
     Captura de email para lead magnet. Guarda el lead en BD,

@@ -76,7 +76,7 @@ class DataHealer:
                     # Si no tenemos un default inteligente, buscamos en el modelo si tiene un tipo analizable
                     # (Fallback básico para evitar crash)
                     healed_data[field] = None
-                    logger.warning(f"❔ Campo '{field}' no tiene default inteligente. Usando None.")
+                    logger.warning(f" Campo '{field}' no tiene default inteligente. Usando None.")
 
             try:
                 # Intento 2: Re-validación con datos curados
@@ -84,7 +84,7 @@ class DataHealer:
             except ValidationError as e2:
                 # Si falla de nuevo, creamos una instancia vacía pero válida si es posible
                 # (aunque esto es extremo, preferimos fallar aquí para boletos)
-                logger.error(f"💥 'Curación' insuficiente para {model_class.__name__}: {str(e2)}")
+                logger.error(f" 'Curación' insuficiente para {model_class.__name__}: {str(e2)}")
                 raise e2
 
     @classmethod

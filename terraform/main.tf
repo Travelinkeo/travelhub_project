@@ -1,6 +1,6 @@
 terraform {
   required_version = ">= 1.5.0"
-  
+
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -11,12 +11,11 @@ terraform {
       version = "~> 5.0"
     }
   }
-  
-  # Backend para almacenar el estado de Terraform en Cloud Storage
-  # (Se configura en inicialización para evitar hardcoding)
+
+  # Backend para almacenar el estado de Terraform en Cloud Storage.
+  # Inicializar con: terraform init -backend-config=backend.hcl
+  # (El bucket no se hardcodea aquí para no exponer credenciales en el repo)
   backend "gcs" {
-    # bucket  = "travelhub-terraform-state-prod"
-    # prefix  = "terraform/state"
   }
 }
 
@@ -43,19 +42,19 @@ resource "google_sql_database_instance" "postgres_primary" {
   settings {
     tier              = var.db_tier
     availability_type = var.environment == "prod" ? "REGIONAL" : "ZONAL"
-    
+
     backup_configuration {
       enabled                        = true
       point_in_time_recovery_enabled = true
       start_time                     = "03:00"
     }
-    
+
     ip_configuration {
       ipv4_enabled    = false # Privado por defecto
       private_network = google_compute_network.vpc.id
     }
   }
-  
+
   deletion_protection = var.environment == "prod" ? true : false
 }
 
@@ -82,14 +81,14 @@ resource "google_cloud_run_v2_service" "travelhub_api" {
   template {
     containers {
       image = "gcr.io/${var.project_id}/travelhub-api:latest"
-      
+
       resources {
         limits = {
           cpu    = "2"
           memory = "2Gi"
         }
       }
-      
+
       # Secrets inyectados desde Secret Manager
       env {
         name = "DATABASE_URL"
@@ -100,7 +99,7 @@ resource "google_cloud_run_v2_service" "travelhub_api" {
           }
         }
       }
-      
+
       # Variables normales
       env {
         name  = "ENVIRONMENT"
@@ -117,7 +116,7 @@ resource "google_cloud_run_v2_service" "travelhub_api" {
 # 4. Secret Manager (Gestión de Secretos)
 resource "google_secret_manager_secret" "db_url" {
   secret_id = "database_url_${var.environment}"
-  
+
   replication {
     auto {}
   }

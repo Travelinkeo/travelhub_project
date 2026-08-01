@@ -23,8 +23,8 @@ if m:
 .dark .bg-background-dark {{ background-color: #101922; }}
 .dark .border-border-dark {{ border-color: #283039; }}
 /* Input Fixes to match design */
-.form-input, .form-select {{ 
-    width: 100%; border-radius: 0.25rem; border: 1px solid #e2e8f0; height: 3rem; padding-left: 1rem; padding-right: 1rem; 
+.form-input, .form-select {{
+    width: 100%; border-radius: 0.25rem; border: 1px solid #e2e8f0; height: 3rem; padding-left: 1rem; padding-right: 1rem;
 }}
 .dark .form-input, .dark .form-select {{ border-color: #283039; background-color: #1b2127; color: white; }}
 </style>

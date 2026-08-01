@@ -18,10 +18,9 @@ echo "✅ PostgreSQL iniciado."
 # Fix permissions for appuser-writable directories
 mkdir -p /app/media/boletos_importados /app/staticfiles
 chown -R appuser:appgroup /app/media /app/staticfiles /app/boletos_importados 2>/dev/null || true
+chmod -R 755 /app/media /app/boletos_importados 2>/dev/null || true
 
-python manage.py migrate --noinput || echo "⚠️ Migrate falló (continuando)..."
-python manage.py collectstatic --noinput &
-echo "📦 collectstatic lanzado en background. Iniciando servidor..."
+echo "🚀 Iniciando servidor..."
 
-# Drop privileges to appuser for the main process
+# Drop privileges to appuser and execute container command
 exec runuser -u appuser -- "$@"

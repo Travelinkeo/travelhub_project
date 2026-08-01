@@ -1,25 +1,14 @@
-import logging
+import os
+
+# Must set DJANGO_SETTINGS_MODULE before importing anything that uses Django settings
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings.testing")
+
 import os
 import unittest.mock
 from decimal import Decimal
 
 import pytest
 from rest_framework.test import APIClient
-
-# Asegurar configuración de Django incluso si pytest-django no se auto-carga
-if "DJANGO_SETTINGS_MODULE" not in os.environ:
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "travelhub.settings")
-try:
-    import django  # noqa: E402
-    from django.conf import settings  # noqa: E402
-
-    if not settings.configured:  # pragma: no cover
-        django.setup()
-except Exception:  # pragma: no cover
-    # Si falla aquí, los tests fallarán luego con más contexto; evitamos romper import global.
-    pass
-
-logger = logging.getLogger(__name__)
 
 
 def pytest_configure(config):
@@ -28,6 +17,12 @@ def pytest_configure(config):
     import socket
 
     from django.conf import settings
+
+    # Skip database connection check for unit tests
+    markexpr = getattr(config.option, "markexpr", "") or ""
+    if "unit" in markexpr:
+        config._pg_unavailable = True
+        return
 
     pg_available = False
     hosts = ["test_db", "travelhub_db", "pgbouncer", "localhost", "127.0.0.1"]

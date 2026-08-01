@@ -56,14 +56,14 @@ class BCVClient:
                     break
 
             if tasa_usd:
-                logger.info(f"✅ Tasa oficial obtenida del API BCV: {tasa_usd} BSD/USD")
+                logger.info(f" Tasa oficial obtenida del API BCV: {tasa_usd} BSD/USD")
                 return tasa_usd
             else:
                 raise ValueError("Campo 'Dólar' no encontrado en el payload JSON")
 
         except Exception as e:
             # 3. Alerta y Fallback (Paso Crítico para Resiliencia)
-            logger.error(f"⚠️ FALLO EN ENDPOINT BCV: {str(e)}. Activando fallback de base de datos.")
+            logger.error(f" FALLO EN ENDPOINT BCV: {str(e)}. Activando fallback de base de datos.")
 
             try:
                 from apps.finance.models import TasaCambioBCV

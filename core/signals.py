@@ -4,7 +4,7 @@ from functools import partial
 from django.core.signals import request_finished
 from django.db import transaction
 from django.db.models.signals import post_save, pre_save
-from django.dispatch import receiver
+from django.dispatch import Signal, receiver
 
 from core.middleware import (
     agency_var,
@@ -29,6 +29,12 @@ def _on_commit(fn, *args, **kwargs):
 # -----------------------------------------------------
 
 logger = logging.getLogger(__name__)
+
+
+# Señal para procesar reportes de proveedor PDF recibidos por email.
+# Emitida por el dominio communications, escuchada por contabilidad
+# (evita la importación directa communications -> contabilidad).
+reporte_proveedor_pdf_recibido = Signal()
 
 
 @receiver(post_save, sender="bookings.BoletoImportado")

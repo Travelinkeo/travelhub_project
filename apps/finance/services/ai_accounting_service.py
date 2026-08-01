@@ -5,9 +5,6 @@
 # ROL: Asistente financiero e interactivo para chat y consultas complejas.
 # PRINCIPAL CARACTERÍSTICA: Interactivo. Utiliza Gemini chats con herramientas
 # dinámicas (Function Calling) para responder y ejecutar tareas en tiempo real.
-#
-# NOTA DE DISEÑO: No confundir con 'accounting_ai_service.py' (AccountingAIService),
-# el cual es el motor (CPA Engine) no interactivo de generación física de asientos.
 # ==============================================================================
 
 import json

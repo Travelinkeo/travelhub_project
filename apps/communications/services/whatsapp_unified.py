@@ -95,11 +95,11 @@ def send_whatsapp_message(
         if success:
             return {"success": True, "provider": "evolution"}
     except Exception as e:
-        logger.warning(f"⚠️ Evolution API falló para {number}: {e}")
+        logger.warning(f" Evolution API falló para {number}: {e}")
 
     # 2. FALLBACK A META (Solo si es texto)
     if not media_url:
-        logger.info(f"🔄 Reintentando vía Meta API para {number}...")
+        logger.info(f" Reintentando vía Meta API para {number}...")
         return enviar_mensaje_meta_api(number, text, agencia=agencia)
 
     return {
@@ -134,8 +134,29 @@ class WhatsAppService:
 
     @classmethod
     def start_session(cls, session_name: str):
-        """Crea la instancia en Evolution."""
-        return EvolutionService.create_instance(session_name)
+        """Crea o recrea la instancia en Evolution.
+
+        Si la instancia ya existe (incluso en estado 'close'), la elimina
+        primero para poder crearla con webhook actualizado.
+        Cachea el QR de la respuesta de creación en Redis si está disponible.
+        """
+        from django.core.cache import cache
+
+        state = EvolutionService.get_instance_state(session_name)
+        if state in ("open", "connecting"):
+            return True
+        result = EvolutionService.create_instance(session_name)
+
+        if result and isinstance(result, dict):
+            qr_data = result.get("qrcode")
+            if qr_data and isinstance(qr_data, dict):
+                qr_b64 = qr_data.get("base64") or qr_data.get("code")
+                if qr_b64:
+                    cache.set(f"evo_qr:{session_name}", qr_b64, 300)
+                    logger.info(
+                        f"QR cacheado en Redis desde creación de instancia '{session_name}'"
+                    )
+        return result
 
     @classmethod
     def get_qr_code(cls, session_name: str):
@@ -226,7 +247,7 @@ def enviar_whatsapp(telefono: str, mensaje: str, **kwargs) -> bool:
                     )
                     return True
             except Exception as e:
-                logger.warning(f"⚠️ Falló envío WhatsApp vía Meta API: {e}. Cayendo a Twilio.")
+                logger.warning(f" Falló envío WhatsApp vía Meta API: {e}. Cayendo a Twilio.")
 
     # 3. Fallback a Twilio Global
     client = get_twilio_client()
@@ -240,13 +261,15 @@ def enviar_whatsapp(telefono: str, mensaje: str, **kwargs) -> bool:
             logger.error("TWILIO_WHATSAPP_NUMBER no configurado")
             return False
 
-        # Asegurar formato whatsapp:+número
-        if not telefono.startswith("whatsapp:"):
-            telefono = f"whatsapp:{telefono}"
-        if not twilio_number.startswith("whatsapp:"):
-            twilio_number = f"whatsapp:{twilio_number}"
+        # Asegurar formato whatsapp:+número (sin mutar el telefono original)
+        destinatario = telefono
+        if not destinatario.startswith("whatsapp:"):
+            destinatario = f"whatsapp:{destinatario}"
+        twilio_from = twilio_number
+        if not twilio_from.startswith("whatsapp:"):
+            twilio_from = f"whatsapp:{twilio_from}"
 
-        msg_params = {"from_": twilio_number, "body": mensaje, "to": telefono}
+        msg_params = {"from_": twilio_from, "body": mensaje, "to": destinatario}
 
         # Soporte para adjuntos (PDF/Imagen) si se proporciona URL pública
         if media_url:
@@ -466,7 +489,7 @@ Un cliente te acaba de escribir por WhatsApp. Analiza su mensaje.
                     cantidad_pasajeros=resultado.pasajeros,
                     notas_ia=f"Interés en viajar de {resultado.origen} a {resultado.destino} en {resultado.fechas}. Pax: {resultado.pasajeros}",
                 )
-                logger.info(f"✨ ¡Nuevo Lead creado! {nombre_perfil} ➔ {resultado.destino}")
+                logger.info(f" ¡Nuevo Lead creado! {nombre_perfil}  {resultado.destino}")
 
                 # 5. Avisar al humano (Agente) por Telegram
                 from apps.common.tasks import send_telegram_task

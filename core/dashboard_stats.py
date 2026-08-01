@@ -81,7 +81,7 @@ def get_dashboard_stats(agencia):
 
     # Margen promedio (Nivel 4 Profitability)
     items_con_margen = items_qs.filter(
-        venta__fecha_venta__gte=inicio_mes, costo_neto_proveedor__isnull=False
+        venta__fecha_venta__date__gte=inicio_mes, costo_neto_proveedor__isnull=False
     ).aggregate(
         total_venta=Sum("total_item_venta"),
         total_costo=Sum("costo_neto_proveedor"),

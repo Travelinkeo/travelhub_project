@@ -97,7 +97,7 @@ class GeminiMigrationValidator:
                 travel_date=travel_date,
             )
 
-            logger.info(f"🤖 Consultando Gemini: {nationality} → {destination}")
+            logger.info(f" Consultando Gemini: {nationality}  {destination}")
 
             response = client.models.generate_content(model=self.model_name, contents=prompt)
             raw_text = response.text

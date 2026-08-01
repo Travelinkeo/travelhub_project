@@ -241,11 +241,15 @@ jobs:
             docker tag $REGISTRY_URL \${COMPOSE_PROJECT}_celery_beat:latest
 
             cd /opt/travelhub
+
+            echo 'Running migrations first...'
+            docker compose run --rm web python manage.py migrate --noinput
+
+            echo 'Collecting static files...'
+            docker compose run --rm web python manage.py collectstatic --noinput
+
             echo 'Restarting services...'
             docker compose up -d web nginx celery_worker celery_notifications celery_beat
-
-            echo 'Running migrations...'
-            docker compose exec -T web python manage.py migrate --noinput
 
             echo 'Health check...'
             sleep 15

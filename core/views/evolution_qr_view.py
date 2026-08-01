@@ -156,8 +156,13 @@ def whatsapp_qr_health(request, instance_name=None):
     Soporta 2 modos:
       * GET /system/whatsapp/health/             — evalúa TODAS las agencias activas
       * GET /system/whatsapp/health/<instance>/   — evalúa una agencia específica
+
+    Seguridad (P1-24): el modo agregado enumera todas las agencias activas y su
+    estado de conexión, por lo que SIEMPRE exige el header 'apikey'
+    (WHATSAPP_MICROSERVICE_TOKEN), incluso en DEBUG. El check de una sola
+    instancia solo requiere auth en producción.
     """
-    if not settings.DEBUG:
+    if not instance_name or not settings.DEBUG:
         expected = getattr(settings, "WHATSAPP_MICROSERVICE_TOKEN", None)
         received = request.headers.get("apikey", "")
         if not expected or received != expected:

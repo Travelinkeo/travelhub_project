@@ -80,6 +80,26 @@ class Cliente(AgenciaMixin, SoftDeleteModel, models.Model):
     telegram_chat_id = models.CharField(
         max_length=50, blank=True, help_text="Chat ID del cliente en Telegram para notificaciones"
     )
+    telegram_subscribed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Fecha y hora de autoconexión del cliente al bot de Telegram",
+    )
+    whatsapp_opt_in = models.BooleanField(
+        default=True, help_text="Indica si el cliente acepta notificaciones por WhatsApp"
+    )
+
+    class PreferredChannel(models.TextChoices):
+        EMAIL = "email", "Email"
+        WHATSAPP = "whatsapp", "WhatsApp"
+        TELEGRAM = "telegram", "Telegram"
+
+    preferred_channel = models.CharField(
+        max_length=20,
+        choices=PreferredChannel.choices,
+        default=PreferredChannel.WHATSAPP,
+        help_text="Canal preferido del cliente para recibir notificaciones",
+    )
 
     pasajeros = models.ManyToManyField("Pasajero", blank=True, related_name="clientes_asociados")
 
@@ -94,6 +114,18 @@ class Cliente(AgenciaMixin, SoftDeleteModel, models.Model):
     def __str__(self):
         """__str__."""
         return f"{self.nombres} {self.apellidos or ''}".strip()
+
+    def get_telegram_onboarding_url(self) -> str | None:
+        """Genera el enlace t.me/BotUsername?start=cli_<uuid> para autoinscripción del pasajero."""
+        if not self.agencia:
+            return None
+        cfg_api = getattr(self.agencia, "configuracion_api", {}) or {}
+        bot_username = cfg_api.get("TELEGRAM_BOT_USERNAME") or getattr(
+            settings, "TELEGRAM_BOT_USERNAME", None
+        )
+        if not bot_username:
+            return None
+        return f"https://t.me/{bot_username}?start=cli_{self.uuid}"
 
     def calcular_cliente_frecuente(self):
         """

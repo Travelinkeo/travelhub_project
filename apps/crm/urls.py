@@ -109,6 +109,12 @@ urlpatterns = [
     path(
         "webhook/evolution/", webhook_views.EvolutionWebhookView.as_view(), name="evolution_webhook"
     ),
+    path("webhook/telegram/", webhook_views.TelegramWebhookView.as_view(), name="telegram_webhook"),
+    path(
+        "webhook/telegram/<int:agencia_id>/",
+        webhook_views.TelegramWebhookView.as_view(),
+        name="telegram_webhook_tenant",
+    ),
     # Kanban CRM
     path("kanban/", kanban_views.KanbanBoardView.as_view(), name="kanban_board"),
     path("kanban/update/", kanban_views.UpdateLeadStageView.as_view(), name="kanban_update_stage"),

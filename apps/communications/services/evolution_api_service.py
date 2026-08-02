@@ -284,13 +284,42 @@ class EvolutionService:
             return {"success": False, "error": str(e)}
 
     @classmethod
+    def _check_and_increment_rate_limit(cls, instance_name: str, max_per_hour: int = 30) -> bool:
+        """Verifica e incrementa el contador de mensajes salientes para la instancia.
+
+        Límite configurable por EVOLUTION_MAX_MSG_PER_HOUR en settings (default: 30 msgs/hora).
+        Protege las líneas de las agencias contra detecciones de spam y bans de Meta.
+
+        Returns:
+            bool: True si el envío está permitido, False si superó el límite.
+        """
+        limit = getattr(settings, "EVOLUTION_MAX_MSG_PER_HOUR", max_per_hour)
+        key = f"evo_rate:{instance_name}"
+        try:
+            count = cache.get(key, 0)
+            if count >= limit:
+                logger.warning(
+                    f"⚠️ [EvolutionRateLimit] Instancia '{instance_name}' superó el límite "
+                    f"de {limit} msgs/hora ({count}/{limit}). Mensaje bloqueado para prevenir ban."
+                )
+                return False
+            cache.set(key, count + 1, timeout=3600)
+            return True
+        except Exception as e:
+            logger.warning(f"⚠️ [EvolutionRateLimit] Error consultando caché: {e}")
+            return True
+
+    @classmethod
     def send_text(cls, instance_name: str, number: str, text: str):
         """EnvÃ­a un mensaje de texto simple con auto-provisioning y circuit breaker."""
         return whatsapp_circuit_breaker.call(cls._send_text_internal, instance_name, number, text)
 
     @classmethod
     def _send_text_internal(cls, instance_name: str, number: str, text: str):
-        """Internal send implementation protected by circuit breaker."""
+        """Internal send implementation protected by circuit breaker and rate limiter."""
+        if not cls._check_and_increment_rate_limit(instance_name):
+            return False
+
         cls._ensure_instance(instance_name)
 
         url = f"{cls._get_base_url()}/message/sendText/{instance_name}"
@@ -342,7 +371,10 @@ class EvolutionService:
         caption: str = "",
         file_name: str = "documento.pdf",
     ):
-        """Internal media send implementation protected by circuit breaker."""
+        """Internal media send implementation protected by circuit breaker and rate limiter."""
+        if not cls._check_and_increment_rate_limit(instance_name):
+            return False
+
         cls._ensure_instance(instance_name)
 
         url = f"{cls._get_base_url()}/message/sendMedia/{instance_name}"

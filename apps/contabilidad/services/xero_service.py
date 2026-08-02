@@ -12,10 +12,9 @@ Configuración en settings.py:
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.conf import settings
-from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -161,7 +160,7 @@ class XeroService:
                 date=factura.fecha_emision.strftime("%Y-%m-%d")
                 if factura.fecha_emision
                 else datetime.now().strftime("%Y-%m-%d"),
-                due_date=(factura.fecha_emision + timezone.timedelta(days=30)).strftime("%Y-%m-%d")
+                due_date=(factura.fecha_emision + timedelta(days=30)).strftime("%Y-%m-%d")
                 if factura.fecha_emision
                 else None,
                 reference=factura.numero_factura or f"TravelHub #{factura.pk}",

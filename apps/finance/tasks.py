@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 
 from celery import shared_task
 
@@ -98,7 +99,7 @@ def auditar_fuga_ingresos_task(**kwargs):
     agencia_activa = get_current_agency()
 
     alertas = 0
-    limite_tiempo = timezone.now() - timezone.timedelta(days=3)
+    limite_tiempo = timezone.now() - timedelta(days=3)
 
     if agencia_activa:
         agencias = [agencia_activa]

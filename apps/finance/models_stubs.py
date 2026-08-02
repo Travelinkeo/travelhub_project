@@ -1,4 +1,5 @@
 import uuid
+from datetime import timedelta
 from decimal import Decimal
 
 import django.utils.timezone
@@ -293,7 +294,7 @@ class LinkDePago(AgenciaMixinStubs):
     def save(self, *args, **kwargs):
         """save."""
         if not self.expira_en:
-            self.expira_en = django.utils.timezone.now() + django.utils.timezone.timedelta(hours=24)
+            self.expira_en = django.utils.timezone.now() + timedelta(hours=24)
         super().save(*args, **kwargs)
 
     @property

@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import timedelta
 from decimal import Decimal
 from typing import Any
 
@@ -260,12 +261,11 @@ class SmartReconciliationService:
         query_local = BoletoImportado.objects.filter(agencia=reporte.agencia)
         if reporte.periodo_inicio:
             query_local = query_local.filter(
-                fecha_emision_boleto__gte=reporte.periodo_inicio
-                - timezone.timedelta(days=buffer_dias)
+                fecha_emision_boleto__gte=reporte.periodo_inicio - timedelta(days=buffer_dias)
             )
         if reporte.periodo_fin:
             query_local = query_local.filter(
-                fecha_emision_boleto__lte=reporte.periodo_fin + timezone.timedelta(days=buffer_dias)
+                fecha_emision_boleto__lte=reporte.periodo_fin + timedelta(days=buffer_dias)
             )
 
         from django.db.models import F

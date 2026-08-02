@@ -1,127 +1,98 @@
 from django import forms
 
-from apps.bookings.models import BoletoImportado, FeeVenta
+from apps.bookings.models import TarifaHabitacion, TipoHabitacion
 
 
-class FeeVentaForm(forms.ModelForm):
-    """FeeVentaForm."""
+class TarifaHabitacionForm(forms.ModelForm):
+    """Formulario para que cada agencia administre sus tarifas por habitación y vigencia."""
 
     class Meta:
-        model = FeeVenta
-        fields = ["tipo_fee", "monto", "moneda", "descripcion", "es_comision_agencia"]
+        model = TarifaHabitacion
+        fields = [
+            "tipo_habitacion",
+            "nombre_temporada",
+            "fecha_inicio",
+            "fecha_fin",
+            "moneda",
+            "tipo_tarifa",
+            "tarifa_sgl",
+            "tarifa_dbl",
+            "tarifa_tpl",
+            "tarifa_cpl",
+            "tarifa_nino",
+        ]
         widgets = {
-            "tipo_fee": forms.Select(
+            "fecha_inicio": forms.DateInput(
                 attrs={
-                    "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-4 py-2 w-full"
+                    "type": "date",
+                    "class": "w-full rounded-lg border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-primary)] p-2.5",
                 }
             ),
-            "monto": forms.NumberInput(
+            "fecha_fin": forms.DateInput(
                 attrs={
-                    "step": "0.01",
-                    "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-4 py-2 w-full",
+                    "type": "date",
+                    "class": "w-full rounded-lg border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-primary)] p-2.5",
+                }
+            ),
+            "nombre_temporada": forms.TextInput(
+                attrs={
+                    "placeholder": "Ej: Temporada Alta 2026 / Especial",
+                    "class": "w-full rounded-lg border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-primary)] p-2.5",
+                }
+            ),
+            "tipo_habitacion": forms.Select(
+                attrs={
+                    "class": "w-full rounded-lg border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-primary)] p-2.5"
                 }
             ),
             "moneda": forms.Select(
                 attrs={
-                    "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-4 py-2 w-full"
+                    "class": "w-full rounded-lg border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-primary)] p-2.5"
                 }
             ),
-            "descripcion": forms.TextInput(
+            "tipo_tarifa": forms.Select(
                 attrs={
-                    "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-4 py-2 w-full",
-                    "placeholder": "Ej. Fee de Emisión",
+                    "class": "w-full rounded-lg border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-primary)] p-2.5"
                 }
             ),
-            "es_comision_agencia": forms.CheckboxInput(
+            "tarifa_sgl": forms.NumberInput(
                 attrs={
-                    "class": "rounded border-gray-700 text-primary focus:ring-primary bg-gray-800/50 w-5 h-5"
+                    "step": "0.01",
+                    "placeholder": "0.00",
+                    "class": "w-full rounded-lg border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-primary)] p-2.5",
+                }
+            ),
+            "tarifa_dbl": forms.NumberInput(
+                attrs={
+                    "step": "0.01",
+                    "placeholder": "0.00",
+                    "class": "w-full rounded-lg border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-primary)] p-2.5",
+                }
+            ),
+            "tarifa_tpl": forms.NumberInput(
+                attrs={
+                    "step": "0.01",
+                    "placeholder": "0.00",
+                    "class": "w-full rounded-lg border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-primary)] p-2.5",
+                }
+            ),
+            "tarifa_cpl": forms.NumberInput(
+                attrs={
+                    "step": "0.01",
+                    "placeholder": "0.00",
+                    "class": "w-full rounded-lg border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-primary)] p-2.5",
+                }
+            ),
+            "tarifa_nino": forms.NumberInput(
+                attrs={
+                    "step": "0.01",
+                    "placeholder": "0.00",
+                    "class": "w-full rounded-lg border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-primary)] p-2.5",
                 }
             ),
         }
 
-
-class BoletoManualForm(forms.ModelForm):
-    """BoletoManualForm."""
-
-    class Meta:
-        model = BoletoImportado
-        fields = [
-            "numero_boleto",
-            "nombre_pasajero_completo",
-            "ruta_vuelo",
-            "fecha_emision_boleto",
-            "aerolinea_emisora",
-            "direccion_aerolinea",
-            "agente_emisor",
-            "foid_pasajero",
-            "localizador_pnr",
-            "tarifa_base",
-            "impuestos_descripcion",
-            "total_boleto",
-        ]
-        widgets = {
-            "ruta_vuelo": forms.Textarea(attrs={"rows": 4}),
-            "impuestos_descripcion": forms.Textarea(attrs={"rows": 3}),
-            "fecha_emision_boleto": forms.DateInput(attrs={"type": "date"}),
-        }
-
-
-class BoletoFileUploadForm(forms.ModelForm):
-    """BoletoFileUploadForm."""
-
-    class Meta:
-        model = BoletoImportado
-        fields = ["archivo_boleto"]
-
-
-class BoletoAereoUpdateForm(forms.ModelForm):
-    """BoletoAereoUpdateForm."""
-
-    class Meta:
-        model = BoletoImportado
-        fields = [
-            "tarifa_base",
-            "impuestos_total_calculado",
-            "total_boleto",
-            "exchange_monto",
-            "void_monto",
-            "fee_servicio",
-            "igtf_monto",
-            "comision_agencia",
-        ]
-        widgets = {
-            "tarifa_base": forms.NumberInput(
-                attrs={"step": "0.01", "class": "form-control form-control-sm"}
-            ),
-            "impuestos_total_calculado": forms.NumberInput(
-                attrs={"step": "0.01", "class": "form-control form-control-sm"}
-            ),
-            "total_boleto": forms.NumberInput(
-                attrs={"step": "0.01", "class": "form-control form-control-sm"}
-            ),
-            "exchange_monto": forms.NumberInput(
-                attrs={"step": "0.01", "class": "form-control form-control-sm"}
-            ),
-            "void_monto": forms.NumberInput(
-                attrs={"step": "0.01", "class": "form-control form-control-sm text-danger"}
-            ),
-            "fee_servicio": forms.NumberInput(
-                attrs={"step": "0.01", "class": "form-control form-control-sm"}
-            ),
-            "igtf_monto": forms.NumberInput(
-                attrs={"step": "0.01", "class": "form-control form-control-sm"}
-            ),
-            "comision_agencia": forms.NumberInput(
-                attrs={"step": "0.01", "class": "form-control form-control-sm"}
-            ),
-        }
-
-    def clean(self):
-        """clean."""
-        cleaned = super().clean()
-        tarifa = cleaned.get("tarifa_base")
-        impuestos = cleaned.get("impuestos_total_calculado")
-        total = cleaned.get("total_boleto")
-        if tarifa is not None and impuestos is not None and total is None:
-            cleaned["total_boleto"] = tarifa + impuestos
-        return cleaned
+    def __init__(self, *args, hotel=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if hotel:
+            self.fields["tipo_habitacion"].queryset = TipoHabitacion.objects.filter(hotel=hotel)

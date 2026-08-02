@@ -55,16 +55,8 @@ def notificar_pago_whatsapp_task(venta_id, **kwargs):
 
 def cls_notificar_infraccion_pasaporte(venta, pasajero, fecha_viaje):
     """cls_notificar_infraccion_pasaporte."""
-    from django.conf import settings
 
-    bot_token = getattr(settings, "TELEGRAM_BOT_TOKEN", None)
-    chat_id = getattr(
-        settings, "TELEGRAM_OPERACIONES_CHAT_ID", getattr(settings, "TELEGRAM_GROUP_ID", None)
-    )
-
-    if not bot_token or not chat_id:
-        logger.warning("Telegram configuration missing for passport violation notification")
-        return
+    agencia = getattr(venta, "agencia", None)
 
     mensaje = (
         f"⚠️ <b>COMPLIANCE GUARD | INFRACCIÓN CRM</b>\n"
@@ -78,16 +70,19 @@ def cls_notificar_infraccion_pasaporte(venta, pasajero, fecha_viaje):
         f"❌ <i>El pasaporte cuenta con menos de 6 meses de vigencia obligatoria para la fecha del vuelo. Contactar de inmediato al cliente.</i>"
     )
 
-    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-    try:
-        response = requests.post(
-            url, json={"chat_id": chat_id, "text": mensaje, "parse_mode": "HTML"}, timeout=5
-        )
-        logger.info(
-            f"Notification sent to Telegram (passport violation). Status: {response.status_code}"
-        )
-    except Exception as e:
-        logger.error(f"Error sending Telegram notification: {e}")
+    from apps.communications.services.telegram_unified import TelegramNotificationService
+
+    buttons = [
+        [
+            {"text": "✅ Aprobar Excepción", "callback_data": f"approve_passport_{venta.id}"},
+            {
+                "text": "📋 Ver en TravelHub",
+                "url": f"https://travelhub.cc/bookings/venta/{venta.id}/",
+            },
+        ]
+    ]
+    keyboard = TelegramNotificationService.build_inline_keyboard(buttons)
+    TelegramNotificationService.send_message(mensaje, agencia=agencia, reply_markup=keyboard)
 
 
 def cls_notificar_urgency_time_limit(venta):

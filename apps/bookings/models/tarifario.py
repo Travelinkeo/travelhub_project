@@ -260,7 +260,7 @@ class TipoHabitacion(models.Model):
         return f"{self.hotel.nombre} - {self.nombre}"
 
 
-class TarifaHabitacion(models.Model):
+class TarifaHabitacion(AgenciaMixin, models.Model):
     """Tarifa de una habitación por período"""
 
     tipo_habitacion = models.ForeignKey(

@@ -1586,3 +1586,55 @@ def limpiar_celery_results(days=30):
 
 _WHATSAPP_HEALTH_LAST_STATE_KEY = "monitor:whatsapp_health:last_state"
 _WHATSAPP_HEALTH_LAST_STATE_TTL = 3600  # 1 hora de gracia (evita reset)
+
+
+@shared_task(
+    name="core.tasks.monitor_evolution_instances_task",
+    time_limit=180,
+    soft_time_limit=150,
+)
+def monitor_evolution_instances_task():
+    """Revisa el estado de conexión de la instancia WhatsApp (Evolution API) de cada agencia.
+
+    Si una instancia cambia de 'open' a 'close', 'disconnected' o 'connecting',
+    envía una alerta crítica al canal de Telegram staff de la agencia correspondiente.
+    """
+    from apps.communications.services.evolution_api_service import EvolutionService
+    from apps.communications.services.telegram_unified import TelegramNotificationService
+    from core.models.agencia import Agencia
+
+    agencias = Agencia.objects.filter(is_active=True)
+    report = []
+
+    for agencia in agencias:
+        instance_name = None
+        if hasattr(agencia, "configuracion") and agencia.configuracion:
+            instance_name = getattr(agencia.configuracion, "evolution_instance_name", None)
+        if not instance_name:
+            instance_name = f"agencia_{agencia.id}"
+
+        current_state = EvolutionService.get_instance_state(instance_name)
+        cache_key = f"evo_state:{instance_name}"
+        previous_state = cache.get(cache_key)
+
+        if (previous_state is None or previous_state == "open") and current_state not in (
+            "open",
+            "connecting",
+        ):
+            logger.warning(
+                f"[EvoMonitor] Agencia '{agencia.nombre}' (Instancia: '{instance_name}') "
+                f"desconectada! Estado actual: '{current_state}'"
+            )
+            msg = (
+                f"🚨 <b>Alerta de WhatsApp - {agencia.nombre}</b>\n\n"
+                f"La instancia de WhatsApp <code>{instance_name}</code> se ha desconectado.\n"
+                f"<b>Estado actual:</b> {current_state.upper()}\n\n"
+                f"Por favor ingresa al panel de la agencia para escanear el código QR "
+                f"y reconectar el servicio."
+            )
+            TelegramNotificationService.send_message(msg, agencia=agencia)
+
+        cache.set(cache_key, current_state, timeout=86400)
+        report.append(f"{agencia.nombre}: {current_state}")
+
+    return f"Monitoreo de instancias completado. Resultados: {', '.join(report)}"

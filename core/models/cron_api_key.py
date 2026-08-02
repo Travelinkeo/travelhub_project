@@ -1,6 +1,7 @@
 import hashlib
 import logging
 import secrets
+from datetime import timedelta
 
 from django.db import models
 from django.utils import timezone
@@ -75,9 +76,7 @@ class CronApiKey(models.Model):
         salt, key_hash_pbkdf2 = _hash_key(raw_key)
         prefix = raw_key[:10]
         lookup_hash = hashlib.sha256(raw_key.encode()).hexdigest()
-        expires_at = (
-            timezone.now() + timezone.timedelta(days=expires_days) if expires_days else None
-        )
+        expires_at = timezone.now() + timedelta(days=expires_days) if expires_days else None
 
         instance = cls.objects.create(
             agencia=agencia,

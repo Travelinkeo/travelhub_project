@@ -1,9 +1,8 @@
 import logging
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 from django.db import transaction
-from django.utils import timezone
 
 from apps.bookings.models import PagoVenta
 from apps.finance.models import Factura, ItemFactura, TasaCambioBCV
@@ -233,7 +232,7 @@ class ContabilidadService:
             if mes == 12:
                 ultimo_dia = date(anio, 12, 31)
             else:
-                ultimo_dia = date(anio, mes + 1, 1) - timezone.timedelta(days=1)
+                ultimo_dia = date(anio, mes + 1, 1) - timedelta(days=1)
 
             ingresos_mes = MovimientoContable.objects.filter(
                 asiento__fecha_contable__range=(primer_dia, ultimo_dia),

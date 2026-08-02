@@ -73,9 +73,11 @@ class RevenueAuditorService:
 
     def run_full_audit(self, days=30, agencia=None):
         """Ejecuta una auditoría sobre las ventas de los últimos X días."""
+        from datetime import timedelta
+
         from django.utils import timezone
 
-        start_date = timezone.now() - timezone.timedelta(days=days)
+        start_date = timezone.now() - timedelta(days=days)
 
         ventas = Venta.all_objects.filter(fecha_venta__gte=start_date, is_deleted=False)
         if agencia:

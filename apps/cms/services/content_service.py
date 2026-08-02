@@ -133,3 +133,43 @@ class AIContentService:
         except Exception as e:
             logger.error(f"Error generando posts para artículo {articulo_id}: {e}")
             raise
+
+    def publish_post_to_telegram_channel(self, post_id: int, agencia=None) -> bool:
+        """Publica un post de redes sociales (plataforma TELEGRAM) directamente al canal de Telegram de la agencia.
+
+        Args:
+            post_id: ID de PostRedesSociales.
+            agencia: Instancia de Agencia (opcional).
+        Returns:
+            bool: True si el mensaje se publicó con éxito.
+        """
+        from apps.cms.models import PostRedesSociales
+        from apps.communications.services.telegram_unified import TelegramNotificationService
+
+        try:
+            post = PostRedesSociales.objects.get(pk=post_id)
+            if post.plataforma != PostRedesSociales.Plataforma.TELEGRAM:
+                logger.warning(f"Post {post_id} no es de plataforma TELEGRAM.")
+                return False
+
+            mensaje = f"{post.contenido}\n\n{post.hashtags or ''}".strip()
+
+            if hasattr(post.articulo, "imagen_destacada") and post.articulo.imagen_destacada:
+                img_path = (
+                    post.articulo.imagen_destacada.path
+                    if hasattr(post.articulo.imagen_destacada, "path")
+                    else post.articulo.imagen_destacada.url
+                )
+                TelegramNotificationService.send_document(
+                    img_path, caption=mensaje, agencia=agencia
+                )
+            else:
+                TelegramNotificationService.send_message(mensaje, agencia=agencia)
+
+            post.esta_publicado = True
+            post.save(update_fields=["esta_publicado"])
+            logger.info(f"Post CMS #{post_id} publicado exitosamente en Telegram.")
+            return True
+        except Exception as e:
+            logger.error(f"Error publicando post CMS #{post_id} a Telegram: {e}")
+            return False

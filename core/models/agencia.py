@@ -210,6 +210,16 @@ class Agencia(models.Model):
         return cfg.telegram_chat_id if cfg else None
 
     @property
+    def telegram_storage_channel_id(self):
+        """Canal de Telegram para almacenamiento de archivos (PDFs, logos).
+
+        Retorna el canal dedicado de storage si esta configurado,
+        o None (el servicio usara telegram_chat_id como fallback).
+        """
+        cfg = self._safe_config()
+        return cfg.telegram_storage_channel_id if cfg else None
+
+    @property
     def correo_emisiones(self):
         cfg = self._safe_config()
         return cfg.correo_emisiones if cfg else None
@@ -519,7 +529,19 @@ class AgenciaConfiguracion(models.Model):
     correo_emisiones = models.EmailField(max_length=255, blank=True, null=True)
     password_app_correo = EncryptedCharField(max_length=255, blank=True, null=True)
     telegram_bot_token = EncryptedCharField(max_length=255, blank=True, null=True)
-    telegram_chat_id = models.CharField(max_length=255, blank=True, null=True)
+    telegram_chat_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Chat ID del canal/grupo principal de notificaciones del staff",
+    )
+    telegram_storage_channel_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="ID del canal privado de Telegram para almacenamiento de archivos (PDFs, logos). "
+        "Si esta vacio, se usara telegram_chat_id como fallback.",
+    )
 
     # Monitor IMAP
     email_monitor_host = models.CharField(max_length=255, default="imap.gmail.com")

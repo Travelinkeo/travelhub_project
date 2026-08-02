@@ -34,6 +34,11 @@
 
                 <!-- Botones Acción -->
                 <div class="absolute bottom-3 right-3 flex gap-2">
+                    <button id="btnOpenRateModal"
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold shadow-md flex items-center gap-1.5 transition-all hover:scale-105">
+                        <span class="material-symbols-outlined w-3.5 h-3.5">payments</span> + Cargar Tarifa Agencia
+                    </button>
+
                     <button id="btnOpenMarketing"
                         class="bg-gradient-to-r from-pink-500 to-indigo-600 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold shadow-md hover:bg-white text-white flex items-center gap-1.5 transition-all hover:scale-105">
                         <span class="material-symbols-outlined w-3 h-3">auto_fix_high</span> Marketing AI
@@ -128,6 +133,35 @@
                                     </span>
                                 </div>
                                 <p class="text-xs text-[var(--text-secondary)] line-clamp-1">{{ hab.descripcion }}</p>
+
+                                <!-- Tarifas Vigentes Agencia -->
+                                <div class="mt-2.5 pt-2 border-t border-[var(--border)] space-y-1.5">
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[12px] text-emerald-500">calendar_clock</span>
+                                        Tarifas Vigentes Agencia
+                                    </p>
+                                    {% if hab.tarifas_agencia %}
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                                        {% for t in hab.tarifas_agencia %}
+                                            <div class="bg-[var(--surface-2)] p-2 rounded-lg text-xs border border-[var(--border)] flex justify-between items-center">
+                                                <div>
+                                                    <span class="font-bold text-[var(--text-primary)] block truncate max-w-[140px]">{{ t.nombre_temporada|default:"Tarifa Base" }}</span>
+                                                    <div class="text-[10px] text-[var(--text-muted)]">
+                                                        {{ t.fecha_inicio|date:"d/m/Y" }} - {{ t.fecha_fin|date:"d/m/Y" }}
+                                                    </div>
+                                                </div>
+                                                <div class="text-right font-extrabold text-emerald-500 text-xs shrink-0">
+                                                    {% if t.tarifa_dbl %}{{ t.moneda }} ${{ t.tarifa_dbl }} <span class="text-[9px] text-[var(--text-muted)] font-normal">DBL</span>
+                                                    {% elif t.tarifa_sgl %}{{ t.moneda }} ${{ t.tarifa_sgl }} <span class="text-[9px] text-[var(--text-muted)] font-normal">SGL</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <p class="text-[11px] text-[var(--text-muted)] italic">Sin tarifas registradas para esta habitación por tu agencia.</p>
+                                    {% endif %}
+                                </div>
                             </div>
 
                             <!-- Botón Seleccionar -->
@@ -739,5 +773,102 @@
             errorMsg.classList.remove('hidden');
         }
     }
+
+    // Modal Cargar Tarifa Agencia Handler
+    const btnOpenRateModal = document.getElementById('btnOpenRateModal');
+    const btnCloseRateModal = document.getElementById('btnCloseRateModal');
+    const btnCancelRateModal = document.getElementById('btnCancelRateModal');
+    const rateModal = document.getElementById('rateModal');
+
+    if (btnOpenRateModal && rateModal) {
+        btnOpenRateModal.addEventListener('click', () => rateModal.classList.remove('hidden'));
+    }
+    if (btnCloseRateModal && rateModal) {
+        btnCloseRateModal.addEventListener('click', () => rateModal.classList.add('hidden'));
+    }
+    if (btnCancelRateModal && rateModal) {
+        btnCancelRateModal.addEventListener('click', () => rateModal.classList.add('hidden'));
+    }
 </script>
+
+<!-- Modal Cargar Tarifa Agencia -->
+<div id="rateModal" class="fixed inset-0 z-[70] bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[var(--surface-1)] w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden border border-[var(--border)]">
+        <div class="p-4 border-b border-[var(--border)] flex justify-between items-center bg-[var(--surface-2)]">
+            <h3 class="font-bold text-[var(--text-primary)] flex items-center gap-2 text-base">
+                <span class="material-symbols-outlined text-emerald-500">payments</span>
+                Agregar Tarifa por Habitación y Vigencia
+            </h3>
+            <button id="btnCloseRateModal" class="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <form method="POST" action="." class="p-5 space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="agregar_tarifa">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-[var(--text-secondary)] mb-1">Tipo de Habitación</label>
+                    {{ tarifa_form.tipo_habitacion }}
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-[var(--text-secondary)] mb-1">Nombre de Temporada / Período</label>
+                    {{ tarifa_form.nombre_temporada }}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-[var(--text-secondary)] mb-1">Fecha Inicio</label>
+                    {{ tarifa_form.fecha_inicio }}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-[var(--text-secondary)] mb-1">Fecha Fin</label>
+                    {{ tarifa_form.fecha_fin }}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-[var(--text-secondary)] mb-1">Moneda</label>
+                    {{ tarifa_form.moneda }}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-[var(--text-secondary)] mb-1">Tipo de Tarifa</label>
+                    {{ tarifa_form.tipo_tarifa }}
+                </div>
+            </div>
+
+            <div class="border-t border-[var(--border)] pt-3">
+                <p class="text-xs font-bold text-[var(--text-primary)] mb-2">Tarifas por Ocupación ($/€)</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] mb-1">SGL (Simple)</label>
+                        {{ tarifa_form.tarifa_sgl }}
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] mb-1">DBL (Doble)</label>
+                        {{ tarifa_form.tarifa_dbl }}
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] mb-1">TPL (Triple)</label>
+                        {{ tarifa_form.tarifa_tpl }}
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] mb-1">CPL (Cuádruple)</label>
+                        {{ tarifa_form.tarifa_cpl }}
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-[var(--text-muted)] mb-1">Niño (CHD)</label>
+                        {{ tarifa_form.tarifa_nino }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 border-t border-[var(--border)] pt-4">
+                <button type="button" id="btnCancelRateModal" class="px-4 py-2 bg-[var(--surface-2)] text-[var(--text-secondary)] rounded-lg text-xs font-bold hover:bg-[var(--border)]">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-md transition">
+                    Guardar Tarifa Agencia
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

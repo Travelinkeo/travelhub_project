@@ -5,6 +5,7 @@ Provee visibilidad total sobre el estado de la ingesta de correos por agencia.
 """
 
 import logging
+from datetime import timedelta
 
 from django.contrib import admin, messages
 from django.db.models import Avg, Count, Max
@@ -65,11 +66,11 @@ class UltimasHorasFilter(admin.SimpleListFilter):
         """queryset."""
         ahora = timezone.now()
         deltas = {
-            "1h": timezone.timedelta(hours=1),
-            "6h": timezone.timedelta(hours=6),
-            "24h": timezone.timedelta(hours=24),
-            "7d": timezone.timedelta(days=7),
-            "30d": timezone.timedelta(days=30),
+            "1h": timedelta(hours=1),
+            "6h": timedelta(hours=6),
+            "24h": timedelta(hours=24),
+            "7d": timedelta(days=7),
+            "30d": timedelta(days=30),
         }
         if self.value() in deltas:
             return queryset.filter(fecha_ejecucion__gte=ahora - deltas[self.value()])
@@ -84,7 +85,7 @@ class UltimasHorasFilter(admin.SimpleListFilter):
 @admin.action(description="🗑️ Purgar logs seleccionados (> 30 días)")
 def purgar_logs_antiguos(modeladmin, request, queryset):
     """purgar_logs_antiguos."""
-    hace_30_dias = timezone.now() - timezone.timedelta(days=30)
+    hace_30_dias = timezone.now() - timedelta(days=30)
     antiguos = queryset.filter(fecha_ejecucion__lt=hace_30_dias)
     count = antiguos.count()
     antiguos.delete()
@@ -215,7 +216,7 @@ class EmailMonitorLogAdmin(SaaSAdminMixin, admin.ModelAdmin):
         if not obj.agencia:
             return "Sin agencia"
 
-        hace_24h = timezone.now() - timezone.timedelta(hours=24)
+        hace_24h = timezone.now() - timedelta(hours=24)
         qs = EmailMonitorLog.objects.filter(agencia=obj.agencia, fecha_ejecucion__gte=hace_24h)
 
         total = qs.count()
@@ -308,7 +309,7 @@ class EmailMonitorLogAdmin(SaaSAdminMixin, admin.ModelAdmin):
         """Inyecta métricas globales en el encabezado de la consola."""
         extra_context = extra_context or {}
 
-        hace_24h = timezone.now() - timezone.timedelta(hours=24)
+        hace_24h = timezone.now() - timedelta(hours=24)
         qs_24h = EmailMonitorLog.objects.filter(fecha_ejecucion__gte=hace_24h)
 
         if request.user.is_superuser:

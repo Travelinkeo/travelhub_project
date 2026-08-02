@@ -382,3 +382,270 @@ class EvolutionWebhookView(View):
                 logger.error(f"Error cacheando QR en Redis: {e}")
         else:
             logger.warning(f"QRCODE_UPDATED sin base64 para '{instance}': {data}")
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class TelegramWebhookView(View):
+    """
+    Webhook unificado para recibir Updates de Telegram (Bot de Agencia o Plataforma).
+    Maneja el comando Deep Linking `/start cli_<uuid>` para autoinscribir pasajeros.
+    """
+
+    def post(self, request, agencia_id: int = None, *args, **kwargs):
+        """Procesa peticiones POST de Telegram Bot Webhook."""
+        try:
+            body = json.loads(request.body)
+
+            # --- MANEJO DE BOTONES INLINE (CALLBACK QUERY) ---
+            callback_query = body.get("callback_query")
+            if callback_query:
+                self._handle_callback_query(callback_query, agencia_id)
+                return HttpResponse("OK", status=200)
+
+            # --- MANEJO DE MENSAJES Y COMANDOS SLASH ---
+            message = body.get("message") or body.get("edited_message")
+            if not message:
+                return HttpResponse("OK", status=200)
+
+            text = message.get("text", "").strip()
+            chat = message.get("chat", {})
+            chat_id = str(chat.get("id", ""))
+            from_user = message.get("from", {})
+
+            if text.startswith("/start"):
+                self._handle_start_command(text, chat_id, from_user, agencia_id)
+            elif text.startswith("/pnr"):
+                self._handle_pnr_command(text, chat_id, agencia_id)
+            elif text.startswith("/ventas"):
+                self._handle_ventas_command(chat_id, agencia_id)
+            elif text.startswith("/whatsapp"):
+                self._handle_whatsapp_command(chat_id, agencia_id)
+            elif text.startswith("/cliente"):
+                self._handle_cliente_command(text, chat_id, agencia_id)
+
+            return HttpResponse("OK", status=200)
+        except Exception as e:
+            logger.error(f"[TelegramWebhook] Error procesando webhook: {e}")
+            return HttpResponse("OK", status=200)
+
+    def _handle_start_command(
+        self, text: str, chat_id: str, from_user: dict, agencia_id: int = None
+    ):
+        """Procesa comando /start y payload de autoinscripción."""
+        from django.utils import timezone
+
+        from apps.communications.services.telegram_unified import TelegramNotificationService
+        from apps.crm.models import Cliente
+        from core.models import Agencia
+
+        parts = text.split(maxsplit=1)
+        payload = parts[1].strip() if len(parts) > 1 else ""
+
+        agencia = None
+        if agencia_id:
+            agencia = Agencia.objects.filter(pk=agencia_id).first()
+
+        cliente = None
+        if payload.startswith("cli_"):
+            client_uuid = payload[4:]
+            try:
+                cliente = Cliente.objects.get(uuid=client_uuid)
+                if not agencia and hasattr(cliente, "agencia"):
+                    agencia = cliente.agencia
+            except (Cliente.DoesNotExist, ValueError):
+                logger.warning(f"[TelegramWebhook] Cliente no encontrado con UUID {client_uuid}")
+                cliente = None
+
+        if cliente:
+            cliente.telegram_chat_id = chat_id
+            cliente.telegram_subscribed_at = timezone.now()
+            cliente.preferred_channel = Cliente.PreferredChannel.TELEGRAM
+            cliente.save(
+                update_fields=["telegram_chat_id", "telegram_subscribed_at", "preferred_channel"]
+            )
+
+            agencia_nombre = agencia.nombre if agencia else "tu agencia de viajes"
+            welcome_msg = (
+                f"🎉 <b>¡Hola {cliente.nombres}!</b>\n\n"
+                f"Tu cuenta ha sido vinculada exitosamente con <b>{agencia_nombre}</b>.\n\n"
+                f"✈️ A partir de este momento recibirás en este chat tus pases de abordar, "
+                f"confirmaciones de reserva y notificaciones de vuelo en tiempo real."
+            )
+            TelegramNotificationService.send_message(welcome_msg, chat_id=chat_id, agencia=agencia)
+            logger.info(
+                f"[TelegramWebhook] Cliente {cliente.id} ({cliente.nombres}) vinculado a Telegram (chat_id: {chat_id})"
+            )
+        else:
+            # Comando /start sin payload específico
+            msg = (
+                "👋 <b>¡Bienvenido a nuestro Bot de Notificaciones!</b>\n\n"
+                "Para vincular tu cuenta y recibir tus pases de abordar, por favor usa el enlace "
+                "de activación enviado por tu agencia de viajes."
+            )
+            TelegramNotificationService.send_message(msg, chat_id=chat_id, agencia=agencia)
+
+    def _handle_pnr_command(self, text: str, chat_id: str, agencia_id: int = None):
+        """Procesa comando /pnr <localizador> consultando boletos e itinerarios."""
+        from apps.communications.services.booking_queries_service import BookingQueriesService
+        from apps.communications.services.telegram_unified import TelegramNotificationService
+        from core.models import Agencia
+
+        agencia = Agencia.objects.filter(pk=agencia_id).first() if agencia_id else None
+        parts = text.split(maxsplit=1)
+        pnr = parts[1].strip().upper() if len(parts) > 1 else ""
+
+        if not pnr:
+            msg = "⚠️ Por favor especifica el PNR/localizador. Ejemplo: <code>/pnr WPYVSD</code>"
+            TelegramNotificationService.send_message(msg, chat_id=chat_id, agencia=agencia)
+            return
+
+        boleto = BookingQueriesService.buscar_boleto_por_pnr(pnr, agencia_id=agencia_id)
+
+        if not boleto:
+            msg = f"❌ No se encontró ningún boleto cargado con el localizador <b>{pnr}</b>."
+            TelegramNotificationService.send_message(msg, chat_id=chat_id, agencia=agencia)
+            return
+
+        msg = (
+            f"✈️ <b>INFORMACIÓN DE RESERVA #{boleto.localizador}</b>\n\n"
+            f"👤 <b>Pasajero:</b> {boleto.pasajero_nombre_completo or 'N/A'}\n"
+            f"🆔 <b>ID Pasajero:</b> {boleto.pasajero_id or 'N/A'}\n"
+            f"✈️ <b>Aerolínea:</b> {boleto.aerolinea or 'N/A'}\n"
+            f"📍 <b>Ruta:</b> {boleto.origen or '?'} ➔ {boleto.destino or '?'}\n"
+            f"📅 <b>Fecha Salida:</b> {boleto.fecha_salida or 'N/A'}\n"
+            f"📊 <b>Estado Parseo:</b> {boleto.estado_parseo.upper()}"
+        )
+
+        buttons = [
+            [
+                {
+                    "text": "🌐 Ver en TravelHub",
+                    "url": f"https://travelhub.cc/erp/boletos-importados/{boleto.id}/",
+                }
+            ]
+        ]
+        keyboard = TelegramNotificationService.build_inline_keyboard(buttons)
+        TelegramNotificationService.send_message(
+            msg, chat_id=chat_id, agencia=agencia, reply_markup=keyboard
+        )
+
+    def _handle_ventas_command(self, chat_id: str, agencia_id: int = None):
+        """Procesa comando /ventas mostrando un resumen express de ventas de hoy."""
+        from django.utils import timezone
+
+        from apps.communications.services.booking_queries_service import BookingQueriesService
+        from apps.communications.services.telegram_unified import TelegramNotificationService
+        from core.models import Agencia
+
+        agencia = Agencia.objects.filter(pk=agencia_id).first() if agencia_id else None
+        today = timezone.now().date()
+
+        resumen = BookingQueriesService.resumen_ventas_del_dia(today, agencia_id=agencia_id)
+
+        msg = (
+            f"📊 <b>RESUMEN DE VENTAS DE HOY ({today.strftime('%d/%m/%Y')})</b>\n\n"
+            f"📈 <b>Ventas Emitidas:</b> {resumen['total']}\n"
+            f"💰 <b>Monto Total:</b> ${resumen['monto_total']:,.2f} USD\n\n"
+            f"<i>Reporte generado automáticamente vía TravelHub Bot.</i>"
+        )
+        TelegramNotificationService.send_message(msg, chat_id=chat_id, agencia=agencia)
+
+    def _handle_whatsapp_command(self, chat_id: str, agencia_id: int = None):
+        """Procesa comando /whatsapp verificando la salud de la instancia de WhatsApp."""
+        from apps.communications.services.evolution_api_service import EvolutionService
+        from apps.communications.services.telegram_unified import TelegramNotificationService
+        from core.models import Agencia
+
+        agencia = Agencia.objects.filter(pk=agencia_id).first() if agencia_id else None
+        instance_name = f"agencia_{agencia_id}" if agencia_id else "instancia_principal"
+
+        if agencia and hasattr(agencia, "configuracion") and agencia.configuracion:
+            instance_name = getattr(agencia.configuracion, "evolution_instance_name", instance_name)
+
+        state = EvolutionService.get_instance_state(instance_name)
+        status_icon = "🟢" if state == "open" else "🔴"
+
+        msg = (
+            f"📱 <b>ESTADO DE WHATSAPP - INSTANCIA '{instance_name}'</b>\n\n"
+            f"Estado: {status_icon} <b>{state.upper()}</b>\n\n"
+        )
+
+        buttons = []
+        if state != "open":
+            msg += "⚠️ Tu línea de WhatsApp se encuentra desconectada. Haz clic en el botón de abajo para reconectar."
+            buttons.append(
+                [
+                    {
+                        "text": "📲 Escanear Código QR",
+                        "url": f"https://travelhub.cc/manager/qr/{instance_name}/",
+                    }
+                ]
+            )
+
+        keyboard = TelegramNotificationService.build_inline_keyboard(buttons) if buttons else None
+        TelegramNotificationService.send_message(
+            msg, chat_id=chat_id, agencia=agencia, reply_markup=keyboard
+        )
+
+    def _handle_cliente_command(self, text: str, chat_id: str, agencia_id: int = None):
+        """Procesa comando /cliente <busqueda> consultando la base de clientes."""
+        from django.db.models import Q
+
+        from apps.communications.services.telegram_unified import TelegramNotificationService
+        from apps.crm.models import Cliente
+        from core.models import Agencia
+
+        agencia = Agencia.objects.filter(pk=agencia_id).first() if agencia_id else None
+        parts = text.split(maxsplit=1)
+        query = parts[1].strip() if len(parts) > 1 else ""
+
+        if not query:
+            msg = "⚠️ Especifica un término de búsqueda. Ejemplo: <code>/cliente Mauricio</code>"
+            TelegramNotificationService.send_message(msg, chat_id=chat_id, agencia=agencia)
+            return
+
+        qs = Cliente.objects.filter(
+            Q(nombres__icontains=query) | Q(apellidos__icontains=query) | Q(email__icontains=query)
+        )
+        if agencia_id:
+            qs = qs.filter(agencia_id=agencia_id)
+
+        clientes = qs[:3]
+        if not clientes:
+            msg = f"❌ No se encontraron clientes con el término <b>{query}</b>."
+            TelegramNotificationService.send_message(msg, chat_id=chat_id, agencia=agencia)
+            return
+
+        msg_lines = [f"👤 <b>RESULTADOS DE BÚSQUEDA ('{query}')</b>\n"]
+        for c in clientes:
+            msg_lines.append(
+                f"• <b>{c.nombres} {c.apellidos or ''}</b>\n"
+                f"  📧 {c.email or 'Sin email'} | 📞 {c.telefono_principal or 'Sin teléfono'}\n"
+                f"  Canal Preferido: <b>{c.preferred_channel.upper()}</b>"
+            )
+
+        TelegramNotificationService.send_message(
+            "\n".join(msg_lines), chat_id=chat_id, agencia=agencia
+        )
+
+    def _handle_callback_query(self, callback_query: dict, agencia_id: int = None):
+        """Maneja las interacciones de botones Inline (callback_query)."""
+        from apps.communications.services.telegram_unified import TelegramNotificationService
+        from core.models import Agencia
+
+        callback_id = callback_query.get("id")
+        data = callback_query.get("data", "")
+        chat_id = str(callback_query.get("message", {}).get("chat", {}).get("id", ""))
+        agencia = Agencia.objects.filter(pk=agencia_id).first() if agencia_id else None
+
+        if data.startswith("approve_"):
+            item_id = data.split("_")[1]
+            TelegramNotificationService.answer_callback_query(
+                callback_id, text="✅ Excepción Aprobada", agencia=agencia
+            )
+            msg = f"✅ Excepción para el ítem #{item_id} aprobada exitosamente por el staff."
+            TelegramNotificationService.send_message(msg, chat_id=chat_id, agencia=agencia)
+        else:
+            TelegramNotificationService.answer_callback_query(
+                callback_id, text="Acción recibida", agencia=agencia
+            )

@@ -14,6 +14,7 @@ import hashlib
 import logging
 import secrets
 import warnings
+from datetime import timedelta
 
 from django.conf import settings
 from django.core.validators import MinValueValidator
@@ -203,9 +204,7 @@ class APIKey(models.Model):
         prefix = raw_key[:10]
         lookup_hash = hashlib.sha256(raw_key.encode()).hexdigest()
         rate_limit = RATE_LIMITS.get(plan, 100)
-        expires_at = (
-            timezone.now() + timezone.timedelta(days=expires_days) if expires_days else None
-        )
+        expires_at = timezone.now() + timedelta(days=expires_days) if expires_days else None
 
         instance = cls.objects.create(
             agencia=agencia,

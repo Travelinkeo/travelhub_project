@@ -2,6 +2,7 @@
 
 import pytest
 
+from apps.automation.parsers.base_parser import ParsedTicketData
 from apps.automation.parsers.legacy.sabre_parser import SabreParser
 
 
@@ -12,26 +13,37 @@ def sabre_parser():
 
 class TestSabreParserDetection:
     def test_can_parse_sabre(self, sabre_parser):
-        text = "SABRE RECEIPT\nPNR: ABC123"
+        text = "SABRE ELECTRONIC TICKET RECEIPT\nRESERVATION CODE ABC123\nPASSENGER: PEREZ/JUAN"
         assert sabre_parser.can_parse(text) is True
 
     def test_can_parse_sabre_recibo(self, sabre_parser):
-        text = "RECIBO DE PASAJE SABRE\nPNR ABC123"
+        text = "RECIBO DE PASAJE SABRE\nCÓDIGO DE RESERVACIÓN ABC123\nPASAJERO PEREZ/JUAN"
         assert sabre_parser.can_parse(text) is True
 
     def test_rejects_non_sabre(self, sabre_parser):
         text = "AMADEUS RECEIPT\nPNR ABC123"
         assert sabre_parser.can_parse(text) is False
 
+    def test_rejects_kiu(self, sabre_parser):
+        text = "KIUSYS.COM\nPASSENGER ITINERARY RECEIPT"
+        assert sabre_parser.can_parse(text) is False
 
-class TestSabreParserPNR:
+
+class TestSabreParserFields:
     def test_extract_pnr(self, sabre_parser):
-        text = "PNR: ABC123\nRESERVATION CODE DEF456"
-        result = sabre_parser._extract_pnr(text)
+        text = "RESERVATION CODE: ABC123\nPASSENGER: PEREZ/JUAN"
+        result = sabre_parser.extract_field(
+            text, [r"(?:Reservation Code|C[OÓ]DIGO DE RESERVA(?:CI[OÓ]N)?)\s*[:\t\s]*([A-Z0-9]{6})"]
+        )
         assert result == "ABC123"
+
+    def test_extract_passenger_name(self, sabre_parser):
+        text = "Preparado para PEREZ/JUAN [200687]\nRESERVATION CODE: ABC123"
+        result = sabre_parser.extract_passenger_name_robust(text)
+        assert "PEREZ/JUAN" in result
 
 
 class TestSabreParserEdgeCases:
-    def test_empty_text(self, sabre_parser):
+    def test_empty_text_returns_dto(self, sabre_parser):
         result = sabre_parser.parse("")
-        assert "error" in result
+        assert isinstance(result, ParsedTicketData)

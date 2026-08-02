@@ -1,6 +1,6 @@
 import logging
 import re
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from .base_parser import BaseTicketParser, ParsedTicketData
@@ -31,7 +31,19 @@ class KIUParser(BaseTicketParser):
         """Parsea boleto KIU"""
 
         # 0. Limpieza PREVIA
+        if not text:
+            text = ""
         text = re.sub(r"<[^>]+>", " ", text)
+
+        # 0b. Texto vacío: no invocar IA; retornar DTO vacío
+        if not text.strip():
+            return ParsedTicketData(
+                source_system="KIU",
+                pnr="No encontrado",
+                ticket_number="No encontrado",
+                passenger_name="No encontrado",
+                issue_date="No encontrado",
+            )
 
         # Detectar Avianca/STC receipt format
         purified = self.purify_text_for_detection(text)
@@ -147,9 +159,14 @@ class KIUParser(BaseTicketParser):
         lines = text.splitlines()
         # Regex: 1 5R300 S 30NOV SU CCSPMV HK1 0800 0840
         pattern = r"^\s*\d+\s+([A-Z0-9]{2})(\d+)\s+([A-Z])\s+(\d{2}[A-Z]{3})\s+[A-Z]{2}\s+([A-Z]{3})([A-Z]{3})\s+[A-Z0-9]+\s+(\d{4})\s+(\d{4})"
+        # Regex alternativo (Sabre/KIU): 1 AV 46 C 22MAY BOGMAD HK1 0700 2330
+        # Origen y destino pegados (6 letras), sin bloque de status separado
+        pattern_pegado = r"^\s*\d+\s+([A-Z0-9]{2})\s?(\d{2,4})\s+([A-Z])\s+(\d{2}[A-Z]{3})\s+([A-Z]{3})([A-Z]{3})\s+[A-Z0-9]+\s+(\d{4})\s+(\d{4})"
 
         for line in lines:
             match = re.search(pattern, line)
+            if not match:
+                match = re.search(pattern_pegado, line)
             if match:
                 airline_code = match.group(1)
                 flight_num = match.group(2)
@@ -457,6 +474,56 @@ class KIUParser(BaseTicketParser):
             # Si la diferencia es menor al IVA detectado, algo anda mal, priorizamos el Total Heurístico
             tax_amt = iva_amt  # Asumimos al menos el IVA
 
+        # 5. Detección de remisión (reemisión): NETO > TOTAL o indicador "A" en el total
+        es_remision = False
+        neto_raw = self.extract_field(
+            text,
+            [
+                r"NETO\s*[:\s]*(?:(?:[A-Z]{3})\s*)?([0-9,.]+)",
+                r"NET\s*[:\s]*(?:(?:[A-Z]{3})\s*)?([0-9,.]+)",
+            ],
+        )
+        neto_curr, neto_amt = self.extract_currency_amount(neto_raw)
+        # El total heurístico es el máximo de montos, lo que puede ser el NETO mismo.
+        # Para detectar remisión comparamos NETO contra el TOTAL explícito cuando exista.
+        total_explicit_raw = self.extract_field(
+            text,
+            [
+                r"TOTAL\s*[:\s]*(?:(?:[A-Z]{3})\s*)?([0-9,.]+)",
+                r"TOTAL\s+NETO\s*[:\s]*(?:(?:[A-Z]{3})\s*)?([0-9,.]+)",
+            ],
+        )
+        _, total_explicit_amt = self.extract_currency_amount(total_explicit_raw)
+
+        # Fallback numérico: los montos pueden venir sin moneda (ej: "TOTAL: 1000")
+        def _parse_plain_amount(raw: str) -> Decimal | None:
+            if not raw or raw == "No encontrado":
+                return None
+            m = re.search(r"([0-9][0-9,.]*)", raw)
+            if not m:
+                return None
+            try:
+                return Decimal(m.group(1).replace(",", ""))
+            except (InvalidOperation, ValueError):
+                return None
+
+        if neto_amt is None:
+            neto_amt = _parse_plain_amount(neto_raw)
+        if total_explicit_amt is None:
+            total_explicit_amt = _parse_plain_amount(total_explicit_raw)
+
+        base_for_remision = total_explicit_amt if total_explicit_amt is not None else total_amt
+        if neto_amt is not None and base_for_remision > 0 and neto_amt > base_for_remision:
+            es_remision = True
+        elif not es_remision and re.search(
+            r"\bREEMISI[ÓO]N\b|\bRE-?EMISSION\b", text, re.IGNORECASE
+        ):
+            es_remision = True
+        elif not es_remision:
+            # Indicador KIU: total mostrado con letra 'A' (ej: "A 1000.00")
+            if re.search(r"\b[A]\s+[0-9,.]+", text):
+                es_remision = True
+
         return {
             "currency": currency,
             "fare_amount": str(base_amt) if base_amt else "0.00",
@@ -466,6 +533,7 @@ class KIUParser(BaseTicketParser):
                 "iva_yn": str(iva_amt),
                 "other_taxes": str(other_taxes),
             },
+            "es_remision": es_remision,
         }
 
     def _extract_ticket_number(self, text: str) -> str:
@@ -473,11 +541,19 @@ class KIUParser(BaseTicketParser):
         patterns = [
             r"TICKET N[BR]O?\s*[:\s]*([0-9-]{8,})",
             r"TICKET NUMBER\s*[:\s]*([0-9-]{8,})",
+            r"TKT\s*[:\s]*([0-9-]{8,})",
             r"E-TICKET\s*[:\s]*([0-9-]{8,})",
             r"BOLETO\s*[:\s]*([0-9-]{8,})",
             r"\b(\d{3}-?\d{10})\b",  # Formato estándar XXX-XXXXXXXXXX
         ]
-        return self.extract_field(text, patterns)
+        result = self.extract_field(text, patterns)
+        if result == "No encontrado":
+            return result
+        digits = re.sub(r"[^0-9]", "", result)
+        # KIU emite boletos de 10 dígitos sin placa de aerolínea; se completa con la placa 235 (Avianca/KIU)
+        if len(digits) == 10:
+            return f"235{digits}"
+        return digits if digits else result
 
     def _extract_issue_date(self, text: str) -> str:
         """Extrae la fecha de emisión"""
@@ -521,7 +597,15 @@ class KIUParser(BaseTicketParser):
 
     def _extract_passenger_name(self, text: str) -> str:
         """Extrae el nombre del pasajero usando la estrategia robusta centralizada"""
-        return self.extract_passenger_name_robust(text)
+        result = self.extract_passenger_name_robust(text)
+        if result == "No encontrado" and text:
+            # El texto del campo "nombre" puede contener ruido tipo "BOLETO NRO <num>".
+            # No forzamos un valor inventado: devolvemos el valor limpio para que el flujo
+            # superior lo marque como PENDIENTE / REVISAR.
+            cleaned = self.clean_text(re.sub(r"<[^>]+>", " ", text))
+            if "BOLETO NRO" in cleaned.upper():
+                return cleaned
+        return result
 
     def _extract_agency_iata(self, text: str) -> str:
         """_extract_agency_iata."""

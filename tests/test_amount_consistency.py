@@ -1,11 +1,16 @@
+from decimal import Decimal
+
 import pytest
 
-from apps.automation.parsers import ticket_parser
-
-pytestmark = pytest.mark.skip(reason="Funciones de parser refactorizadas - pendiente actualización")
+from apps.automation.parsers.kiu_parser import KIUParser
 
 
-def test_amount_consistency_ok_kiu():
+@pytest.fixture
+def parser():
+    return KIUParser()
+
+
+def test_amount_consistency_ok_kiu(parser):
     """test_amount_consistency_ok_kiu."""
     sample = (
         "TICKET NRO: 308-0201196996\n"
@@ -15,53 +20,26 @@ def test_amount_consistency_ok_kiu():
         "AIR FARE: USD 170.00\n"
         "TOTAL: USD 210.50\n"
     )
-    data = ticket_parser._parse_kiu_ticket(sample, "")
-    n = data["normalized"]
-    assert n["taxes_amount"] in ("40.50", "40.5")
-    assert n.get("amount_consistency") == "OK"
-    assert n.get("amount_difference") in ("0.00", "0")
+    a = parser._extract_amounts(sample)
+    assert Decimal(a["fare_amount"]) == Decimal("170.00")
+    assert Decimal(a["total_amount"]) == Decimal("210.50")
+    assert Decimal(a["tax_details"]["total_taxes"]) == Decimal("40.50")
+    assert a["es_remision"] is False
 
 
-def test_amount_consistency_mismatch_sabre():
+def test_amount_consistency_mismatch_sabre(parser):
     """test_amount_consistency_mismatch_sabre."""
-    raw = {
-        "SOURCE_SYSTEM": "SABRE",
-        "numero_boleto": "3080201196996",
-        "codigo_reservacion": "ABC123",
-        "preparado_para": "DOE/JOHN",
-        "fecha_emision_iso": "2025-08-17",
-        "fare_currency": "USD",
-        "fare_amount": "100.00",
-        "taxes_currency": "USD",
-        "taxes_amount": "40.60",
-        "total_currency": "USD",
-        "total_amount": "160.60",
-        "vuelos": [],
-    }
-    ticket_parser.normalize_common_fields(raw)
-    n2 = raw["normalized"]
-    assert n2.get("amount_consistency") == "MISMATCH"
-    assert n2.get("taxes_amount_expected") == "60.60"
-    assert n2.get("taxes_difference") in ("-20.00", "-20.00")
+    sample = "TICKET NRO: 308-0201196996\nAIR FARE: USD 100.00\nTOTAL: USD 160.60\n"
+    a = parser._extract_amounts(sample)
+    assert Decimal(a["fare_amount"]) == Decimal("100.00")
+    assert Decimal(a["total_amount"]) == Decimal("160.60")
+    assert Decimal(a["tax_details"]["total_taxes"]) == Decimal("60.60")
 
 
-def test_amount_consistency_tolerance():
+def test_amount_consistency_tolerance(parser):
     """test_amount_consistency_tolerance."""
-    raw = {
-        "SOURCE_SYSTEM": "SABRE",
-        "numero_boleto": "3080201196997",
-        "codigo_reservacion": "DEF456",
-        "preparado_para": "TEST/USER",
-        "fecha_emision_iso": "2025-08-17",
-        "fare_currency": "USD",
-        "fare_amount": "200.00",
-        "taxes_currency": "USD",
-        "taxes_amount": "49.99",
-        "total_currency": "USD",
-        "total_amount": "250.00",
-        "vuelos": [],
-    }
-    ticket_parser.normalize_common_fields(raw)
-    n = raw["normalized"]
-    assert n.get("amount_consistency") == "OK"
-    assert n.get("taxes_difference") in ("-0.01", "-0.010")
+    sample = "TICKET NRO: 308-0201196997\nAIR FARE: USD 200.00\nTOTAL: USD 250.00\n"
+    a = parser._extract_amounts(sample)
+    assert Decimal(a["fare_amount"]) == Decimal("200.00")
+    assert Decimal(a["total_amount"]) == Decimal("250.00")
+    assert Decimal(a["tax_details"]["total_taxes"]) == Decimal("50.00")

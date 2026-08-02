@@ -89,16 +89,16 @@ class TestKIUFlightExtraction:
 
     def test_extract_flight_sabre_format(self, kiu_parser):
         text = "1 AV 46 C 22MAY BOGMAD HK1 0700 2330"
-        flights = kiu_parser._extract_flights(text, "")
-        assert len(flights) == 1
-        flight = flights[0]
-        assert flight["airline"] == "AV"
-        assert flight["flight_number"] == "AV 46"
-        assert flight["date"] == "22MAY"
-        assert flight["departure"]["location"] == "BOG"
-        assert flight["arrival"]["location"] == "MAD"
-        assert flight["departure"]["time"] == "07:00"
-        assert flight["arrival"]["time"] == "23:30"
+        parsed = kiu_parser._parse_raw_kiu_lines(text)
+        assert len(parsed.flights) == 1
+        flight = parsed.flights[0]
+        assert flight["aerolinea"] == "AV"
+        assert flight["numero_vuelo"] == "46"
+        assert flight["fecha_salida"] == "22MAY"
+        assert flight["origen"] == "BOG"
+        assert flight["destino"] == "MAD"
+        assert flight["hora_salida"] == "07:00"
+        assert flight["hora_llegada"] == "23:30"
 
     def test_empty_flights(self, kiu_parser):
         text = "NO FLIGHTS HERE"
@@ -125,11 +125,13 @@ class TestKIUParserEdgeCases:
 
     def test_empty_text(self, kiu_parser):
         result = kiu_parser.parse("")
-        assert "error" in result
+        assert isinstance(result, ParsedTicketData)
+        assert result.pnr == "No encontrado"
 
     def test_none_text(self, kiu_parser):
         result = kiu_parser.parse(None)
-        assert "error" in result
+        assert isinstance(result, ParsedTicketData)
+        assert result.pnr == "No encontrado"
 
     def test_html_stripping(self, kiu_parser):
         text = "<html><body>PNR ABC123</body></html>"

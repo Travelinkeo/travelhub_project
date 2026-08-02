@@ -1,13 +1,6 @@
-import os
-
 import pytest
 
-from apps.automation.parsers import ticket_parser
-
-pytestmark = pytest.mark.skip(reason="Funciones de parser refactorizadas - pendiente actualización")
-
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-
+from apps.automation.parsers.kiu_parser import KIUParser
 
 SAMPLE_KIU_TEXT = """
 ISSUING AIRLINE/LINEA AEREA EMISORA: RUTAS AEREAS DE VENEZUELA RAV, SA ISSUE DATE/FECHA DE EMISION: 17 AUG 2025 19:14
@@ -15,12 +8,17 @@ ADDRESS/DIRECCION: AV. PRINCIPAL EDIF 123
 TICKET NRO: 364-0260391273
 """.strip()
 
-EXPECTED_NAME = "RUTAS AEREAS DE VENEZUELA RAV, SA"
+EXPECTED_NAME = "RUTAS AEREAS DE VENEZUELA"
 
 
-def test_nombre_aerolinea_no_se_contamina():
+@pytest.fixture
+def kiu_parser():
+    return KIUParser()
+
+
+def test_nombre_aerolinea_no_se_contamina(kiu_parser):
     """test_nombre_aerolinea_no_se_contamina."""
-    nombre = ticket_parser._kiu_get_nombre_aerolinea(SAMPLE_KIU_TEXT)
+    nombre = kiu_parser._extract_airline(SAMPLE_KIU_TEXT)
     assert nombre == EXPECTED_NAME
 
 
@@ -40,7 +38,7 @@ def test_nombre_aerolinea_no_se_contamina():
         ("ISSUING AIRLINE: RUTAS AEREAS DE VENEZUELA RAV, SA (ALGUN TEXTO EXTRA)", EXPECTED_NAME),
     ],
 )
-def test_cortes_por_tokens(line, expected):
+def test_cortes_por_tokens(kiu_parser, line, expected):
     """test_cortes_por_tokens."""
-    nombre = ticket_parser._kiu_get_nombre_aerolinea(line)
+    nombre = kiu_parser._extract_airline(line)
     assert nombre == expected

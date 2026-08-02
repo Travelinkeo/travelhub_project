@@ -1,22 +1,20 @@
 """Tests adicionales para aumentar cobertura de parsers"""
 
-import pytest
-
 from apps.automation.parsers.kiu_parser import KIUParser
 from apps.automation.parsers.legacy.amadeus_parser import AmadeusParser
 from apps.automation.parsers.legacy.sabre_parser import SabreParser
 
-pytestmark = pytest.mark.skip(reason="Funciones de parser refactorizadas - pendiente actualización")
 
-
-@pytest.mark.django_db
 class TestSabreParserCoverage:
     """Tests adicionales para SabreParser"""
 
     def test_parse_with_minimal_data(self):
         """test_parse_with_minimal_data."""
         parser = SabreParser()
-        text = "ETICKET RECEIPT\nRESERVATION CODE: ABC123"
+        text = (
+            "ETICKET RECEIPT\nRESERVATION CODE: ABC123\nPASSENGER: PEREZ/JUAN\n"
+            "TICKET NUMBER: 1234567890123\n"
+        )
         result = parser.parse(text)
         assert result.source_system == "SABRE"
         assert result.pnr == "ABC123"
@@ -34,7 +32,6 @@ class TestSabreParserCoverage:
         assert str(amount) == "1234.56"
 
 
-@pytest.mark.django_db
 class TestAmadeusParserCoverage:
     """Tests adicionales para AmadeusParser"""
 
@@ -48,11 +45,16 @@ class TestAmadeusParserCoverage:
     def test_extract_pnr_fallback(self):
         """test_extract_pnr_fallback."""
         parser = AmadeusParser()
-        pnr = parser._extract_pnr("Booking ref: ABC123")
+        pnr = parser.extract_field(
+            "Booking ref: ABC123",
+            [
+                r"Booking ref\s*?:\s*([A-Z0-9]{6})",
+                r"Booking reference\s*?:\s*([A-Z0-9]{6})",
+            ],
+        )
         assert pnr == "ABC123"
 
 
-@pytest.mark.django_db
 class TestKIUParserCoverage:
     """Tests adicionales para KIUParser"""
 

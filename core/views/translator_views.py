@@ -219,17 +219,15 @@ def get_airlines_catalog_api(request):
     """
     try:
         airlines_list = []
-        for airline in (
-            Aerolinea.objects.filter(activa=True, codigo_iata__isnull=False)
-            .exclude(codigo_iata="")
-            .select_related("pais")
+        for airline in Aerolinea.objects.filter(activa=True, codigo_iata__isnull=False).exclude(
+            codigo_iata=""
         ):
             try:
                 airlines_list.append(
                     {
                         "code": airline.codigo_iata,
                         "name": airline.nombre or "Sin nombre",
-                        "country": airline.pais.nombre if airline.pais else "No especificado",
+                        "country": airline.pais_origen or "No especificado",
                     }
                 )
             except Exception as exc:

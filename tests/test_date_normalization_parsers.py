@@ -1,29 +1,41 @@
 import pytest
 
-from apps.automation.parsers import ticket_parser
+from apps.automation.parsers.kiu_parser import KIUParser
+from apps.automation.parsers.legacy.sabre_parser import SabreParser
 
-pytestmark = pytest.mark.skip(reason="Funciones de parser refactorizadas - pendiente actualización")
+
+@pytest.fixture
+def kiu_parser():
+    return KIUParser()
 
 
-@pytest.mark.skip(reason="KIU parser is a placeholder")
-def test_kiu_fecha_emision_iso_present():
+@pytest.fixture
+def sabre_parser():
+    return SabreParser()
+
+
+def test_kiu_fecha_emision_iso_present(kiu_parser):
     """test_kiu_fecha_emision_iso_present."""
-    # Ejemplo simplificado de línea KIU con ISSUE DATE/FECHA DE EMISION
     sample = "ISSUE DATE/FECHA DE EMISION: 17 AUG 2025 19:14\nOTHER LINE"
-    data = ticket_parser._parse_kiu_ticket(sample, "")
-    assert "FECHA_DE_EMISION" in data
-    assert data["FECHA_DE_EMISION"] != "No encontrado"
-    assert "fecha_emision_iso" in data and data["fecha_emision_iso"] is not None
-    assert data["fecha_emision_iso"] == "2025-08-17"
+    fecha = kiu_parser._extract_issue_date(sample)
+    assert fecha != "No encontrado"
+    iso = kiu_parser.normalize_date(fecha)
+    assert iso == "2025-08-17"
 
 
-def test_sabre_fecha_emision_iso_present():
+def test_sabre_fecha_emision_iso_present(sabre_parser):
     """test_sabre_fecha_emision_iso_present."""
-    # Ejemplo simplificado para Sabre
     sample = (
         "Itinerary Details\n...\nIssue Date 17 Aug 25\n...\nPlease contact your travel arranger"
     )
-    data = ticket_parser._parse_sabre_ticket(sample)
-    assert "fecha_emision_iso" in data and data["fecha_emision_iso"] is not None
-    # Puede venir como 2-digit year -> string_a_fecha maneja y _fecha_a_iso equivale
-    assert data["fecha_emision_iso"].startswith("202")
+    fecha = sabre_parser.extract_field(
+        sample,
+        [
+            r"(?:Issue Date|Fecha de Emisi[óo]n|FECHA DE EMISI[ÓO]N)\s*[:\t\s]*([^\n]+)",
+            r"emisi[^\n]*?([0-9]{1,2}[A-Z]{3}[0-9]{2,4})",
+        ],
+    )
+    assert fecha != "No encontrado"
+    iso = sabre_parser.normalize_date(fecha)
+    assert iso is not None
+    assert iso.startswith("202")

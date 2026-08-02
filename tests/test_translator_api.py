@@ -1,4 +1,3 @@
-import pytest
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
@@ -6,8 +5,6 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.common.models import Aerolinea, Pais
-
-pytestmark = pytest.mark.skip(reason="Funciones de parser refactorizadas - pendiente actualización")
 
 
 class TranslatorAPITestCase(TestCase):
@@ -83,7 +80,15 @@ class TranslatorAPITestCase(TestCase):
     def test_batch_translate_success(self):
         """test_batch_translate_success."""
         url = reverse("core:translator:batch_translate")
-        data = {"itineraries": ["1 AA 1234 15JAN W MIABOG 0800 1200"]}
+        data = {
+            "itineraries": [
+                {
+                    "id": "1",
+                    "itinerary": "1 AA 1234 15JAN W MIABOG 0800 1200",
+                    "gds_system": "SABRE",
+                }
+            ]
+        }
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -97,21 +102,25 @@ class TranslatorAPITestCase(TestCase):
     def test_batch_translate_limit_exceeded(self):
         """test_batch_translate_limit_exceeded."""
         url = reverse("core:translator:batch_translate")
-        data = {"itineraries": ["1 AA 1234 15JAN W MIABOG 0800 1200"] * 51}
+        data = {
+            "itineraries": [
+                {"id": str(i), "itinerary": "1 AA 1234 15JAN W MIABOG 0800 1200"} for i in range(11)
+            ]
+        }
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_calculate_ticket_price_success(self):
         """test_calculate_ticket_price_success."""
-        url = reverse("core:translator:calculate_ticket_price")
-        data = {"base_price": 140.0, "tax_percentage": 10}
+        url = reverse("core:translator:calculate_price")
+        data = {"tarifa": 140.0, "fee_consolidador": 10.0, "fee_interno": 5.0, "porcentaje": 10}
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_calculate_ticket_price_negative_values(self):
         """test_calculate_ticket_price_negative_values."""
-        url = reverse("core:translator:calculate_ticket_price")
-        data = {"base_price": -100, "tax_percentage": 10}
+        url = reverse("core:translator:calculate_price")
+        data = {"tarifa": -100, "fee_consolidador": 0, "fee_interno": 0, "porcentaje": 10}
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

@@ -133,7 +133,7 @@ class MapeoColumnasView(SaaSMixin, LoginRequiredMixin, View):
             column_mapping = {}
 
         # Validar que nombres esté mapeado
-        if "nombres" not in [v for v in column_mapping.values()]:
+        if "nombres" not in column_mapping.values():
             return JsonResponse({"error": "El campo 'Nombres' es obligatorio"}, status=400)
 
         # Invertir mapping: {col_excel: campo_destino}

@@ -33,11 +33,19 @@ urlpatterns = [
     path("onboarding/wizard/", OnboardingWizardView.as_view(), name="onboarding_wizard"),
     # --- WEBHOOKS ---
     path("webhooks/", WebhookListView.as_view(), name="webhooks_list"),
-    path("webhooks/<int:webhook_id>/deliveries/", WebhookDeliveryListView.as_view(), name="webhooks_deliveries"),
+    path(
+        "webhooks/<int:webhook_id>/deliveries/",
+        WebhookDeliveryListView.as_view(),
+        name="webhooks_deliveries",
+    ),
     # --- PORTAL DEL PASAJERO ---
     path("portal/", PortalHomeView.as_view(), name="portal_home"),
     path("portal/lookup/", PortalLookupView.as_view(), name="portal_lookup"),
-    path("portal/r/<uuid:uuid_token>/", PortalTokenRedirectView.as_view(), name="portal_token_redirect"),
+    path(
+        "portal/r/<uuid:uuid_token>/",
+        PortalTokenRedirectView.as_view(),
+        name="portal_token_redirect",
+    ),
     # --- DASHBOARD PRINCIPAL ---
     # Redirige a la vista modern_dashboard que ahora reside en bookings
     path(

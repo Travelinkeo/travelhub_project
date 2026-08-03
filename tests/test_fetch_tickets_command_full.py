@@ -1,4 +1,5 @@
 """Tests para Fetch tickets command full."""
+
 from types import SimpleNamespace
 
 import pytest
@@ -7,6 +8,7 @@ from django.core.management import call_command
 
 class DummyMailSuccess:
     """Dummy Mail Success."""
+
     def __init__(self, subject="E-TICKET ITINERARY RECEIPT TEST", body=b"RawEmailBytes"):
         self._subject = subject
         self._body = body
@@ -47,6 +49,7 @@ class DummyMailSuccess:
 
 class DummyMailFetchError(DummyMailSuccess):
     """Dummy Mail Fetch Error."""
+
     def fetch(self, email_id, params):  # simulate fetch failure
         """Fetch."""
         return "NO", []
@@ -54,6 +57,7 @@ class DummyMailFetchError(DummyMailSuccess):
 
 class DummyMailRaise(DummyMailSuccess):
     """Dummy Mail Raise."""
+
     def search(self, charset, criteria):
         """Search."""
         raise RuntimeError("Injected failure in search")
@@ -76,6 +80,7 @@ def test_fetch_tickets_success(monkeypatch, settings, tmp_path):
 
     class DummyBoleto:  # minimal stub with file save API
         """Dummy Boleto."""
+
         def __init__(self):
             self.id_boleto_importado = 123
             self.archivo_boleto = SimpleNamespace(save=lambda filename, content, save=True: None)
@@ -102,6 +107,7 @@ def test_fetch_tickets_fetch_failure(monkeypatch, settings, capsys):
 
     class DummyBoleto:  # stub - shouldn't be used successfully
         """Dummy Boleto."""
+
         def __init__(self):
             self.id_boleto_importado = 999
             self.archivo_boleto = SimpleNamespace(save=lambda filename, content, save=True: None)

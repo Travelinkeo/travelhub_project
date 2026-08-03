@@ -65,9 +65,6 @@ from apps.common.tasks import (
     send_whatsapp_task,
 )
 
-# ── apps.reports.tasks ──────────────────────────────────────────────────────
-from apps.reports.tasks import enviar_reportes_programados_task
-
 # ── apps.contabilidad.tasks ──────────────────────────────────────────────────
 from apps.contabilidad.tasks import sync_bcv_rates
 
@@ -77,6 +74,9 @@ from apps.finance.tasks import (
     create_invoice_from_sale_task,
     procesar_facturacion_masiva_task,
 )
+
+# ── apps.reports.tasks ──────────────────────────────────────────────────────
+from apps.reports.tasks import enviar_reportes_programados_task
 
 # ── Lista completa para inspección programática ──────────────────────────────
 __all__ = [

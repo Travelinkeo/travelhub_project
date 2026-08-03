@@ -116,7 +116,9 @@ def _get_latency_samples(hour_key: str, provider: str) -> list[int]:
     try:
         return cache.get(f"ai_metrics:{hour_key}:latency:{provider}") or []
     except Exception:
-        logger.debug("Cache get falló para latency samples %s", f"ai_metrics:{hour_key}:latency:{provider}")
+        logger.debug(
+            "Cache get falló para latency samples %s", f"ai_metrics:{hour_key}:latency:{provider}"
+        )
         return []
 
 

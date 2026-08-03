@@ -28,6 +28,8 @@ ignore = [
 "scripts/testing/*" = ["E402", "F841", "E722", "B007", "UP038", "F821"]
 "scripts/tools/*" = ["E402", "F841", "E722", "B007", "UP038", "F821"]
 "scripts/diagnostics/*" = ["E402", "F841", "E722", "B007", "UP038", "F821"]
+".agents/scripts/*" = ["E402", "F841", "E722", "B007", "UP038", "F821", "C401", "C4"]
+".agents/tmp/*" = ["E402", "F841", "E722", "B007", "UP038", "F821"]
 
 [format]
 quote-style = "double"

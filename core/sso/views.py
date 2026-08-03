@@ -76,15 +76,11 @@ def _verify_jwt(id_token: str, provider) -> bool:
         kid = unverified_header.get("kid")
         jwk_data = [k for k in jwks.get("keys", []) if k.get("kid") == kid]
         if not jwk_data:
-            logger.error(
-                "SSO RECHAZADO: kid='%s' no encontrado en JWKS de %s.", kid, provider
-            )
+            logger.error("SSO RECHAZADO: kid='%s' no encontrado en JWKS de %s.", kid, provider)
             return False
 
         public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(jwk_data[0]))
-        jwt.decode(
-            id_token, public_key, algorithms=["RS256"], options={"verify_exp": True}
-        )
+        jwt.decode(id_token, public_key, algorithms=["RS256"], options={"verify_exp": True})
         return True
 
     except Exception as e:

@@ -1,9 +1,8 @@
 from datetime import timedelta
 from decimal import Decimal
 
-from django.db.utils import IntegrityError
-
 import pytest
+from django.db.utils import IntegrityError
 from django.utils import timezone
 
 from apps.bookings.models import BoletoImportado, PagoVenta, Venta

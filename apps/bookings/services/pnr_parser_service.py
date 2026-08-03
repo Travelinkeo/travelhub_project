@@ -282,7 +282,9 @@ class PNRParserService:
                             dt_llegada += datetime.timedelta(days=1)
                         fecha_llegada = dt_llegada
                     except Exception:
-                        logger.warning("Error calculando fecha_llegada, usando fecha_salida", exc_info=True)
+                        logger.warning(
+                            "Error calculando fecha_llegada, usando fecha_salida", exc_info=True
+                        )
                         fecha_llegada = fecha_salida
 
                 SegmentoVuelo.objects.get_or_create(

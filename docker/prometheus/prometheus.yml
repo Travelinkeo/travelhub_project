@@ -20,8 +20,8 @@ scrape_configs:
     metrics_path: /health/metrics/
     scrape_interval: 60s
 
-  # Redis Cache
+  # Redis Broker
   - job_name: 'redis-cache'
     static_configs:
-      - targets: ['redis:6379']
+      - targets: ['redis_broker:6379']
     scrape_interval: 30s

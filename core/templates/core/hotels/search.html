@@ -2,99 +2,101 @@
 {% load static %}
 {% load humanize %}
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    
+<div class="w-full max-w-[1400px] mx-auto px-2 sm:px-4 py-4 sm:py-8 overflow-x-hidden">
+
     <!-- DASHBOARD OPERATIVO DE HOTELES -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         <!-- Card 1: Ventas -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-[var(--primary)] transition-all">
-            <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 group-hover:bg-[var(--primary)] group-hover:text-white transition-all">
-                <span class="material-symbols-outlined w-6 h-6">hotel</span>
+        <div class="bg-surface-1 rounded-2xl p-4 sm:p-6 border border-border-color shadow-sm flex items-center gap-3 sm:gap-4 group hover:border-primary transition-all">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+                <span class="material-symbols-outlined text-[20px] sm:text-[24px]">hotel</span>
             </div>
-            <div>
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Ventas (30d)</p>
-                <h3 class="text-2xl font-black text-slate-800 leading-none">{{ stats_30d.total_reservas }}</h3>
+            <div class="min-w-0">
+                <p class="text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest mb-0.5 sm:mb-1 truncate">Ventas (30d)</p>
+                <h3 class="text-xl sm:text-2xl font-black text-text-main leading-none">{{ stats_30d.total_reservas }}</h3>
             </div>
         </div>
 
         <!-- Card 2: Revenue -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-emerald-500 transition-all">
-            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-all">
-                <span class="material-symbols-outlined w-6 h-6">attach_money</span>
+        <div class="bg-surface-1 rounded-2xl p-4 sm:p-6 border border-border-color shadow-sm flex items-center gap-3 sm:gap-4 group hover:border-emerald-500 transition-all">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all shrink-0">
+                <span class="material-symbols-outlined text-[20px] sm:text-[24px]">attach_money</span>
             </div>
-            <div>
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Facturación</p>
-                <h3 class="text-2xl font-black text-slate-800 leading-none">${{ stats_30d.revenue|floatformat:0|intcomma }}</h3>
+            <div class="min-w-0">
+                <p class="text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest mb-0.5 sm:mb-1 truncate">Facturación</p>
+                <h3 class="text-xl sm:text-2xl font-black text-text-main leading-none">${{ stats_30d.revenue|floatformat:0|intcomma }}</h3>
             </div>
         </div>
 
         <!-- Card 3: Margen -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-amber-500 transition-all">
-            <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-all">
-                <span class="material-symbols-outlined w-6 h-6">trending_up</span>
+        <div class="bg-surface-1 rounded-2xl p-4 sm:p-6 border border-border-color shadow-sm flex items-center gap-3 sm:gap-4 group hover:border-amber-500 transition-all">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-amber-50 dark:bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:bg-amber-500 group-hover:text-white transition-all shrink-0">
+                <span class="material-symbols-outlined text-[20px] sm:text-[24px]">trending_up</span>
             </div>
-            <div>
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Margen Bruto</p>
-                <h3 class="text-2xl font-black text-slate-800 leading-none">${{ stats_30d.margen_bruto|floatformat:0|intcomma }}</h3>
+            <div class="min-w-0">
+                <p class="text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest mb-0.5 sm:mb-1 truncate">Margen Bruto</p>
+                <h3 class="text-xl sm:text-2xl font-black text-text-main leading-none">${{ stats_30d.margen_bruto|floatformat:0|intcomma }}</h3>
             </div>
         </div>
 
         <!-- Card 4: Top Destino -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-rose-500 transition-all">
-            <div class="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 group-hover:bg-rose-500 group-hover:text-white transition-all">
-                <span class="material-symbols-outlined w-6 h-6">location_on</span>
+        <div class="bg-surface-1 rounded-2xl p-4 sm:p-6 border border-border-color shadow-sm flex items-center gap-3 sm:gap-4 group hover:border-rose-500 transition-all">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-rose-50 dark:bg-rose-500/10 rounded-xl flex items-center justify-center text-rose-600 dark:text-rose-400 group-hover:bg-rose-500 group-hover:text-white transition-all shrink-0">
+                <span class="material-symbols-outlined text-[20px] sm:text-[24px]">location_on</span>
             </div>
-            <div>
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Top Destino</p>
-                <h3 class="text-xl font-black text-slate-800 leading-none truncate max-w-[150px]">{{ top_destino }}</h3>
+            <div class="min-w-0">
+                <p class="text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest mb-0.5 sm:mb-1 truncate">Top Destino</p>
+                <h3 class="text-lg sm:text-xl font-black text-text-main leading-none truncate">{{ top_destino }}</h3>
             </div>
         </div>
     </div>
-    <div class="bg-[var(--primary)] rounded-xl p-8 mb-8 text-white relative overflow-hidden shadow-lg border border-[var(--primary-hover)]">
+
+    <div class="bg-primary rounded-2xl p-4 sm:p-8 mb-6 sm:mb-8 text-white relative overflow-hidden shadow-lg border border-primary/20">
         <div class="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80')] bg-cover bg-center mix-blend-overlay"></div>
         <div class="relative z-10">
-            <h1 class="text-3xl font-bold mb-4 text-white drop-shadow-md">Encuentra el Alojamiento Perfecto</h1>
-            
+            <h1 class="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-white drop-shadow-md tracking-tight">Encuentra el Alojamiento Perfecto</h1>
+
             {% if checkins_hoy > 0 %}
-            <div class="inline-flex items-center gap-2 bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 px-3 py-1.5 rounded-full mb-6">
+            <div class="inline-flex items-center gap-2 bg-emerald-500/20 backdrop-blur-md border border-emerald-500/30 px-3 py-1.5 rounded-full mb-4 sm:mb-6">
                 <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
                 <span class="text-[10px] font-black uppercase tracking-widest text-emerald-300">{{ checkins_hoy }} Check-ins para hoy</span>
             </div>
             {% endif %}
 
-            <form method="get" class="bg-[var(--surface-1)] p-2 rounded-lg flex flex-col md:flex-row gap-2 shadow-2xl items-center border border-[var(--border)]">
-                <div class="flex-1 px-4 py-2 border-r border-[var(--border)] w-full group">
-                    <label class="block text-xs font-bold text-[var(--text-muted)] uppercase group-focus-within:text-[var(--primary)] transition-colors">Destino</label>
-                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="¿A dónde vas?" class="w-full bg-transparent text-[var(--text-primary)] font-semibold focus:outline-none placeholder-[var(--text-muted)]">
+            <form method="get" class="bg-surface-1 p-2 rounded-xl flex flex-col md:flex-row gap-2 shadow-2xl items-stretch md:items-center border border-border-color">
+                <div class="flex-1 px-3 sm:px-4 py-2 border-b md:border-b-0 md:border-r border-border-color w-full group">
+                    <label class="block text-[10px] sm:text-xs font-bold text-text-muted uppercase group-focus-within:text-primary transition-colors">Destino</label>
+                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="¿A dónde vas?" class="w-full bg-transparent text-text-main font-semibold focus:outline-none placeholder-text-muted text-sm sm:text-base">
                 </div>
-                <button type="submit" class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold py-3 px-8 rounded-lg flex items-center gap-2">
-                    <span class="material-symbols-outlined w-5 h-5">search</span> Buscar
+                <button type="submit" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 sm:px-8 rounded-lg flex items-center justify-center gap-2 w-full md:w-auto min-h-[48px] shrink-0">
+                    <span class="material-symbols-outlined text-[20px]">search</span> <span>Buscar</span>
                 </button>
             </form>
         </div>
     </div>
-    <div class="flex flex-col lg:flex-row gap-8">
+
+    <div class="flex flex-col lg:flex-row gap-6 sm:gap-8">
         <aside class="w-full lg:w-1/4 space-y-6">
-            <div class="bg-[var(--surface-1)] rounded-xl shadow-sm p-6 border border-[var(--border)] sticky top-4">
+            <div class="bg-surface-1 rounded-xl shadow-sm p-4 sm:p-6 border border-border-color sticky top-4">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-[var(--text-primary)]">Filtros</h3>
-                    {% if request.GET %}<a href="{% url 'bookings:hotel_search' %}" class="text-xs text-[var(--primary)] hover:underline">Limpiar</a>{% endif %}
+                    <h3 class="font-bold text-text-main text-base">Filtros</h3>
+                    {% if request.GET %}<a href="{% url 'bookings:hotel_search' %}" class="text-xs text-primary hover:underline">Limpiar</a>{% endif %}
                 </div>
-                <div class="mb-6">
-                    <h4 class="text-sm font-semibold text-[var(--text-secondary)] mb-2">Destinos Populares</h4>
-                    <div class="space-y-2">
+                <div class="mb-4 sm:mb-6">
+                    <h4 class="text-xs sm:text-sm font-semibold text-text-muted mb-2">Destinos Populares</h4>
+                    <div class="flex flex-wrap lg:flex-col gap-1.5 sm:gap-2">
                         {% for dest in destinos %}
-                        <a href="?destino={{ dest }}" class="block text-sm text-[var(--text-secondary)] hover:text-[var(--primary)] {% if request.GET.destino == dest %}font-bold text-[var(--primary)]{% endif %}">{{ dest }}</a>
+                        <a href="?destino={{ dest }}" class="inline-block lg:block text-xs sm:text-sm text-text-muted hover:text-primary px-2 py-1 lg:p-0 bg-surface-2 lg:bg-transparent rounded-md lg:rounded-none {% if request.GET.destino == dest %}font-bold text-primary bg-primary/10{% endif %}">{{ dest }}</a>
                         {% endfor %}
                     </div>
                 </div>
-                <div class="mb-6">
-                    <h4 class="text-sm font-semibold text-[var(--text-secondary)] mb-2">Categoría</h4>
-                    <div class="space-y-2">
+                <div>
+                    <h4 class="text-xs sm:text-sm font-semibold text-text-muted mb-2">Categoría</h4>
+                    <div class="grid grid-cols-2 lg:grid-cols-1 gap-2">
                         {% for val, label in categorias %}
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="radio" name="categoria" value="{{ val }}" {% if request.GET.categoria == val|stringformat:"i" %}checked{% endif %} data-filter-url="?categoria={{ val }}" class="category-filter text-[var(--primary)] focus:ring-[var(--primary)] bg-[var(--surface-2)] border-[var(--border)]">
-                            <span class="text-sm text-[var(--text-secondary)]">{{ label }}</span>
+                        <label class="flex items-center space-x-2 cursor-pointer p-1.5 rounded-lg hover:bg-surface-2 transition-colors">
+                            <input type="radio" name="categoria" value="{{ val }}" {% if request.GET.categoria == val|stringformat:"i" %}checked{% endif %} data-filter-url="?categoria={{ val }}" class="category-filter text-primary focus:ring-primary bg-surface-2 border-border-color">
+                            <span class="text-xs sm:text-sm text-text-main">{{ label }}</span>
                         </label>
                         {% endfor %}
                     </div>
@@ -102,10 +104,10 @@
             </div>
         </aside>
         <div class="w-full lg:w-3/4">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-[var(--text-primary)]">{{ page_obj.paginator.count }} Alojamientos encontrados</h2>
+            <div class="flex justify-between items-center mb-4 sm:mb-6">
+                <h2 class="text-lg sm:text-xl font-bold text-text-main">{{ page_obj.paginator.count }} Alojamientos encontrados</h2>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 {% for hotel in hoteles %}
                 <a href="{% url 'bookings:hotel_detail' hotel.slug %}" class="group bg-[var(--surface-1)] rounded-xl shadow-sm hover:shadow-xl transition duration-300 border border-[var(--border)] overflow-hidden flex flex-col h-full hover:border-[var(--primary)]">
                     <div class="relative h-48 overflow-hidden bg-[var(--surface-2)]">

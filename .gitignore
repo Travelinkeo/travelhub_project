@@ -56,6 +56,16 @@ logs/*.txt
 logs/*.log
 debug_*.py
 temp_*.py
+*.out.txt
+showmig.txt
+makemig_out.txt
+final_prod_out.txt
+db_check_out.txt
+broken_imports_report.txt
+real_dashboard.png
+alpine.js
+core/tests/debug_*.txt
+core/tests/murillo_clean.txt
 .idea/
 
 # Custom

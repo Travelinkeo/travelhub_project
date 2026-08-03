@@ -20,37 +20,38 @@ class TestCotizacionesModels:
             agencia=agencia,
             cliente=cliente,
             moneda=moneda,
-            tipo_viaje="NAC",
-            estado="PEN",
+            estado="BOR",
         )
-        assert cotizacion.id is not None
+        assert cotizacion.id_cotizacion is not None
         assert str(cotizacion) is not None
 
 
 class TestGamificationModels:
     """TestGamificationModels."""
 
-    def test_puntaje_creation(self, db):
-        """test_puntaje_creation."""
-        from apps.gamification.models import Puntaje
-        from tests.helpers import create_test_user
+    def test_puntuacion_creation(self, db):
+        """test_puntuacion_creation."""
+        from apps.gamification.models import PuntuacionUsuario
+        from tests.helpers import create_test_agencia, create_test_user
 
+        agencia = create_test_agencia()
         usuario = create_test_user()
-        puntaje = Puntaje.objects.create(
+        puntuacion = PuntuacionUsuario.objects.create(
+            agencia=agencia,
             usuario=usuario,
-            puntos=100,
-            razon="Test",
+            puntos_total=100,
         )
-        assert puntaje.id is not None
+        assert puntuacion.id is not None
 
     def test_logro_creation(self, db):
         """test_logro_creation."""
         from apps.gamification.models import Logro
 
         logro = Logro.objects.create(
+            codigo="test-achievement",
             nombre="Test Achievement",
             descripcion="Test description",
-            icono="🏆",
+            icono="emoji_events",
         )
         assert logro.id is not None
 
@@ -67,7 +68,6 @@ class TestMarketingModels:
         campania = Campania.objects.create(
             agencia=agencia,
             nombre="Test Campaign",
-            tipo="EMAIL",
             estado="BORRADOR",
         )
         assert campania.id is not None
@@ -85,9 +85,8 @@ class TestReportsModels:
         reporte = ReporteProgramado.objects.create(
             agencia=agencia,
             nombre="Test Report",
-            tipo_reporte="VENTAS",
-            frecuencia="DIARIO",
-            formato="PDF",
+            tipo="ventas",
+            frecuencia="diario",
             activo=True,
         )
         assert reporte.id is not None
@@ -108,8 +107,9 @@ class TestTasksModels:
             titulo="Test Task",
             descripcion="Test",
             asignado_a=usuario,
-            prioridad="MEDIA",
-            estado="PEN",
+            creado_por=usuario,
+            prioridad="media",
+            estado="pendiente",
         )
         assert tarea.id is not None
 
@@ -120,14 +120,15 @@ class TestCmsModels:
     def test_articulo_creation(self, db):
         """test_articulo_creation."""
         from apps.cms.models import Articulo
-        from tests.helpers import create_test_user
+        from tests.helpers import create_test_agencia
 
-        autor = create_test_user()
+        agencia = create_test_agencia()
         articulo = Articulo.objects.create(
+            agencia=agencia,
             titulo="Test Article",
+            slug="test-article",
             contenido="Test content",
-            autor=autor,
-            estado="BORRADOR",
+            estado="BOR",
         )
         assert articulo.id is not None
 

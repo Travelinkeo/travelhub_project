@@ -16,9 +16,14 @@ while True:
 echo "✅ PostgreSQL iniciado."
 
 # Fix permissions for appuser-writable directories
+# Idempotente: el chown/chmod recursivo solo corre si el owner cambió
+# (primer arranque o volumen con ownership roto). Evita O(n) en cada boot.
 mkdir -p /app/media/boletos_importados /app/staticfiles
-chown -R appuser:appgroup /app/media /app/staticfiles /app/boletos_importados 2>/dev/null || true
-chmod -R 755 /app/media /app/boletos_importados 2>/dev/null || true
+if [ "$(stat -c %U /app/media 2>/dev/null)" != "appuser" ]; then
+    echo "⏳ Corrigiendo ownership de /app/media..."
+    chown -R appuser:appgroup /app/media /app/staticfiles /app/boletos_importados 2>/dev/null || true
+    chmod -R 755 /app/media /app/boletos_importados 2>/dev/null || true
+fi
 
 echo "🚀 Iniciando servidor..."
 

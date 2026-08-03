@@ -6,7 +6,7 @@ from apps.marketing.views.generation_views import (
     GenerarSocialMediaAdvancedView,
     MarketingFeedView,
 )
-from apps.marketing.views.marketing_views import GenerateAIImageView, MarketingHubView
+from apps.marketing.views.marketing_views import MarketingHubView
 from apps.marketing.views.social_views import SocialHubView
 
 __all__ = [
@@ -16,7 +16,6 @@ __all__ = [
     "GenerarFlyerView",
     "GenerarSocialMediaAdvancedView",
     "MarketingFeedView",
-    "GenerateAIImageView",
     "MarketingHubView",
     "SocialHubView",
 ]

@@ -204,9 +204,8 @@ https://abc123.ngrok.io
 ```
 
 ### Opción B: Deploy en la Nube (Permanente)
-- Railway.app (recomendado)
+- VPS con Docker Compose (recomendado, ver `docs/deployment/deployment_production.md`)
 - PythonAnywhere
-- Render.com
 
 ---
 

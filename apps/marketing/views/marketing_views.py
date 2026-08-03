@@ -49,36 +49,3 @@ class MarketingHubView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, View):
             return JsonResponse({"html_content": html_content})
 
         return JsonResponse({"error": "Acción no válida"}, status=400)
-
-
-class GenerateAIImageView(LoginRequiredMixin, View):
-    """GenerateAIImageView."""
-
-    def post(self, request, *args, **kwargs):
-        """
-        Endpoint to generate an AI image for marketing.
-        """
-        try:
-            data = request.POST
-            hotel_name = data.get("hotel_name")
-            price = data.get("price")
-            style = data.get("style", "Luxurious")
-            custom_text = data.get("custom_text")
-
-            if not hotel_name or not price:
-                return JsonResponse({"error": "Faltan campos obligatorios"}, status=400)
-
-            result = MarketingService.generate_ai_promo_image(
-                hotel_name=hotel_name, price=price, style=style, custom_text=custom_text
-            )
-
-            if result and result.get("image"):
-                return JsonResponse({"image_b64": result["image"], "status": "success"})
-            else:
-                return JsonResponse(
-                    {"error": result.get("error", "Error en generación"), "status": "error"},
-                    status=500,
-                )
-
-        except Exception as e:
-            return JsonResponse({"error": str(e), "status": "error"}, status=500)

@@ -880,7 +880,7 @@ travelhub_project/
   ┌──────────────────────────────────────────────────────────────┐
   │  JOB: DEPLOY (sólo main)                                     │
   │  ─────────────────                                           │
-  │  • Deploy automático en Coolify/Railway                      │
+  │  • Deploy automático a VPS (Docker Compose + Nginx)            │
   │  • Migraciones: python manage.py migrate                     │
   │  • Collectstatic: python manage.py collectstatic --noinput   │
   └──────────────────────────────────────────────────────────────┘

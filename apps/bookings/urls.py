@@ -242,11 +242,6 @@ urlpatterns = [
         name="generate_copy_api",
     ),
     path(
-        "api/marketing/generate-image/",
-        dynamic_view("apps.marketing.views.marketing_views.GenerateAIImageView"),
-        name="generate_ai_image",
-    ),
-    path(
         "marketing/hub/",
         dynamic_view("apps.marketing.views.marketing_views.MarketingHubView"),
         name="marketing_hub",

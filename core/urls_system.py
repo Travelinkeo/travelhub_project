@@ -18,7 +18,7 @@ from apps.cotizaciones.views import (
     CotizacionUpdateView,
 )
 from apps.finance.views.facturacion_views import generar_factura_desde_venta
-from apps.marketing.views.marketing_views import GenerateAIImageView, MarketingHubView
+from apps.marketing.views.marketing_views import MarketingHubView
 from core.api.hotel_api import HotelQuoteAPI
 from core.dashboard_stats import get_dashboard_stats as dashboard_stats_api
 from core.metrics import health_metrics_view
@@ -395,7 +395,6 @@ urlpatterns = [
     path("flights/", FlightSearchView.as_view(), name="flight_search"),
     # Marketing y Generación IA
     path("api/marketing/generate-copy/", GenerateCopyAPI.as_view(), name="generate_copy_api"),
-    path("api/marketing/generate-image/", GenerateAIImageView.as_view(), name="generate_ai_image"),
     path("marketing/hub/", MarketingHubView.as_view(), name="marketing_hub"),
     path("", include("apps.common.urls_core")),
 ]

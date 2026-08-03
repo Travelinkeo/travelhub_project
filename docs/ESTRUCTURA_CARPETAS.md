@@ -247,12 +247,9 @@ travelhub_project/
 ├── 📄 requirements.txt                         # Dependencias Python (50+)
 ├── 📄 .env                                     # Variables de entorno
 ├── 📄 .gitignore                               # Git ignore
-├── 📄 Procfile                                 # Configuración Render/Railway
-├── 📄 render.yaml                              # Configuración Render
-├── 📄 railway.json                             # Configuración Railway
 ├── 📄 README.md                                # README principal
 ├── 📄 organizacion_proyecto.md                 # Guía de organización
-└── 📄 INICIO_RAPIDO.txt                        # Comandos rápidos
+├── 📄 INICIO_RAPIDO.txt                        # Comandos rápidos
 ```
 
 ---
@@ -314,8 +311,8 @@ Total:                  ~70,000 líneas
 ### Configuración (TOP 5)
 1. **.env** - Variables de entorno
 2. **requirements.txt** - Dependencias Python
-3. **Procfile** - Configuración Render/Railway
-4. **render.yaml** - Configuración Render
+3. **docker-compose.yml** - Orquestación de servicios
+4. **Dockerfile** - Imagen de la aplicación
 5. **travelhub/settings.py** - Configuración Django
 
 ---
@@ -379,8 +376,8 @@ Histórica:      docs_archive/
 
 ### Para Deployment
 ```
-Scripts:        batch_scripts/
-Configuración:  Procfile, render.yaml, railway.json
+Scripts:        deploy.sh, docker/
+Configuración:  docker-compose.yml, Dockerfile, nginx.conf
 Variables:      .env
 ```
 
@@ -435,8 +432,8 @@ nombre_minusculas_archive/      Carpetas de archivo
 ### Para Deployment
 1. Revisar **docs/deployment/**
 2. Configurar variables en **.env**
-3. Usar scripts en **batch_scripts/**
-4. Seguir guías de Railway/Render
+3. Usar scripts en **docker/**
+4. Seguir la guía de despliegue en **docs/deployment/deployment_production.md**
 
 ---
 

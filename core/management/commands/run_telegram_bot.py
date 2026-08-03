@@ -670,9 +670,7 @@ class Command(BaseCommand):
             """Envía el botón para abrir la Mini App"""
             # URL pública del servidor (Debe ser HTTPS real, ngrok o hosting)
             # Como fallback local, usamos una variable de entorno o hardcode para test
-            web_app_url = os.getenv(
-                "WEB_APP_URL", "https://travelhub-project.onrender.com/telegram/flyer-app/"
-            )
+            web_app_url = os.getenv("WEB_APP_URL", "https://travelhub.cc/telegram/flyer-app/")
 
             # Inject UID into URL (Fallback for "UID: 0" issue)
             user_id = update.effective_user.id

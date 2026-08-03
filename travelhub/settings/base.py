@@ -169,7 +169,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # Servir estáticos en Render
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Servir estáticos
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.locale.LocaleMiddleware",  # i18n: detección de idioma
@@ -408,9 +408,6 @@ BINANCE_PAY_API_KEY = env("BINANCE_PAY_API_KEY", default="")
 BINANCE_PAY_SECRET_KEY = env("BINANCE_PAY_SECRET_KEY", default="")
 BINANCE_WEBHOOK_SECRET = env("BINANCE_WEBHOOK_SECRET", default="")
 
-GCP_JSON_CREDENTIALS = env("GCP_JSON_CREDENTIALS", default="")
-GCP_PROJECT_ID = env("GCP_PROJECT_ID", default="")
-GCP_LOCATION = env("GCP_LOCATION", default="")
 GOOGLE_PLACES_API_KEY = env(
     "GOOGLE_PLACES_API_KEY", default=os.environ.get("GOOGLE_PLACES_API_KEY", "")
 )
@@ -595,25 +592,25 @@ if _redis_url_env:
     except Exception:
         logger.debug("No se pudo parsear REDIS_URL; usando defaults de entorno")
 
-_redis_cache_password = os.getenv(
-    "REDIS_CACHE_PASSWORD",
-    _default_redis_password if _redis_url_env else os.getenv("REDIS_PASSWORD"),
+_raw_redis_pass = (
+    os.getenv("REDIS_CACHE_PASSWORD")
+    or _default_redis_password
+    or os.getenv("REDIS_PASSWORD")
+    or "ROTATE_BEFORE_PROD_REDIS_PASSWORD"
 )
-_redis_cache_host = os.getenv("REDIS_CACHE_HOST", _default_redis_host or "redis-cache")
+if _raw_redis_pass and _raw_redis_pass.endswith("_DEV"):
+    _raw_redis_pass = _raw_redis_pass[:-4]
+
+_redis_cache_password = _raw_redis_pass
+_redis_cache_host = os.getenv("REDIS_CACHE_HOST", _default_redis_host or "redis_cache")
 _redis_cache_port = os.getenv("REDIS_CACHE_PORT", _default_redis_port or "6379")
 
-_redis_celery_password = os.getenv(
-    "REDIS_CELERY_PASSWORD",
-    _default_redis_password if _redis_url_env else os.getenv("REDIS_PASSWORD"),
-)
-_redis_celery_host = os.getenv("REDIS_CELERY_HOST", _default_redis_host or "redis-celery")
+_redis_celery_password = _raw_redis_pass
+_redis_celery_host = os.getenv("REDIS_CELERY_HOST", _default_redis_host or "redis_broker")
 _redis_celery_port = os.getenv("REDIS_CELERY_PORT", _default_redis_port or "6379")
 
-_redis_evolution_password = os.getenv(
-    "REDIS_EVOLUTION_PASSWORD",
-    _default_redis_password if _redis_url_env else os.getenv("REDIS_PASSWORD"),
-)
-_redis_evolution_host = os.getenv("REDIS_EVOLUTION_HOST", _default_redis_host or "redis-evolution")
+_redis_evolution_password = _raw_redis_pass
+_redis_evolution_host = os.getenv("REDIS_EVOLUTION_HOST", _default_redis_host or "redis_evolution")
 _redis_evolution_port = os.getenv("REDIS_EVOLUTION_PORT", _default_redis_port or "6379")
 
 
@@ -680,7 +677,7 @@ if "redis://" in _cache_url:
         "CLIENT_CLASS": "django_redis.client.DefaultClient",
         "CONNECTION_POOL_KWARGS": {"max_connections": 50},
     }
-    if _redis_cache_password:
+    if _redis_cache_password and "@" not in _cache_url:
         _cache_options["PASSWORD"] = _redis_cache_password
 
     CACHES = {
@@ -699,7 +696,7 @@ if "redis://" in _cache_url:
             "TIMEOUT": 3600,
         },
     }
-    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
     SESSION_CACHE_ALIAS = "sessions"
     SESSION_SAVE_EVERY_REQUEST = False
 else:

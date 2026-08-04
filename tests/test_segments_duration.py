@@ -1,8 +1,10 @@
 import pytest
 
-from apps.automation.parsers import ticket_parser
+from apps.automation.services.ticket_parser_service import _parse_sabre_ticket
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
+pytestmark = pytest.mark.skip(
+    reason="Usa samples sinteticos que el parser refactorizado ya no reconoce (cae a regex generico, 0 segmentos); debe usar tests/fixtures/sabre_rosangela_diaz_fixture.txt. Verificado 2026-08-04."
+)
 
 
 def test_sabre_segment_duration_same_day():
@@ -21,7 +23,7 @@ def test_sabre_segment_duration_same_day():
         "Baggage Allowance 1PC\n"
         "Please contact your travel arranger\n"
     )
-    data = ticket_parser._parse_sabre_ticket(sample)
+    data = _parse_sabre_ticket(sample)
     segs = data["normalized"]["segments"]
     assert segs and segs[0]["duration_minutes"] == ((12 * 60 + 5) - (9 * 60 + 15))  # 170 minutos
 
@@ -42,7 +44,7 @@ def test_sabre_segment_duration_cross_midnight():
         "Baggage Allowance 1PC\n"
         "Please contact your travel arranger\n"
     )
-    data = ticket_parser._parse_sabre_ticket(sample)
+    data = _parse_sabre_ticket(sample)
     seg = data["normalized"]["segments"][0]
     # Cruza medianoche: (23:30 -> 05:50) = 6h20 = 380 min + 24h? No, lógica añade +1 día solo si arr_dt < dep_dt
     # 23:30 a 05:50 => arr_dt < dep_dt inicialmente, se suma +1 día: duración = (24:00-23:30)=30m + 5h50 = 6h20=380m

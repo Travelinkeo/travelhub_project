@@ -6,7 +6,9 @@ from apps.bookings.models import AuditLog, Venta
 from apps.common.models import Moneda
 from apps.crm.models import Cliente
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
+pytestmark = pytest.mark.skip(
+    reason="Requiere log de cambio de estado en Venta; no hay signal post_save de estado. Verificado 2026-08-04."
+)
 
 
 @pytest.mark.django_db

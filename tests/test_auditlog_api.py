@@ -7,7 +7,9 @@ from apps.bookings.models import ItemVenta, ProductoServicio, Venta
 from apps.common.models import Moneda
 from apps.crm.models import Cliente
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - pendiente")
+pytestmark = pytest.mark.skip(
+    reason="Usa reverse('core:audit-log-list') pero la URL real es name='api_audit_logs' sin namespace; ademas la vista requiere modelo+object_id+agencia (no lista general). Verificado 2026-08-04."
+)
 
 
 @pytest.mark.django_db

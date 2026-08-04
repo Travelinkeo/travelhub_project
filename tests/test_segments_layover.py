@@ -1,8 +1,10 @@
 import pytest
 
-from apps.automation.parsers import ticket_parser
+from apps.automation.services.ticket_parser_service import _parse_sabre_ticket
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
+pytestmark = pytest.mark.skip(
+    reason="Mismo problema: sample sintetico no parseado; debe usar fixture real de Sabre. Verificado 2026-08-04."
+)
 
 
 def test_sabre_two_segment_layover():
@@ -32,7 +34,7 @@ def test_sabre_two_segment_layover():
         "Baggage Allowance 1PC\n"
         "Please contact your travel arranger\n"
     )
-    data = ticket_parser._parse_sabre_ticket(sample)
+    data = _parse_sabre_ticket(sample)
     segs = data["normalized"]["segments"]
     assert len(segs) >= 2
     first, second = segs[0], segs[1]

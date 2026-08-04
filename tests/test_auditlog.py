@@ -7,7 +7,9 @@ from apps.bookings.models import AuditLog, ItemVenta, ProductoServicio, Venta
 from apps.common.models import Moneda
 from apps.crm.models import Cliente
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
+pytestmark = pytest.mark.skip(
+    reason="Requiere que el sistema genere logs DELETE automaticamente al eliminar ItemVenta/Venta; los signals actuales (core/signals_audit.py) no cubren ese caso. Verificado 2026-08-04."
+)
 
 
 @pytest.mark.django_db

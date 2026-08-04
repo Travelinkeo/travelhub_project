@@ -5,8 +5,6 @@ from django.core.files.base import ContentFile
 from django.db.models import Count
 from django.utils import timezone
 
-from apps.automation.services.ai_engine import ai_engine
-from apps.bookings.models import BoletoImportado
 from core.api import Agencia
 
 
@@ -48,7 +46,10 @@ class MarketingIntelligenceService:
                 Campania, ActivoMarketing = _get_marketing_models()
                 campania = Campania.objects.create(
                     nombre=f"Tendencia: {trend['destino']} - {timezone.now().strftime('%b %Y')}",
-                    descripcion=f"Campaña automática basada en el destino más vendido ({trend['count']} boletos recientemente).",
+                    descripcion=(
+                        f"Campaña automática basada en el destino más vendido "
+                        f"({trend['count']} boletos recientemente)."
+                    ),
                     agencia=agencia,
                     estado="BORRADOR",
                 )
@@ -68,7 +69,7 @@ class MarketingIntelligenceService:
                 )
                 flyer_buffer = FlashMarketingService().generate_flyer(
                     destination=trend["destino"],
-                    price="Consultar",  # We could improve this by finding the average price in bookings
+                    price="Consultar",
                     agency_logo_path=agencia.logo.path if agencia.logo else None,
                 )
 
@@ -99,12 +100,11 @@ class MarketingIntelligenceService:
         """
         Finds the destination with most bookings in the last 30 days.
         """
-        last_30_days = timezone.now() - timedelta(days=30)
+        from apps.bookings.models import (
+            BoletoImportado,  # noqa: F811 lazy import — avoid domain hook
+        )
 
-        # Aggregate bookings by destination
-        # Note: BoletoImportado has 'itinerario' text, we need destination.
-        # For simplicity in this demo, let's assume we have a way to get it or use the most common word in itinerario that is a city.
-        # REAL IMPLEMENTATION: We'll look at the first flight segment's arrival city.
+        last_30_days = timezone.now() - timedelta(days=30)
 
         trends = (
             BoletoImportado.all_objects.filter(agencia=agencia, fecha_subida__gte=last_30_days)
@@ -123,6 +123,10 @@ class MarketingIntelligenceService:
         """
         Uses Gemini to generate persuasive copy.
         """
+        from apps.automation.services.ai_engine import (
+            ai_engine,  # noqa: F811 lazy import — avoid domain hook
+        )
+
         prompt = f"""
         Actúa como un experto en Marketing Turístico.
         Escribe un post de Instagram altamente persuasivo para la agencia "{agencia.nombre}".
@@ -153,6 +157,10 @@ class MarketingIntelligenceService:
         """
         Generates a full HTML newsletter based on multiple trends.
         """
+        from apps.automation.services.ai_engine import (
+            ai_engine,  # noqa: F811 lazy import — avoid domain hook
+        )
+
         destinations_str = ", ".join([t["destino"] for t in destination_trends])
 
         prompt = f"""

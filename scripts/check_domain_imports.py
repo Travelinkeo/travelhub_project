@@ -91,7 +91,7 @@ ALLOWED_DEPENDENCIES = {
         "cms",
         "automation",
     },
-    "marketing": {"crm", "common", "communications"},
+    "marketing": {"crm", "common", "communications", "bookings", "automation"},
     "cms": {"common", "communications"},
     "crm": {"common", "communications", "automation"},
     "common": {

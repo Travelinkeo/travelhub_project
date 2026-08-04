@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from apps.automation.services.marketing_intelligence_service import MarketingIntelligenceService
+from apps.marketing.services.intelligence import MarketingIntelligenceService
 
 
 class Command(BaseCommand):

@@ -11,7 +11,7 @@ from apps.bookings.models import BoletoImportado, Venta
 from apps.common.models import Moneda
 from apps.crm.models import Cliente
 
-pytestmark = pytest.mark.skip(reason="Métodos de admin refactorizados - pendiente actualización")
+# SKIP REMOVIDO - reactivado
 
 
 @pytest.fixture
@@ -69,46 +69,34 @@ def test_venta_admin_get_changeform_initial_data_with_boleto(rf, admin_site):
         tarifa_base=100,
         impuestos_total_calculado=20,
         total_boleto=120,
+        localizador_pnr="ABC123",
     )
     request = rf.get("/admin/core/venta/add/", {"boleto_id": boleto.pk})
-    # Necesario un usuario staff para el admin (aunque no se usa intensamente aquí)
     user = User.objects.create_superuser("admin", "admin@example.com", "pwd")
     request.user = user
     va = VentaAdmin(Venta, admin_site)
     initial = va.get_changeform_initial_data(request)
-    assert initial["moneda"] == Moneda.objects.get(codigo_iso="USD").pk
-    assert "Venta desde Boleto Nro" in initial["descripcion_general"]
+    # El admin actual precarga subtotal/impuestos/localizador desde el boleto
+    assert initial["subtotal"] == 100
+    assert initial["impuestos"] == 20
+    assert initial["localizador"] == "ABC123"
 
 
 @pytest.mark.django_db
-def test_boleto_importado_admin_crear_venta_desde_boleto_link_variants(admin_site, tmp_path):
-    """test_boleto_importado_admin_crear_venta_desde_boleto_link_variants."""
+def test_boleto_importado_admin_actions_registered(admin_site):
+    """Las actions actuales del admin son reprocesar y hard_delete."""
     bia = BoletoImportadoAdmin(BoletoImportado, admin_site)
-    archivo = SimpleUploadedFile("ticket.eml", b"Subject: Test\n\nBody")
-    boleto_no_parseado = BoletoImportado.objects.create(
-        archivo_boleto=archivo, estado_parseo=BoletoImportado.EstadoParseo.PENDIENTE
-    )
-    assert "debe ser parseado" in bia.crear_venta_desde_boleto_link(boleto_no_parseado).lower()
-    boleto_parseado = BoletoImportado.objects.create(
-        archivo_boleto=archivo, estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO
-    )
-    link = bia.crear_venta_desde_boleto_link(boleto_parseado)
-    assert "Crear Venta" in link
-    # Con venta asociada
-    moneda = Moneda.objects.create(
-        nombre="Dolar", codigo_iso="USD", simbolo="$", es_moneda_local=True
-    )
-    cliente = Cliente.objects.create(nombres="Jose", apellidos="Diaz", email="jose@example.com")
-    venta = Venta.objects.create(cliente=cliente, moneda=moneda, subtotal=50, impuestos=10)
-    boleto_parseado.venta_asociada = venta
-    boleto_parseado.save(update_fields=["venta_asociada"])
-    link2 = bia.crear_venta_desde_boleto_link(boleto_parseado)
-    assert "Venta <a href=" in link2
+    assert "reprocesar_boletos" in bia.actions
+    assert "hard_delete_boletos" in bia.actions
 
 
 @pytest.mark.django_db
-def test_boleto_importado_admin_reintentar_parseo_action(rf, admin_site):
-    """test_boleto_importado_admin_reintentar_parseo_action."""
+def test_boleto_importado_admin_reprocesar_action(rf, admin_site, monkeypatch):
+    """reprocesar_boletos re-encola boletos en estado ERROR_PARSEO."""
+    from unittest.mock import MagicMock
+
+    from apps.bookings.admin_boletos import BoletoImportadoAdmin
+
     bia = BoletoImportadoAdmin(BoletoImportado, admin_site)
     archivo = SimpleUploadedFile("ticket.eml", b"Subject: Test\n\nBody")
     boleto = BoletoImportado.objects.create(
@@ -117,7 +105,18 @@ def test_boleto_importado_admin_reintentar_parseo_action(rf, admin_site):
     request = rf.post("/admin/core/boletoimportado/")
     user = User.objects.create_superuser("staff", "staff@example.com", "pwd")
     request.user = user
+
+    # Mockear la tarea Celery (no hay Redis en el entorno de test).
+    # La action la importa con import_string("core.tasks.parsear_boleto_individual")
+    import core.tasks as core_tasks
+
+    monkeypatch.setattr(core_tasks, "parsear_boleto_individual", MagicMock())
+    # message_user requiere MessageMiddleware; no aplica al request del RequestFactory
+    monkeypatch.setattr(bia, "message_user", MagicMock())
+
+    # Ejecutar la action directamente
     queryset = BoletoImportado.objects.filter(pk=boleto.pk)
-    bia.reintentar_parseo(request, queryset)
+    bia.reprocesar_boletos(request, queryset)
+
     boleto.refresh_from_db()
     assert boleto.estado_parseo == BoletoImportado.EstadoParseo.PENDIENTE

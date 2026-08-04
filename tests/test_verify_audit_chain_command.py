@@ -3,7 +3,7 @@ from django.core.management import call_command
 
 from apps.bookings.models import AuditLog
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
+# SKIP REMOVIDO - reactivado
 
 
 def test_verify_audit_chain_success(monkeypatch, capsys):

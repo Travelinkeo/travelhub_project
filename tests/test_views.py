@@ -1,14 +1,13 @@
 import json
 from datetime import timedelta
 
-import pytest
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.utils import timezone
 
 from core.models.magic_link import MagicLinkToken
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
+# SKIP REMOVIDO - reactivado
 
 User = get_user_model()
 

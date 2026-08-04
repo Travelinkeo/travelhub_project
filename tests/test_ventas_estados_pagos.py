@@ -6,7 +6,9 @@ from apps.bookings.models import ProductoServicio
 from apps.common.models import Moneda
 from apps.crm.models import Cliente
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - pendiente")
+pytestmark = pytest.mark.skip(
+    reason="Requiere transicion PEN->PAR/PAG de estado de Venta al registrar pagos, no implementada en el backend actual. 7 fails de logica de negocio (estados/puntos). Verificado 2026-08-04."
+)
 
 
 @pytest.fixture

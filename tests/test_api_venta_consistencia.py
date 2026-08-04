@@ -6,7 +6,7 @@ from apps.bookings.models import Venta
 from apps.common.models import Moneda
 from apps.crm.models import Cliente
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
+# SKIP REMOVIDO - reactivado
 
 
 @pytest.mark.django_db
@@ -29,16 +29,17 @@ def test_api_venta_includes_consistency_fields():
         total_venta=115,
         monto_pagado=0,
         saldo_pendiente=115,
-        tipo_venta="BOL",
+        tipo_venta="B2C",
         canal_origen="WEB",
         estado="PEN",
     )
 
     client = APIClient()
-    # Autenticar (la API requiere credenciales)
-    User = get_user_model()
-    User.objects.create_user(username="consistency", password="pass123", is_staff=True)
-    client.login(username="consistency", password="pass123")
+    # Autenticar (la API requiere credenciales) — force_authenticate evita django-axes
+    user = get_user_model().objects.create_user(
+        username="consistency", password="pass123", is_staff=True
+    )
+    client.force_authenticate(user=user)
     resp = client.get(f"/api/ventas/{venta.id_venta}/")
     assert resp.status_code == 200, resp.content
     data = resp.json()

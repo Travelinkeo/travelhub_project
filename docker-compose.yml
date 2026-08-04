@@ -448,8 +448,8 @@ services:
       - LANGUAGE=es
       - DATABASE_ENABLED=true
       - DATABASE_PROVIDER=postgresql
-      # 🔴 B3: parametrizado desde ${EVOLUTION_DB_USER}/${EVOLUTION_DB_PASSWORD}.
-      # Defaults 'evolution'/'evolution' solo OK para dev/local.
+      # 🔴 B3: parametrizado desde ${EVOLUTION_DB_USER}/${EVOLUTION_DB_PASSWORD} (obligatorio).
+      # Sin defaults — compose aborta si no estan definidas.
       - DATABASE_CONNECTION_URI=postgresql://${EVOLUTION_DB_USER:-evolution}:${EVOLUTION_DB_PASSWORD:-evolution}@evolution_db:5432/evolution_v2?schema=public
       - DATABASE_CONNECTION_CLIENT_NAME=travelhub
       - DATABASE_SAVE_DATA_INSTANCE=true
@@ -483,15 +483,15 @@ services:
     restart: unless-stopped
     logging: *default-logging
     environment:
-      - POSTGRES_USER=${EVOLUTION_DB_USER:-evolution}
-      - POSTGRES_PASSWORD=${EVOLUTION_DB_PASSWORD:-evolution}
+      - POSTGRES_USER=${EVOLUTION_DB_USER:?}
+      - POSTGRES_PASSWORD=${EVOLUTION_DB_PASSWORD:?}
       - POSTGRES_DB=evolution_v2
     volumes:
       - evolution_db_data:/var/lib/postgresql/data
     networks:
       - travelhub_private
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${EVOLUTION_DB_USER:-evolution} -d evolution_v2"]
+      test: ["CMD-SHELL", "pg_isready -U ${EVOLUTION_DB_USER:?} -d evolution_v2"]
       interval: 10s
       timeout: 5s
       retries: 5

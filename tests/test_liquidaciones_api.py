@@ -10,7 +10,9 @@ from apps.common.models import Moneda
 from apps.contabilidad.models import LiquidacionProveedor
 from apps.crm.models import Cliente
 
-pytestmark = pytest.mark.skip(reason="Endpoints de liquidaciones no registrados en URLs")
+pytestmark = pytest.mark.skip(
+    reason="No existe ViewSet REST para /api/liquidaciones/. Solo existe LiquidacionDashboardView (TemplateView en apps/finance/views/liquidaciones_views.py). Se necesita crear LiquidacionViewSet + router.register() en urls_api.py. Verificado 2026-08-03."
+)
 
 User = get_user_model()
 

@@ -2,7 +2,9 @@ import pytest
 from django.db import connection
 from django.test import TestCase
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
+pytestmark = pytest.mark.skip(
+    reason="Necesita PostgreSQL con Row-Level Security activo (pg_policy + SET LOCAL app.current_agencia_id). Los tests requieren ejecución contra PostgreSQL real con políticas RLS creadas vía migraciones, no SQLite ni --nomigrations. Verificado 2026-08-03: requiere migraciones reales + PostgreSQL."
+)
 
 
 class RLSPolicyTest(TestCase):

@@ -2,7 +2,9 @@ import pytest
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
+pytestmark = pytest.mark.skip(
+    reason="Necesita fixture de Agencia+UsuarioAgencia. El JWT obtiene token (200 OK) pero /api/ventas/ requiere permisos multi-tenant (Agencia asignada al usuario), no solo autenticación. Verificado 2026-08-03: token JWT funciona, falla en permisos de agencia."
+)
 
 
 @pytest.mark.django_db

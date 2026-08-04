@@ -6,7 +6,9 @@ from apps.bookings.models import Venta
 from apps.common.models import Moneda
 from apps.crm.models import Cliente
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa de endpoints/axes")
+pytestmark = pytest.mark.skip(
+    reason="Fixtures dependientes de Venta y Cliente necesitan cambios post-refactorización del modelo (id_cliente, monto_ pagado, etc.). Verificado 2026-08-03: los fixtures no coinciden con los campos actuales del modelo Venta."
+)
 
 
 @pytest.fixture

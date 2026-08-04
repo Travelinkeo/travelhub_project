@@ -8,7 +8,9 @@ from apps.bookings.models import Venta
 from apps.common.models import Moneda
 from apps.crm.models import Cliente
 
-pytestmark = pytest.mark.skip(reason="Endpoints de dashboard no registrados en URLs")
+pytestmark = pytest.mark.skip(
+    reason="No existe ViewSet REST para /api/dashboard/. El dashboard usa TemplateView (apps/bookings/views/dashboard_views.py) + HTMX, no DRF. Se necesita crear DashboardAPIView o ViewSet si se quiere exponer vía REST. Verificado 2026-08-03."
+)
 
 User = get_user_model()
 

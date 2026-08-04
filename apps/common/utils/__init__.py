@@ -196,10 +196,17 @@ def verify_audit_chain(limit: int | None = None) -> tuple[bool, int | None, str 
         import hashlib
         import json
 
+        # El primer registro usa "0"*64 como previous_hash (bloque génesis).
+        # Aceptar también None para registros previos al cambio.
+        genesis = ("0" * 64, None)
+
         for log in qs:
             # Validar previous_hash coincide con la cadena esperada
             if log.previous_hash != prev_hash:
-                return False, log.id_audit_log, "previous_hash mismatch"
+                if prev_hash is None and log.previous_hash in genesis:
+                    prev_hash = log.previous_hash  # primer registro: génesis válido
+                else:
+                    return False, log.id_audit_log, "previous_hash mismatch"
             payload = {
                 "modelo": log.modelo,
                 "object_id": log.object_id,

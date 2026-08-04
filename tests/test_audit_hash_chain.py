@@ -3,7 +3,7 @@ import pytest
 from apps.bookings.models import AuditLog
 from apps.common.utils import verify_audit_chain
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
+# SKIP REMOVIDO - reactivado
 
 
 @pytest.mark.django_db
@@ -23,7 +23,8 @@ def test_audit_hash_chain_creation_sequence():
     # Validar que el encadenamiento se estableció
     assert a2.previous_hash == a1.record_hash
     assert a3.previous_hash == a2.record_hash
-    assert a1.previous_hash is None
+    # Primer registro: bloque génesis (0*64), no None
+    assert a1.previous_hash == "0" * 64
 
     # Re-verificar vía utilidad
     ok, break_id, reason = verify_audit_chain()

@@ -72,7 +72,7 @@ class AuditLog(models.Model):
     datos_nuevos = models.JSONField(_("Datos Nuevos"), blank=True, null=True)
     metadata_extra = models.JSONField(_("Metadata Extra"), blank=True, null=True)
 
-    creado = models.DateTimeField(_("Creado"), auto_now_add=True, db_index=True)
+    creado = models.DateTimeField(_("Creado"), default=_tz.now, db_index=True)
 
     # DOCTRINA ANTIGRAVITY: Encadenamiento de integridad (Blockchain-style)
     previous_hash = models.CharField(max_length=64, blank=True, null=True, db_index=True)

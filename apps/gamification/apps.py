@@ -10,3 +10,6 @@ class GamificationConfig(AppConfig):
 
     def ready(self):
         """ready."""
+        # Importar signals para registrar los receivers (Venta, BoletoImportado,
+        # Cliente, PagoVenta, Articulo). Sin esto el motor de logros nunca se dispara.
+        from . import signals  # noqa: F401

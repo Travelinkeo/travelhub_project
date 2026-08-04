@@ -23,7 +23,7 @@ def on_boleto_importado(sender, instance, created, **kwargs):
     """on_boleto_importado."""
     if not created:
         return
-    _disparar(instance.agencia, instance.importado_por, evento="boleto_importado")
+    _disparar(instance.agencia, getattr(instance, "importado_por", None), evento="boleto_importado")
 
 
 @receiver(post_save, sender="crm.Cliente")
@@ -31,7 +31,7 @@ def on_cliente_creado(sender, instance, created, **kwargs):
     """on_cliente_creado."""
     if not created:
         return
-    _disparar(instance.agencia, instance.creado_por, evento="cliente_creado")
+    _disparar(instance.agencia, getattr(instance, "creado_por", None), evento="cliente_creado")
 
 
 @receiver(post_save, sender="bookings.PagoVenta")
@@ -39,7 +39,7 @@ def on_pago_confirmado(sender, instance, created, **kwargs):
     """on_pago_confirmado."""
     if not created or not instance.confirmado:
         return
-    _disparar(instance.agencia, instance.creado_por, evento="pago_confirmado")
+    _disparar(instance.agencia, getattr(instance, "creado_por", None), evento="pago_confirmado")
 
 
 @receiver(post_save, sender="cms.Articulo")

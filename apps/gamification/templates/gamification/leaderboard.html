@@ -37,9 +37,9 @@
       <span class="material-symbols-outlined text-4xl text-amber-600">workspace_premium</span>
       {% endif %}
       <div class="size-16 rounded-full bg-surface-2 mx-auto flex items-center justify-center text-xl font-black text-text-main mt-1">
-        {{ pos.usuario.email|first|upper }}
+        {{ pos.usuario.email|default:pos.usuario.username|first|upper }}
       </div>
-      <p class="text-sm font-bold text-text-main mt-2 truncate">{{ pos.usuario.email }}</p>
+      <p class="text-sm font-bold text-text-main mt-2 truncate">{{ pos.usuario.email|default:pos.usuario.username }}</p>
       <p class="text-lg font-black text-primary">{{ pos.puntos_total }} pts</p>
     </div>
     {% endfor %}
@@ -51,10 +51,10 @@
     <div class="flex items-center gap-4 px-6 py-3 {% if pos.usuario == request.user %}bg-primary/5{% endif %}">
       <span class="text-lg font-black text-text-muted w-8">#{{ forloop.counter|add:"3" }}</span>
       <div class="size-10 rounded-full bg-surface-2 flex items-center justify-center text-sm font-bold text-text-main">
-        {{ pos.usuario.email|first|upper }}
+        {{ pos.usuario.email|default:pos.usuario.username|first|upper }}
       </div>
       <div class="flex-1">
-        <p class="text-sm font-bold text-text-main">{{ pos.usuario.email }}</p>
+        <p class="text-sm font-bold text-text-main">{{ pos.usuario.email|default:pos.usuario.username }}</p>
         <p class="text-xs text-text-muted">{{ pos.nivel.nombre|default:"-" }} · {{ pos.logros_completados }} logros</p>
       </div>
       <span class="text-sm font-bold text-primary">{{ pos.puntos_total }} pts</span>

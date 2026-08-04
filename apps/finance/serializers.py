@@ -13,7 +13,7 @@ class MonedaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Moneda
-        fields = ["id", "codigo_iso", "nombre", "simbolo", "es_moneda_local"]
+        fields = ["id_moneda", "codigo_iso", "nombre", "simbolo", "es_moneda_local"]
 
 
 class ItemFacturaSerializer(serializers.ModelSerializer):

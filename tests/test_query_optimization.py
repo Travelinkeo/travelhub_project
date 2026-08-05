@@ -10,7 +10,7 @@ from apps.bookings.models import BoletoImportado, Venta
 from apps.common.models import Moneda
 from apps.crm.models import Cliente
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
+# SKIP REMOVIDO - reactivado
 
 
 @pytest.mark.django_db
@@ -20,6 +20,14 @@ class TestQueryOptimization:
     def setup_method(self):
         """Setup para cada test"""
         self.client = APIClient()
+
+        # Auth requerida por los endpoints (403 sin credenciales)
+        from django.contrib.auth import get_user_model
+
+        user = get_user_model().objects.create_user(
+            username="queryopt", password="pass123", is_staff=True
+        )
+        self.client.force_authenticate(user=user)
 
         # Crear datos de prueba
         self.moneda = Moneda.objects.create(nombre="USD", codigo_iso="USD", simbolo="$")
@@ -34,7 +42,7 @@ class TestQueryOptimization:
         for i in range(5):
             venta = Venta.objects.create(cliente=self.cliente, moneda=self.moneda, total_venta=100)
             BoletoImportado.objects.create(
-                numero_boleto=f"12345{i}", localizador_pnr=f"ABC{i}", venta=venta
+                numero_boleto=f"12345{i}", localizador_pnr=f"ABC{i}", venta_asociada=venta
             )
 
         # Contar queries

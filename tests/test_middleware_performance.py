@@ -2,12 +2,11 @@
 
 from unittest.mock import Mock
 
-import pytest
 from django.test import RequestFactory
 
 from core.middleware_performance import CacheHeaderMiddleware, QueryCountDebugMiddleware
 
-pytestmark = pytest.mark.skip(reason="Tests de middleware con mocks incompatibles")
+# SKIP REMOVIDO - reactivado
 
 
 class TestQueryCountDebugMiddleware:
@@ -46,9 +45,16 @@ class TestQueryCountDebugMiddleware:
 class TestCacheHeaderMiddleware:
     """Tests para CacheHeaderMiddleware"""
 
+    @staticmethod
+    def _mock_response():
+        """Response dict-like: el middleware hace response["Cache-Control"] = ..."""
+        from collections import UserDict
+
+        return UserDict()
+
     def test_adds_cache_headers_for_paises(self):
         """Test que agrega headers de caché para países"""
-        get_response = Mock(return_value=Mock())
+        get_response = Mock(return_value=self._mock_response())
         middleware = CacheHeaderMiddleware(get_response)
 
         factory = RequestFactory()
@@ -61,7 +67,7 @@ class TestCacheHeaderMiddleware:
 
     def test_adds_cache_headers_for_ciudades(self):
         """Test que agrega headers de caché para ciudades"""
-        get_response = Mock(return_value=Mock())
+        get_response = Mock(return_value=self._mock_response())
         middleware = CacheHeaderMiddleware(get_response)
 
         factory = RequestFactory()
@@ -74,7 +80,7 @@ class TestCacheHeaderMiddleware:
 
     def test_no_cache_headers_for_other_endpoints(self):
         """Test que no agrega headers para otros endpoints"""
-        get_response = Mock(return_value=Mock())
+        get_response = Mock(return_value=self._mock_response())
         middleware = CacheHeaderMiddleware(get_response)
 
         factory = RequestFactory()

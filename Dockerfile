@@ -23,6 +23,7 @@ COPY manage.py ./
 COPY static/ ./static/
 COPY templates/ ./templates/
 COPY locale/ ./locale/
+COPY compose/ ./compose/
 COPY docs/ ./docs/
 COPY tests/ ./tests/
 COPY fixtures/ ./fixtures/
@@ -62,6 +63,7 @@ COPY --from=builder /build/static ./static/
 COPY --from=builder /build/staticfiles ./staticfiles/
 COPY --from=builder /build/templates ./templates/
 COPY --from=builder /build/locale ./locale/
+COPY --from=builder /build/compose ./compose/
 COPY --from=builder /build/docs ./docs/
 COPY --from=builder /build/tests ./tests/
 COPY --from=builder /build/fixtures ./fixtures/

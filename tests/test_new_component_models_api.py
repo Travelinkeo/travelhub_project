@@ -1,6 +1,6 @@
 import pytest
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - pendiente")
+# SKIP REMOVIDO - reactivado
 
 
 @pytest.mark.django_db

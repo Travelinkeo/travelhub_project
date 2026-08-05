@@ -6,7 +6,9 @@ from rest_framework.test import APIClient
 
 from apps.common.models import Moneda, Pais
 
-pytestmark = pytest.mark.skip(reason="Middleware de cache no activo en entorno de tests")
+pytestmark = pytest.mark.skip(
+    reason="Las vistas de paises/monedas/ciudades NO implementan cache (grep: sin cache.set de paises_list/monedas_list/ciudades_list en apps/common o core). Los tests describen una feature deseada, no existente. Verificado 2026-08-04."
+)
 
 
 @pytest.mark.django_db

@@ -62,7 +62,7 @@ class SecurityHeadersMiddleware:
                     "https://cloudflareinsights.com https://cdn.jsdelivr.net"
                 ),
                 "form-action": "'self'",
-                "frame-ancestors": "'none'",
+                "frame-ancestors": "'self'",
                 "base-uri": "'self'",
             }
 
@@ -91,7 +91,7 @@ class SecurityHeadersMiddleware:
             response["Content-Security-Policy"] = csp
             response["X-Content-Type-Options"] = "nosniff"
             response["Referrer-Policy"] = "strict-origin-when-cross-origin"
-            response["X-Frame-Options"] = "DENY"
+            response["X-Frame-Options"] = "SAMEORIGIN"
             response["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
 
             if not is_debug:

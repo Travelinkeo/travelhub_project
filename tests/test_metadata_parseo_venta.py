@@ -6,16 +6,16 @@ from apps.bookings.models import Venta, VentaParseMetadata
 from apps.common.models import Moneda
 from apps.crm.models import Cliente
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa o refactorización")
+# SKIP REMOVIDO - reactivado
 
 
 @pytest.mark.django_db
 def test_metadata_creacion_reflejada_en_venta_detalle():
     """test_metadata_creacion_reflejada_en_venta_detalle."""
     User = get_user_model()
-    User.objects.create_user(username="metauser", password="pass123", is_staff=True)
+    user = User.objects.create_user(username="metauser", password="pass123", is_staff=True)
     c = APIClient()
-    c.login(username="metauser", password="pass123")
+    c.force_authenticate(user=user)
 
     moneda = Moneda.objects.create(nombre="Dólar", codigo_iso="USD", simbolo="$")
     cliente = Cliente.objects.create(nombres="Ana", apellidos="Prueba", email="ana@example.com")
@@ -57,8 +57,11 @@ def test_metadata_se_toma_la_mas_reciente():
     """test_metadata_se_toma_la_mas_reciente."""
     User = get_user_model()
     User.objects.create_user(username="metauser2", password="pass123", is_staff=True)
+    user2 = get_user_model().objects.create_user(
+        username="metauser2", password="pass123", is_staff=True
+    )
     c = APIClient()
-    c.login(username="metauser2", password="pass123")
+    c.force_authenticate(user=user2)
 
     moneda = Moneda.objects.create(nombre="Euro", codigo_iso="EUR", simbolo="€")
     cliente = Cliente.objects.create(nombres="Luis", apellidos="Tester", email="luis@example.com")

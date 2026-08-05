@@ -14,7 +14,7 @@ from apps.bookings.models import (
 from apps.common.models import Ciudad, Moneda, Pais
 from apps.crm.models import Cliente
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - pendiente")
+# SKIP REMOVIDO - reactivado
 
 
 @pytest.fixture

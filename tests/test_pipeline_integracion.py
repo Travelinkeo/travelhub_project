@@ -21,7 +21,7 @@ from apps.bookings.models import BoletoImportado, Venta
 from apps.common.models import Moneda
 from apps.crm.models import Cliente
 
-pytestmark = pytest.mark.skip(reason="Tests requieren configuración completa - pendiente")
+# SKIP REMOVIDO - reactivado
 
 User = get_user_model()
 

@@ -15,7 +15,7 @@ format: ## Format code with ruff (replaces black/isort)
 
 security: ## Run security checks
 	python manage.py check --deploy
-	safety check --json
+	pip-audit
 	bandit -r . -ll -ii -x tests/
 
 docker-build: ## Build Docker image

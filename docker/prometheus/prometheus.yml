@@ -20,8 +20,8 @@ scrape_configs:
     metrics_path: /health/metrics/
     scrape_interval: 60s
 
-  # Redis Broker
-  - job_name: 'redis-cache'
+  # Redis — vía redis_exporter (Redis habla RESP, no HTTP; el exporter traduce)
+  - job_name: 'redis-exporter'
     static_configs:
-      - targets: ['redis_broker:6379']
+      - targets: ['redis_exporter:9121']
     scrape_interval: 30s

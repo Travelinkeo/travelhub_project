@@ -61,14 +61,39 @@ if not os.getenv("EVOLUTION_INSTANCE_TOKEN"):
 
     raise ImproperlyConfigured("EVOLUTION_INSTANCE_TOKEN debe configurarse en producción")
 
-# JWT debe usar una clave separada de SECRET_KEY en producción.
+# Rechazar valores placeholder que nunca deben llegar a producción. Un deploy
+# que arranque con ROTATE_BEFORE_PROD_*/PLACEHOLDER_* debe fallar rápido, no
+# correr con credenciales de plantilla conocidas públicamente.
+_PLACEHOLDER_MARKERS = ("ROTATE_BEFORE_PROD", "PLACEHOLDER")
+_CRITICAL_ENV_VARS = (
+    "DB_PASSWORD",
+    "REDIS_PASSWORD",
+    "EVOLUTION_DB_PASSWORD",
+    "WHATSAPP_MICROSERVICE_TOKEN",
+    "EVOLUTION_INSTANCE_TOKEN",
+    "GEMINI_API_KEY",
+    "RESEND_API_KEY",
+    "JWT_SIGNING_KEY",
+)
+for _var in _CRITICAL_ENV_VARS:
+    _val = os.getenv(_var, "")
+    if any(_marker in _val for _marker in _PLACEHOLDER_MARKERS):
+        from django.core.exceptions import ImproperlyConfigured
 
+        raise ImproperlyConfigured(
+            f"🔒 {_var} contiene un valor placeholder. "
+            "Configura la credencial real antes de arrancar en producción."
+        )
+
+# JWT debe usar una clave separada de SECRET_KEY en producción. Si SECRET_KEY
+# se compromete, el atacante no debe poder firmar tokens JWT con la misma clave.
 if not os.getenv("JWT_SIGNING_KEY"):
-    import warnings
+    from django.core.exceptions import ImproperlyConfigured
 
-    warnings.warn(
-        "JWT_SIGNING_KEY no configurada en producción, usando SECRET_KEY como respaldo.",
-        stacklevel=2,
+    raise ImproperlyConfigured(
+        "🔒 JWT_SIGNING_KEY debe configurarse en producción (no puede recaer en "
+        "SECRET_KEY). Genera una con: "
+        'python -c "import secrets; print(secrets.token_urlsafe(64))"'
     )
 
 # ---------------------------------------------------------------------------

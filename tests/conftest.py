@@ -25,7 +25,13 @@ def pytest_configure(config):
         return
 
     pg_available = False
-    hosts = ["test_db", "travelhub_db", "pgbouncer", "localhost", "127.0.0.1"]
+    # Descubrimiento acotado en el tiempo: socket.gethostbyname() NO tiene
+    # timeout y puede bloquearse indefinidamente resolviendo nombres Docker
+    # (test_db/travelhub_db/pgbouncer) en redes locales/Windows. Se corre en un
+    # hilo daemon con tope de 20s para no colgar la sesión de pytest.
+    import threading
+
+    hosts = ["localhost", "127.0.0.1", "test_db", "travelhub_db", "pgbouncer"]
     # Credenciales: probar primero las reales del entorno, luego defaults
     creds = set()
     db_user = _os.environ.get("DB_USER", "postgres")
@@ -34,13 +40,16 @@ def pytest_configure(config):
         creds.add((db_user, db_pass))
     creds.update([("postgres", "postgres"), ("travelhub", "travelhub")])
 
-    for host in hosts:
-        for user, password in creds:
-            try:
-                socket.gethostbyname(host)
-                import psycopg2
-
+    def _discover():
+        for host in hosts:
+            for user, password in creds:
                 try:
+                    socket.gethostbyname(host)
+                except socket.gaierror:
+                    continue
+                try:
+                    import psycopg2
+
                     conn = psycopg2.connect(
                         host=host,
                         port=5432,
@@ -50,18 +59,30 @@ def pytest_configure(config):
                         connect_timeout=2,
                     )
                     conn.close()
-                    pg_available = True
-                    settings.DATABASES["default"]["HOST"] = host
-                    settings.DATABASES["default"]["PORT"] = 5432
-                    settings.DATABASES["default"]["USER"] = user
-                    settings.DATABASES["default"]["PASSWORD"] = password
-                    break
+                    return (host, user, password)
                 except Exception:
                     continue
-            except socket.gaierror:
-                continue
-        if pg_available:
-            break
+        return None
+
+    _found = {}
+
+    def _run_discover():
+        try:
+            _found["res"] = _discover()
+        except Exception:
+            _found["res"] = None
+
+    _t = threading.Thread(target=_run_discover, daemon=True)
+    _t.start()
+    _t.join(timeout=20)
+
+    if not _t.is_alive() and _found.get("res"):
+        _host, _user, _password = _found["res"]
+        pg_available = True
+        settings.DATABASES["default"]["HOST"] = _host
+        settings.DATABASES["default"]["PORT"] = 5432
+        settings.DATABASES["default"]["USER"] = _user
+        settings.DATABASES["default"]["PASSWORD"] = _password
 
     if not pg_available:
         # Store flag; conftest session-scoped fixture will skip tests
@@ -146,8 +167,10 @@ def _require_pg(request):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def create_stub_tables(django_db_setup, django_db_blocker):
+def create_stub_tables(request, django_db_setup, django_db_blocker):
     """Create tables for managed=False stub models so tests can use them."""
+    if getattr(request.config, "_pg_unavailable", False):
+        return
     with django_db_blocker.unblock():
         from django.db import connection, models
 
@@ -555,10 +578,8 @@ def mock_provider_chain(monkeypatch):
         "apps.automation.providerchain.fallback_router.fallback_router",
         mock_router,
     )
-    monkeypatch.setattr(
-        "apps.automation.services.ai_engine.fallback_router",
-        mock_router,
-    )
+    # ai_engine importa fallback_router localmente dentro de sus funciones, por
+    # lo que no existe como atributo de módulo; basta parchear el módulo fuente.
     return mock_router
 
 

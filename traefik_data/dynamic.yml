@@ -12,6 +12,8 @@ http:
       entryPoints:
         - web
       service: travelhub
+      middlewares:
+        - redirect-https
 
 
   services:

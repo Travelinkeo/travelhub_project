@@ -247,7 +247,7 @@ class TestCallGemini:
 
         self.mock_router = unittest.mock.MagicMock()
         monkeypatch.setattr(
-            "apps.automation.services.ai_engine.fallback_router",
+            "apps.automation.providerchain.fallback_router.fallback_router",
             self.mock_router,
         )
 
@@ -361,7 +361,7 @@ class TestAnalizarDocumento:
         """_mock_router."""
         self.mock_router = unittest.mock.MagicMock()
         monkeypatch.setattr(
-            "apps.automation.services.ai_engine.fallback_router",
+            "apps.automation.providerchain.fallback_router.fallback_router",
             self.mock_router,
         )
 

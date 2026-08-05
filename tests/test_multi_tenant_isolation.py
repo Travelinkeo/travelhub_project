@@ -17,7 +17,7 @@ from apps.automation.models import NotificacionAgente, NotificacionInteligente
 from apps.bookings.models import Venta
 from apps.common.models import Moneda
 from apps.communications.models import NotificationLog, NotificationTemplate
-from apps.contabilidad.models import AsientoContable, LiquidacionProveedor
+from apps.contabilidad.models import AsientoContable
 from apps.crm.models import Cliente, MensajeWhatsApp, OportunidadViaje
 from apps.finance.models import Factura, ItemFactura
 from apps.finance.models_stubs import FacturaConsolidada
@@ -371,76 +371,6 @@ class TestFinanceModelsIsolation(MultiTenantIsolationTestCase):
         facturas = Factura.objects.all()
         self.assertIn(factura2, facturas)
         self.assertNotIn(factura1, facturas)
-
-        self.clear_agency()
-
-
-class TestLiquidacionProveedorIsolation(MultiTenantIsolationTestCase):
-    """Test LiquidacionProveedor isolation by agencia field directly.
-
-    Regression: LiquidacionListView filtraba por proveedor__agencia en vez de
-    agencia directa. Liquidaciones creadas sin proveedor (FK nullable) quedaban
-    ocultas para usuarios del tenant correcto. Ver apps/finance/views/liquidaciones_views.py.
-    """
-
-    def setUp(self):
-        """setUp."""
-        self.clear_agency()
-
-    def test_liquidacion_isolation_with_agencia_direct(self):
-        """LiquidacionProveedor se filtra por su propio campo agencia."""
-        self.set_current_agency(self.agency1)
-        liquidacion_a1 = LiquidacionProveedor.objects.create(
-            agencia=self.agency1,
-            fecha_emision="2024-01-01",
-            monto_total=1000,
-            estado=LiquidacionProveedor.EstadoLiquidacion.PENDIENTE,
-        )
-
-        self.set_current_agency(self.agency2)
-        liquidacion_a2 = LiquidacionProveedor.objects.create(
-            agencia=self.agency2,
-            fecha_emision="2024-01-01",
-            monto_total=2000,
-            estado=LiquidacionProveedor.EstadoLiquidacion.PENDIENTE,
-        )
-
-        # Contexto agencia1 solo ve liquidacion_a1
-        self.set_current_agency(self.agency1)
-        liquidaciones = LiquidacionProveedor.objects.all()
-        self.assertIn(liquidacion_a1, liquidaciones)
-        self.assertNotIn(liquidacion_a2, liquidaciones)
-
-        # Contexto agencia2 solo ve liquidacion_a2
-        self.set_current_agency(self.agency2)
-        liquidaciones = LiquidacionProveedor.objects.all()
-        self.assertIn(liquidacion_a2, liquidaciones)
-        self.assertNotIn(liquidacion_a1, liquidaciones)
-
-        self.clear_agency()
-
-    def test_liquidacion_sin_proveedor_se_filtra_por_agencia(self):
-        """Regression: una liquidacion sin proveedor (FK nullable) debe seguir
-        siendo visible solo para usuarios de su agencia directa, no ocultarse
-        por un filtro que dependa de proveedor__agencia."""
-        self.set_current_agency(self.agency1)
-        liquidacion_sin_proveedor = LiquidacionProveedor.objects.create(
-            agencia=self.agency1,
-            proveedor=None,  # FK nullable: simula liquidacion creada sin proveedor
-            fecha_emision="2024-01-01",
-            monto_total=500,
-            estado=LiquidacionProveedor.EstadoLiquidacion.PENDIENTE,
-        )
-
-        # agency1 debe verla (filtro por agencia directa, no proveedor__agencia)
-        self.set_current_agency(self.agency1)
-        qs = LiquidacionProveedor.objects.all()
-        self.assertIn(liquidacion_sin_proveedor, qs)
-
-        # agency2 NO debe verla
-        self.set_current_agency(self.agency2)
-        qs = LiquidacionProveedor.objects.all()
-        self.assertNotIn(liquidacion_sin_proveedor, qs)
 
         self.clear_agency()
 

@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
                         creado TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                         actualizado TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                         agencia_id BIGINT NOT NULL REFERENCES core_agencia(id) ON DELETE CASCADE,
-                        moneda_id BIGINT NOT NULL REFERENCES common_moneda(id) ON DELETE RESTRICT,
+                        moneda_id BIGINT NOT NULL REFERENCES core_moneda(id_moneda) ON DELETE RESTRICT,
                         creado_por_id INTEGER NULL REFERENCES auth_user(id) ON DELETE SET NULL
                     );
                     CREATE INDEX IF NOT EXISTS finance_gastooperativo_agencia_fecha
@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
                         creado TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                         actualizado TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
                         agencia_id BIGINT NOT NULL REFERENCES core_agencia(id) ON DELETE CASCADE,
-                        cliente_id BIGINT NULL REFERENCES crm_cliente(id) ON DELETE RESTRICT
+                        cliente_id BIGINT NULL REFERENCES crm_cliente(id_cliente) ON DELETE RESTRICT
                     );
                     CREATE INDEX IF NOT EXISTS finance_facturaconsolidada_agencia_estado
                         ON finance_facturaconsolidada (agencia_id, estado);

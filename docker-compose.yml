@@ -185,8 +185,10 @@ services:
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@pgbouncer:5432/${DB_NAME}
       - REDIS_URL=redis://redis_cache:6379/0
-      - CELERY_BROKER_URL=redis://redis_broker:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis_broker:6379/0
+      # CELERY_BROKER_URL / CELERY_RESULT_BACKEND se construyen en
+      # travelhub/settings/base.py via build_redis_url() con REDIS_PASSWORD
+      # (no inyectar aqui: sin password -> "Authentication required" contra
+      # redis con requirepass)
       # Settings module explícito — producción
       - DJANGO_SETTINGS_MODULE=travelhub.settings.production
       - DJANGO_ENV=production
@@ -213,11 +215,11 @@ services:
       redis_broker:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python3", "/app/compose/healthcheck.py"]
-      interval: 20s
-      timeout: 15s
-      retries: 5
-      start_period: 180s
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 30s
+      timeout: 60s
+      retries: 10
+      start_period: 300s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.travelhub.rule=Host(`${MAIN_DOMAIN}`) || HostRegexp(`{subdomain:[a-z0-9-]+}.${MAIN_DOMAIN}`)"
@@ -230,7 +232,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 4G
           cpus: '2.0'
 
   # ---------------------------------------------------------------------------
@@ -313,14 +315,16 @@ services:
     container_name: travelhub_worker
     restart: unless-stopped
     logging: *default-logging
-    command: celery -A travelhub worker --loglevel=info -Q celery --concurrency=4 --max-tasks-per-child=1000 --max-memory-per-child=512000
+    command: celery -A travelhub worker --loglevel=info -Q celery --concurrency=2 --max-tasks-per-child=1000 --max-memory-per-child=256000
     env_file:
       - .env.local
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@pgbouncer:5432/${DB_NAME}
       - REDIS_URL=redis://redis_cache:6379/0
-      - CELERY_BROKER_URL=redis://redis_broker:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis_broker:6379/0
+      # CELERY_BROKER_URL / CELERY_RESULT_BACKEND se construyen en
+      # travelhub/settings/base.py via build_redis_url() con REDIS_PASSWORD
+      # (no inyectar aqui: sin password -> "Authentication required" contra
+      # redis con requirepass)
     volumes:
       - ./media:/app/media
       - ./boletos_importados:/app/boletos_importados
@@ -355,14 +359,16 @@ services:
     container_name: travelhub_notifications
     restart: unless-stopped
     logging: *default-logging
-    command: celery -A travelhub worker --loglevel=info -Q notifications --concurrency=2 --max-tasks-per-child=1000 --max-memory-per-child=256000
+    command: celery -A travelhub worker --loglevel=info -Q notifications --concurrency=1 --max-tasks-per-child=1000 --max-memory-per-child=256000
     env_file:
       - .env.local
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@pgbouncer:5432/${DB_NAME}
       - REDIS_URL=redis://redis_cache:6379/0
-      - CELERY_BROKER_URL=redis://redis_broker:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis_broker:6379/0
+      # CELERY_BROKER_URL / CELERY_RESULT_BACKEND se construyen en
+      # travelhub/settings/base.py via build_redis_url() con REDIS_PASSWORD
+      # (no inyectar aqui: sin password -> "Authentication required" contra
+      # redis con requirepass)
     volumes:
       - ./media:/app/media
     depends_on:
@@ -406,8 +412,10 @@ services:
     environment:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@pgbouncer:5432/${DB_NAME}
       - REDIS_URL=redis://redis_cache:6379/0
-      - CELERY_BROKER_URL=redis://redis_broker:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis_broker:6379/0
+      # CELERY_BROKER_URL / CELERY_RESULT_BACKEND se construyen en
+      # travelhub/settings/base.py via build_redis_url() con REDIS_PASSWORD
+      # (no inyectar aqui: sin password -> "Authentication required" contra
+      # redis con requirepass)
     depends_on:
       pgbouncer:
         condition: service_started

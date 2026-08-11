@@ -16,18 +16,42 @@
 
     <link rel="icon" id="dynamic-favicon" type="image/png" href="{% static 'images/Logo TravelHub.png' %}">
     <script nonce="{{ request.csp_nonce }}">
+        // Lee el tema guardado en localStorage (mismo que usa el resto del sistema)
         (function() {
-            const favicon = document.getElementById('dynamic-favicon');
-            const darkLogo = "{% static 'images/Logo TravelHub.png' %}";
-            const lightLogo = "{% static 'images/Logo TravelHub Negro.png' %}";
-            function updateFavicon() {
-                const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                favicon.href = isDarkMode ? darkLogo : lightLogo;
+            const DARK_LOGO  = "{% static 'images/Logo TravelHub.png' %}";
+            const LIGHT_LOGO = "{% static 'images/Logo TravelHub Negro.png' %}";
+
+            function isLightTheme() {
+                var saved = localStorage.getItem('travelhub_theme');
+                if (saved) {
+                    // swiss y nordic son temas claros; obsidian, galaxy, carbon son oscuros
+                    return ['swiss', 'nordic', 'light'].indexOf(saved) !== -1;
+                }
+                // Fallback al prefiere del OS solo si no hay nada guardado
+                return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
             }
+
+            function syncLogo() {
+                var img = document.getElementById('logo-img');
+                var fav = document.getElementById('dynamic-favicon');
+                var src = isLightTheme() ? LIGHT_LOGO : DARK_LOGO;
+                if (img) img.src = src;
+                if (fav) fav.href = src;
+            }
+
+            // Aplicar de inmediato cuando el DOM esté listo
+            // (se llama también inline debajo del <img> para evitar flash)
+            document.addEventListener('DOMContentLoaded', syncLogo);
+
+            // Escuchar cambios del OS como fallback secundario
             if (window.matchMedia) {
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateFavicon);
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncLogo);
             }
-            updateFavicon();
+
+            // Escuchar cambios de tema desde otras pestañas (storage event)
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'travelhub_theme') syncLogo();
+            });
         })();
     </script>
 
@@ -42,12 +66,15 @@
             backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
         }
-        .logo-light { display: none; }
-        .logo-dark { display: block; }
-        @media (prefers-color-scheme: light) {
-            .logo-light { display: block; }
-            .logo-dark { display: none; }
+        /* Logo: controlado por JS (ver script de sincronización de tema) */
+        .logo-img {
+            height: 80px;
+            width: auto;
+            object-fit: contain;
+            margin: 0 auto;
+            transition: transform 0.5s ease, opacity 0.3s ease;
         }
+        .logo-img:hover { transform: scale(1.05); }
         .bg-blob {
             background: color-mix(in srgb, var(--primary) 15%, transparent);
             border-radius: 50%;
@@ -79,12 +106,24 @@
         <div class="text-center mb-8">
             <div class="p-4 rounded-3xl inline-block mb-4 shadow-lg backdrop-blur-sm border transition duration-300"
                  style="background: color-mix(in srgb, var(--surface-2) 50%, transparent); border-color: color-mix(in srgb, var(--border-color) 50%, transparent);">
-                <img src="{% static 'images/Logo TravelHub Negro.png' %}" alt="TravelHub Logo"
-                     style="height: 80px; width: auto; object-fit: contain; margin: 0 auto;"
-                     class="mx-auto logo-light transform hover:scale-105 transition-all duration-500">
-                <img src="{% static 'images/Logo TravelHub.png' %}" alt="TravelHub Logo"
-                     style="height: 80px; width: auto; object-fit: contain; margin: 0 auto;"
-                     class="mx-auto logo-dark transform hover:scale-105 transition-all duration-500">
+                <!-- Un solo <img> controlado por JS según localStorage -->
+                <img id="logo-img"
+                     src="{% static 'images/Logo TravelHub.png' %}"
+                     alt="TravelHub Logo"
+                     class="logo-img mx-auto">
+                <script nonce="{{ request.csp_nonce }}">
+                    // Sync inline para evitar flash del logo incorrecto
+                    (function() {
+                        var saved = localStorage.getItem('travelhub_theme');
+                        var isLight = saved
+                            ? ['swiss', 'nordic', 'light'].indexOf(saved) !== -1
+                            : (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+                        var img = document.getElementById('logo-img');
+                        if (img && isLight) {
+                            img.src = "{% static 'images/Logo TravelHub Negro.png' %}";
+                        }
+                    })();
+                </script>
             </div>
             <p style="color: var(--text-muted);" class="text-sm font-medium tracking-wide">Plataforma de Gestión Integral</p>
         </div>
@@ -115,8 +154,10 @@
                         </svg>
                     </div>
                     <input type="text" name="username" autofocus required autocomplete="username"
-                           class="block w-full pl-11 pr-4 py-3 rounded-xl outline-none transition-all"
-                           style="background: var(--surface-2); border: 1px solid var(--border-color); color: var(--text-main);"
+                           class="block w-full pl-11 pr-4 py-3 rounded-xl outline-none transition-all focus:ring-2"
+                           style="background: var(--surface-2); border: 1px solid var(--border-color); color: var(--text-main); box-shadow: 0 0 0 0 transparent;"
+                           onfocus="this.style.boxShadow='0 0 0 2px var(--primary)'; this.style.borderColor='var(--primary)';"
+                           onblur="this.style.boxShadow='0 0 0 0 transparent'; this.style.borderColor='var(--border-color)';"
                            placeholder="Ingresa tu usuario">
                 </div>
             </div>
@@ -134,6 +175,8 @@
                     <input type="password" name="password" required autocomplete="current-password"
                            class="block w-full pl-11 pr-4 py-3 rounded-xl outline-none transition-all"
                            style="background: var(--surface-2); border: 1px solid var(--border-color); color: var(--text-main);"
+                           onfocus="this.style.boxShadow='0 0 0 2px var(--primary)'; this.style.borderColor='var(--primary)';"
+                           onblur="this.style.boxShadow='0 0 0 0 transparent'; this.style.borderColor='var(--border-color)';"
                            placeholder="••••••••">
                 </div>
             </div>

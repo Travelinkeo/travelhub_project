@@ -268,26 +268,32 @@
                 </div>
             </div>
 
+            <!-- BANNER BIMONEDA -->
+            <div style="background: #edf2f7; border-left: 4px solid var(--brand-color); padding: 8px 12px; margin-bottom: 20px; font-size: 11px; font-weight: 700; color: #2d3748; display: flex; justify-content: space-between; align-items: center;">
+                <span>DOCUMENTO FISCAL EXPRESADO EN DOBLE MONEDA (USD Y VES)</span>
+                <span>TASA BCV OFICIAL: Bs. {{ factura.tasa_bcv_aplicada|default:757.54|floatformat:4 }} / USD</span>
+            </div>
+
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 40px">#</th>
-                        <th>DESCRIPCI_N DEL SERVICIO</th>
+                        <th style="width: 35px">#</th>
+                        <th>DESCRIPCIÓN DEL SERVICIO</th>
                         <th class="col-numeric">CANT.</th>
-                        <th class="col-numeric">PRECIO UNIT.</th>
-                        <th class="col-numeric">IMP.</th>
-                        <th class="col-numeric">TOTAL</th>
+                        <th class="col-numeric">PRECIO (USD)</th>
+                        <th class="col-numeric">TOTAL (USD)</th>
+                        <th class="col-numeric">TOTAL (VES - BCV)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in factura.items_factura.all %}
+                    {% for item in factura.items.all %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td class="col-desc">{{ item.descripcion|upper }}</td>
                         <td class="col-numeric">{{ item.cantidad|floatformat:2 }}</td>
-                        <td class="col-numeric">{{ item.precio_unitario|floatformat:2 }}</td>
-                        <td class="col-numeric">{{ item.monto_impuesto|default:0|floatformat:2 }}</td>
-                        <td class="col-numeric">{{ item.subtotal_item|floatformat:2 }}</td>
+                        <td class="col-numeric">${{ item.precio_unitario_usd|default:0|floatformat:2 }}</td>
+                        <td class="col-numeric">${{ item.monto_total_usd|floatformat:2 }}</td>
+                        <td class="col-numeric">Bs. {{ item.monto_total_ves|floatformat:2 }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -298,24 +304,55 @@
             </table>
 
             <div class="summary-container">
-                <div class="totals-block">
-                    <div class="total-row">
-                        <span>SUBTOTAL:</span>
-                        <span>{{ factura.subtotal|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                <div class="totals-block" style="width: 420px; background: #f8fafc; border-radius: 12px; border: 1px solid #edf2f7; padding: 5px;">
+                    <div style="text-align: center; font-size: 10px; font-weight: 800; color: var(--brand-color); border-bottom: 1px solid #edf2f7; padding: 6px 0; letter-spacing: 0.5px; text-transform: uppercase;">
+                        DESGLOSE FISCAL BIMONEDA
                     </div>
+                    {% if factura.monto_cuenta_terceros_usd > 0 %}
                     <div class="total-row">
-                        <span>IMPUESTOS:</span>
-                        <span>{{ factura.monto_impuestos|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
-                    </div>
-                    {% if factura.monto_pagado > 0 %}
-                    <div class="total-row" style="color: #38a169;">
-                        <span>PAGADO:</span>
-                        <span>- {{ factura.monto_pagado|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                        <span>Pasajes / Terceros (TSJ 00256 Exento):</span>
+                        <span>${{ factura.monto_cuenta_terceros_usd|floatformat:2 }} / Bs. {{ factura.monto_cuenta_terceros_ves|floatformat:2 }}</span>
                     </div>
                     {% endif %}
-                    <div class="total-row final">
-                        <span>TOTAL:</span>
-                        <span>{{ factura.monto_total|floatformat:2 }} {{ factura.moneda.simbolo }}</span>
+                    {% if factura.ingreso_propio_agencia_usd > 0 %}
+                    <div class="total-row">
+                        <span>Servicio / Fee Agencia:</span>
+                        <span>${{ factura.ingreso_propio_agencia_usd|floatformat:2 }} / Bs. {{ factura.ingreso_propio_agencia_ves|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    {% if factura.monto_iva_16_usd > 0 %}
+                    <div class="total-row">
+                        <span>IVA (16% sobre Fee):</span>
+                        <span>${{ factura.monto_iva_16_usd|floatformat:2 }} / Bs. {{ factura.monto_iva_16_ves|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    {% if factura.monto_inatur_1_usd > 0 %}
+                    <div class="total-row">
+                        <span>1% INATUR (MINTUR):</span>
+                        <span>${{ factura.monto_inatur_1_usd|floatformat:2 }} / Bs. {{ factura.monto_inatur_1_ves|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    {% if factura.monto_impuesto_municipal_usd > 0 %}
+                    <div class="total-row">
+                        <span>LOCTEM Municipal (3%):</span>
+                        <span>${{ factura.monto_impuesto_municipal_usd|floatformat:2 }} / Bs. {{ factura.monto_impuesto_municipal_ves|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    {% if factura.monto_igtf_usd > 0 %}
+                    <div class="total-row">
+                        <span>IGTF (3% Divisas):</span>
+                        <span>${{ factura.monto_igtf_usd|floatformat:2 }} / Bs. {{ factura.monto_igtf_ves|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="total-row final" style="display: flex; flex-direction: column; align-items: flex-end; background: var(--brand-color); color: var(--text-on-brand); padding: 12px 15px; border-radius: 8px; margin-top: 5px;">
+                        <div style="display: flex; justify-content: space-between; width: 100%; font-size: 14px;">
+                            <span>TOTAL GENERAL (USD):</span>
+                            <span>${{ factura.gran_total_usd|floatformat:2 }} USD</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; width: 100%; font-size: 13px; opacity: 0.95; margin-top: 4px; border-top: 1px rgba(255,255,255,0.2) dashed; padding-top: 4px;">
+                            <span>TOTAL EQUIVALENTE (VES):</span>
+                            <span>Bs. {{ factura.gran_total_ves|floatformat:2 }}</span>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -82,7 +82,41 @@ class AgenciaAdmin(ModelAdmin):
     list_filter = ["activa", "pais"]
     search_fields = ["nombre", "rif", "iata"]
     readonly_fields = ["fecha_creacion", "fecha_actualizacion"]
-    inlines = [AgenciaBrandingInline, AgenciaConfiguracionInline]
+    fieldsets = [
+        (
+            "Información de la Agencia",
+            {
+                "fields": [
+                    ("nombre", "nombre_comercial"),
+                    ("rif", "iata"),
+                    "activa",
+                    "propietario",
+                ]
+            },
+        ),
+        (
+            "Contacto y Ubicación",
+            {
+                "fields": [
+                    ("email_principal", "email_soporte", "email_ventas"),
+                    ("telefono_principal", "telefono_secundario"),
+                    "direccion",
+                    ("ciudad", "estado", "pais", "codigo_postal"),
+                ]
+            },
+        ),
+        (
+            "Redes Sociales y Web",
+            {
+                "classes": ("collapse",),
+                "fields": [
+                    "website",
+                    "dominio_personalizado",
+                    ("facebook", "instagram", "twitter", "whatsapp"),
+                ],
+            },
+        ),
+    ]
 
     def get_readonly_fields(self, request, obj=None):
         """get_readonly_fields."""
@@ -105,7 +139,15 @@ class AgenciaConfiguracionAdmin(ModelAdmin):
 
     list_display = ["agencia_master", "plan", "subdominio_slug", "short_keys_status"]
     search_fields = ["agencia_master__nombre", "subdominio_slug"]
-    readonly_fields = ["ventas_mes_actual"]
+    readonly_fields = [
+        "ventas_mes_actual",
+        "evolution_api_key_display",
+        "gemini_api_key_display",
+        "password_app_correo_display",
+        "telegram_bot_token_display",
+        "email_monitor_password_display",
+        "email_monitor_last_check",
+    ]
 
     fieldsets = [
         (
@@ -142,6 +184,7 @@ class AgenciaConfiguracionAdmin(ModelAdmin):
                 "classes": ("collapse",),
                 "fields": [
                     "evolution_api_url",
+                    "evolution_api_key",
                     "evolution_api_key_display",
                     "evolution_instance_name",
                 ],
@@ -152,7 +195,7 @@ class AgenciaConfiguracionAdmin(ModelAdmin):
             "Gemini AI",
             {
                 "classes": ("collapse",),
-                "fields": ["gemini_api_key_display"],
+                "fields": ["gemini_api_key", "gemini_api_key_display"],
                 "description": "Clave API de Gemini específica para esta agencia (opcional, si no se usa la global)",
             },
         ),
@@ -162,8 +205,9 @@ class AgenciaConfiguracionAdmin(ModelAdmin):
                 "classes": ("collapse",),
                 "fields": [
                     "correo_emisiones",
+                    "password_app_correo",
                     "password_app_correo_display",
-                    ("telegram_bot_token_display", "telegram_chat_id"),
+                    ("telegram_bot_token", "telegram_bot_token_display", "telegram_chat_id"),
                     "canal_notificaciones_mailbot",
                 ],
             },
@@ -175,6 +219,7 @@ class AgenciaConfiguracionAdmin(ModelAdmin):
                 "fields": [
                     ("email_monitor_host", "email_monitor_port"),
                     "email_monitor_user",
+                    "email_monitor_password",
                     "email_monitor_password_display",
                     "email_monitor_active",
                     "email_monitor_last_check",

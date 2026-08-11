@@ -11,8 +11,8 @@
         <span class="material-symbols-outlined text-[20px] {% if 'crm' in request.path %}text-primary{% endif %}">group</span>
         <span class="text-[8px] font-bold mt-0.5 leading-none">Clientes</span>
     </a>
-    <a href="{% url 'finance:facturacion_dashboard' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-text-muted hover:text-primary transition-all {% if 'facturacion' in request.path or 'invoices' in request.path or 'finance' in request.path %}text-primary{% endif %}">
-        <span class="material-symbols-outlined text-[20px] {% if 'facturacion' in request.path or 'invoices' in request.path %}text-primary{% endif %}">receipt_long</span>
+    <a href="{% url 'finance:facturacion_dashboard' %}" class="flex flex-col items-center justify-center flex-1 py-1 text-text-muted hover:text-primary transition-all {% if 'facturacion' in request.path or 'invoices' in request.path or 'finance' in request.path or 'liquidaciones' in request.path or 'profit' in request.path or 'reconciliacion' in request.path %}text-primary{% endif %}">
+        <span class="material-symbols-outlined text-[20px] {% if 'facturacion' in request.path or 'invoices' in request.path or 'finance' in request.path or 'liquidaciones' in request.path or 'profit' in request.path or 'reconciliacion' in request.path %}text-primary{% endif %}">receipt_long</span>
         <span class="text-[8px] font-bold mt-0.5 leading-none">Finanzas</span>
     </a>
     <button @click="mobileMenuOpen = !mobileMenuOpen" class="flex flex-col items-center justify-center flex-1 py-1 text-text-muted hover:text-primary transition-all">

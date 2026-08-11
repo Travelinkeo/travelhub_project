@@ -55,6 +55,55 @@ class BoletoImportadoAdmin(SaaSAdminMixin, ModelAdmin):
     actions = ["reprocesar_boletos", "hard_delete_boletos"]
     actions_list = ["subir_boleto_action"]
 
+    fieldsets = (
+        (
+            "Información Principal del Boleto",
+            {
+                "fields": (
+                    "numero_boleto",
+                    "localizador_pnr",
+                    "nombre_pasajero_completo",
+                    "nombre_pasajero_procesado",
+                    "foid_pasajero",
+                    "aerolinea_emisora",
+                    "ruta_vuelo",
+                    "fecha_emision_boleto",
+                    "venta_asociada",
+                )
+            },
+        ),
+        (
+            "Desglose de Tarifas y Montos (Sabre / Carga Manual)",
+            {
+                "fields": (
+                    "tarifa_base",
+                    "total_boleto",
+                    "iva_monto",
+                    "fee_servicio",
+                    "inatur_monto",
+                    "otros_impuestos_monto",
+                    "comision_agencia",
+                    "igtf_monto",
+                ),
+                "description": "Si el boleto de Sabre o GDS llegó sin montos, ingrese la Tarifa Base o Total para sincronizar con la Venta y la Factura.",
+            },
+        ),
+        (
+            "Estado y Diagnóstico",
+            {
+                "fields": (
+                    "archivo_boleto",
+                    "formato_detectado",
+                    "estado_parseo",
+                    "pdf_generado_link",
+                    "fecha_subida",
+                    "datos_parseados",
+                    "log_parseo",
+                )
+            },
+        ),
+    )
+
     @action(description="📤 Subir Boleto (IA)")
     def subir_boleto_action(self, request):
         """subir_boleto_action."""
@@ -97,6 +146,21 @@ class BoletoImportadoAdmin(SaaSAdminMixin, ModelAdmin):
     def save_model(self, request, obj, form, change):
         """save_model."""
         super().save_model(request, obj, form, change)
+
+        # 1. Sincronizar montos con la Venta y la Factura asociada
+        if obj.venta_asociada:
+            try:
+                from apps.finance.services.facturacion_service import FacturacionService
+
+                FacturacionService.generar_o_actualizar_factura_por_localizador(obj.venta_asociada)
+                logger.info(
+                    f"Sincronizada factura para venta {obj.venta_asociada.pk} tras actualizar montos de boleto {obj.pk}"
+                )
+            except Exception as e_sync:
+                logger.error(
+                    f"Error sincronizando factura tras actualizar boleto {obj.pk}: {e_sync}"
+                )
+
         if not change:
             return
         try:
@@ -116,7 +180,8 @@ class BoletoImportadoAdmin(SaaSAdminMixin, ModelAdmin):
             data["aerolinea_emisora"] = obj.aerolinea_emisora
             data["foid"] = obj.foid_pasajero
             data["passenger_document"] = obj.foid_pasajero
-            data["total_boleto"] = obj.total_boleto
+            data["total_boleto"] = float(obj.total_boleto) if obj.total_boleto else 0.0
+            data["total"] = float(obj.total_boleto) if obj.total_boleto else 0.0
 
             from django.utils.module_loading import import_string
 
@@ -124,22 +189,26 @@ class BoletoImportadoAdmin(SaaSAdminMixin, ModelAdmin):
             pdf_bytes, filename = generate_ticket(data, agencia_obj=obj.agencia)
 
             if pdf_bytes:
-                messages.success(
-                    request,
-                    f"✨ PDF regenerado exitosamente para el boleto {obj.numero_boleto or obj.pk}.",
-                )
+                if hasattr(request, "_messages"):
+                    messages.success(
+                        request,
+                        f"✨ PDF regenerado exitosamente con montos actualizados para el boleto {obj.numero_boleto or obj.pk}.",
+                    )
             else:
-                messages.warning(
-                    request,
-                    "Se guardaron los cambios, pero falló la regeneración del PDF (verifique Gotenberg).",
-                )
+                if hasattr(request, "_messages"):
+                    messages.warning(
+                        request,
+                        "Se guardaron los cambios, pero falló la regeneración del PDF (verifique Gotenberg).",
+                    )
         except Exception as e:
             logger.error(
                 f"Error regenerando PDF desde Admin para Boleto {obj.pk}: {e}", exc_info=True
             )
-            messages.warning(
-                request, f"Se actualizaron los datos, pero falló la regeneración del PDF: {e}"
-            )
+            if hasattr(request, "_messages"):
+                messages.warning(
+                    request,
+                    f"Se actualizaron los datos del boleto y la factura, pero falló la regeneración del PDF: {e}",
+                )
 
     @admin.action(description="🔥 ELIMINACIÓN FÍSICA (Irreversible)")
     def hard_delete_boletos(self, request, queryset):

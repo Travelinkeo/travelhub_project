@@ -9,7 +9,7 @@ from apps.common.models import Aerolinea, Ciudad, Pais
 from core.serializers import AerolineaSerializer, CiudadSerializer, PaisSerializer
 
 from . import views
-from .views import invoice_views, payment_views
+from .views import fiscal_views, invoice_views, payment_views
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +98,22 @@ urlpatterns = [
         "api/ventas/<int:pk>/double-invoice/",
         invoice_views.VentaDoubleInvoiceAPIView.as_view(),
         name="api_venta_double_invoice",
+    ),
+    # Fiscalidad Especializada (TSJ 00256, LOCTEM, INATUR & Retenciones SPE)
+    path(
+        "fiscal/libro-ventas-tsj256/",
+        fiscal_views.LibroVentasTSJ256View.as_view(),
+        name="libro_ventas_tsj256",
+    ),
+    path(
+        "fiscal/factura/<int:factura_id>/guia-spe/",
+        fiscal_views.GuiaRetencionSPEView.as_view(),
+        name="guia_retencion_spe",
+    ),
+    path(
+        "fiscal/dashboard-regulaciones/",
+        fiscal_views.DashboardRegulacionesView.as_view(),
+        name="dashboard_regulaciones",
     ),
     # Pagos
     path(

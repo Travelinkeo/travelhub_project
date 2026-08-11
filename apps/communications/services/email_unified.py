@@ -819,14 +819,16 @@ class EmailMonitorService:
 
         logger.info(f"Es KIU Oficial: {is_official_kiu} | Subject Ticket: {is_kiu_subject}")
 
-        if is_official_kiu:
-            logger.info("Procesando KIU Oficial (HTML)")
+        if is_official_kiu or is_kiu_subject:
+            logger.info(
+                f"Procesando como Boleto E-Ticket (KIU/HTML) | Asunto: {is_kiu_subject} | Oficial: {is_official_kiu}"
+            )
             resultado = self._procesar_boleto_email(message, msg_num, mail_connection)
             if resultado and self.mark_as_read and mail_connection:
                 mail_connection.store(msg_num, "+FLAGS", "\\Seen")
             return resultado
 
-        # ⚡ Interceptación Autónoma para PNR GDS (Amadeus, Sabre, KIU)
+        # ⚡ Interceptación Autónoma para PNR GDS en texto plano (Amadeus, Sabre, KIU PNR text)
         texto = self._extraer_texto(message)
         html = self._extraer_html(message)
         email_body = texto
@@ -891,13 +893,6 @@ class EmailMonitorService:
                         pass
                     logger.error(f" Error en parseo autónomo de email GDS: {e}")
 
-        if is_kiu_subject:
-            logger.info("Procesando como KIU/HTML por Asunto")
-            resultado = self._procesar_boleto_email(message, msg_num, mail_connection)
-            if resultado and self.mark_as_read and mail_connection:
-                mail_connection.store(msg_num, "+FLAGS", "\\Seen")
-            return resultado
-
         logger.warning("No reconocido como boleto")
         return False
 
@@ -920,6 +915,23 @@ class EmailMonitorService:
             content = html if html else texto
             ext = "html" if html else "txt"
             filename = f"email_ticket_{msg_num}.{ext}"
+
+            raw_subject = message.get("subject", "")
+            # Decodificar correctamente subjects codificados en MIME (RFC 2047)
+            # Ej: =?UTF-8?Q?E-TICKET_ITINERARY_RECEIPT_-_DUQUE_GOMEZ=2FMARIO_RENE?=
+            try:
+                import email.header as _eh
+
+                subject = str(_eh.make_header(_eh.decode_header(raw_subject)))
+            except Exception:
+                subject = str(raw_subject)
+
+            if subject and not content.startswith("--- HEADERS START ---"):
+                header_prefix = (
+                    f"--- HEADERS START ---\nSubject: {subject}\n--- HEADERS END ---\n\n"
+                )
+                content = header_prefix + content
+                logger.info(f" Subject inyectado en content: {subject[:80]}")
 
             boleto = BoletoImportado(
                 agencia=self.agencia,
@@ -946,8 +958,10 @@ class EmailMonitorService:
 
             from apps.bookings.tasks import parsear_boleto_individual
 
-            parsear_boleto_individual.delay(boleto.pk)
-            logger.info(f" Parseo async encolado para Boleto {boleto.pk}")
+            parsear_boleto_individual.delay(boleto.pk, bypass_cache=True, ignore_manual=True)
+            logger.info(
+                f" Parseo async encolado para Boleto {boleto.pk} (modo IA forzado/bypass_cache=True)"
+            )
 
             return True
 
@@ -1002,8 +1016,11 @@ class EmailMonitorService:
                 )
                 boleto.archivo_boleto.save(final_filename, ContentFile(pdf_content))
                 boleto.save()
+                from apps.bookings.tasks import parsear_boleto_individual
+
+                parsear_boleto_individual.delay(boleto.pk, bypass_cache=True, ignore_manual=True)
                 logger.info(
-                    f"📁 BoletoImportado ID {boleto.pk} guardado. Procesamiento en segundo plano iniciado por señal."
+                    f"📁 BoletoImportado ID {boleto.pk} guardado. Parseo async (IA) encolado con éxito."
                 )
                 procesados_exito += 1
 

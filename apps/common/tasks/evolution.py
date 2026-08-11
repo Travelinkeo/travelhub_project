@@ -157,23 +157,26 @@ def fetch_evolution_qr_task(self, instance_name):
         ws_url = f"{ws_url}/{instance_name}"
         ws_headers = {"apikey": headers.get("apikey", "")}
 
-        ws = websocket.create_connection(ws_url, header=ws_headers, timeout=2)
-        for _ in range(10):
-            try:
-                message = ws.recv()
-                data = json.loads(message)
-                event = data.get("event", "")
-                qr = data.get("qrcode", data if event else {})
-                if isinstance(qr, dict) and qr.get("base64"):
-                    cache.set(cache_key, qr["base64"], 120)
-                    logger.info(f"Evolution QR cached via WebSocket for {instance_name}")
-                    ws.close()
-                    return qr["base64"]
-            except (json.JSONDecodeError, KeyError, ValueError):
-                continue
-        ws.close()
-    except ImportError:
-        logger.warning("websocket module not available for QR fetch")
+        try:
+            ws = websocket.create_connection(ws_url, header=ws_headers, timeout=2)
+            for _ in range(10):
+                try:
+                    message = ws.recv()
+                    data = json.loads(message)
+                    event = data.get("event", "")
+                    qr = data.get("qrcode", data if event else {})
+                    if isinstance(qr, dict) and qr.get("base64"):
+                        cache.set(cache_key, qr["base64"], 120)
+                        logger.info(f"Evolution QR cached via WebSocket for {instance_name}")
+                        ws.close()
+                        return qr["base64"]
+                except Exception:
+                    pass
+            ws.close()
+        except Exception as ws_err:
+            logger.debug(f"WebSocket connection skipped: {ws_err}")
+    except (ImportError, Exception) as e:
+        logger.debug(f"WebSocket fallback skipped for {instance_name}: {e}")
     return None
 
 

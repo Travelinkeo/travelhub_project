@@ -104,7 +104,7 @@ def _notificar_operador_telegram(agencia, cantidad_correos):
             f"_Tu agencia: {agencia.nombre}_"
         )
 
-        send_telegram_task.delay(message=mensaje, chat_id=chat_id)
+        send_telegram_task.delay(message=mensaje, chat_id=chat_id, agencia_id=agencia.id)
         logger.info(f" Telegram de monitoreo enviado a operador de {agencia.nombre}")
     except Exception as e:
         logger.warning(f" No se pudo enviar Telegram al operador de {agencia.nombre}: {e}")

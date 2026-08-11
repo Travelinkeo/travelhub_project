@@ -30,8 +30,7 @@ def disparar_asiento_contable_factura(sender, instance, created, **kwargs):
     """disparar_asiento_contable_factura."""
     if instance.estado == Factura.EstadoFactura.EMITIDA:
         if not getattr(instance, "_contabilizando", False):
-            factura_id = instance.pk
-            transaction.on_commit(_generar_asiento_factura_sync, factura_id)
+            transaction.on_commit(partial(_generar_asiento_factura_sync, instance.pk))
 
 
 def _generar_asiento_factura_sync(factura_id):

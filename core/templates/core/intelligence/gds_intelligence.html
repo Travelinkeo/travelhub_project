@@ -9,7 +9,7 @@
     .custom-scrollbar::-webkit-scrollbar-track { background: var(--bg-deep, #0a140e); }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--accent-dim, #1f3a29); border-radius: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--primary, #13ec5b); }
-    
+
     .glowing-border {
         box-shadow: 0 0 10px rgba(19, 236, 91, 0.3);
         transition: all 0.3s ease;
@@ -41,7 +41,7 @@
 
     <!-- Main Layout -->
     <div class="flex flex-col xl:flex-row gap-6 min-h-[700px]">
-        
+
         <!-- Left Column: terminal input -->
         <div class="flex flex-col flex-1 xl:flex-[0.4] bg-[#0a140e] rounded-xl overflow-hidden shadow-2xl border border-[#1f3a29]">
             <div class="bg-[#1a2e22] px-4 py-2 border-b border-[#1f3a29] flex items-center justify-between">
@@ -50,21 +50,21 @@
                     <span class="text-slate-300 text-xs font-mono font-medium tracking-wide capitalized">RAW GDS INPUT</span>
                 </div>
             </div>
-            
-            <form id="gds-form" 
-                  hx-post="{% url 'core:gds_analyzer_ajax' %}" 
-                  hx-target="#analysis-target" 
+
+            <form id="gds-form"
+                  hx-post="{% url 'core:gds_analyzer_ajax' %}"
+                  hx-target="#analysis-target"
                   hx-indicator="#loading-indicator"
                   class="flex-1 flex flex-col p-4 bg-black/40">
                 {% csrf_token %}
-                <textarea name="terminal_text" 
+                <textarea name="terminal_text"
                           id="gds-input"
                           class="flex-1 w-full bg-transparent border-none focus:ring-0 text-primary font-mono text-sm resize-none custom-scrollbar p-0"
                           placeholder=">>> Pega aquí el itinerario de la terminal (Sabre, KIU, Amadeus)..."></textarea>
-                
+
                 <div class="mt-4 flex items-center justify-between">
                     <span class="text-slate-500 text-[10px] font-mono">STATUS: READY TO PARSE</span>
-                    <button type="submit" 
+                    <button type="submit"
                             class="px-4 py-2 bg-primary/20 border border-primary/40 text-primary rounded-lg text-xs font-bold hover:bg-primary/30 transition-all flex items-center gap-2">
                         <span class="material-symbols-outlined text-sm">bolt</span>
                         ANALIZAR CON IA
@@ -101,5 +101,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- La lógica del GDS Analyzer ahora es reactiva y reside en analysis_results.html usando Alpine.js -->
+<script src="{% static 'vendor/html2canvas_v2.js' %}"></script>
+<script src="{% static 'core/js/gds_analyzer_logic.js' %}"></script>
 {% endblock %}

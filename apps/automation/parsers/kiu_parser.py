@@ -15,9 +15,17 @@ class KIUParser(BaseTicketParser):
         """Detecta si es un boleto KIU"""
         purified = self.purify_text_for_detection(text)
         if (
-            "KIUSYS.COM" in purified
+            "KIUSYS" in purified
+            or "KIU" in purified
             or "PASSENGER ITINERARY RECEIPT" in purified
+            or "E-TICKET ITINERARY RECEIPT" in purified
+            or "ETICKET ITINERARY RECEIPT" in purified
+            or "NAME/NOMBRE" in purified
             or ("ISSUE AGENT/AGENTE EMISOR" in purified and "FROM/TO" in purified)
+            or any(
+                a in purified
+                for a in ["AVIOR", "RUTACA", "LASER", "VENEZOLANA", "ESTELAR", "TURPIAL"]
+            )
         ):
             return True
         # Avianca/STC e-ticket receipt format

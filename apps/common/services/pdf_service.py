@@ -19,11 +19,11 @@ def generar_pdf_factura(factura_id: int):
     Factura = apps.get_model("finance", "Factura")
     try:
         factura = (
-            Factura.objects.select_related("cliente", "moneda", "agencia")
-            .prefetch_related("items_factura")
+            Factura.objects.select_related("cliente", "agencia")
+            .prefetch_related("items")
             .get(pk=factura_id)
         )
-        logger.info(f"Iniciando generación de PDF para Factura ID: {factura.id_factura}")
+        logger.info(f"Iniciando generación de PDF para Factura ID: {factura.id}")
 
         agencia = factura.agencia
         if not agencia:
@@ -61,12 +61,15 @@ def generar_pdf_factura(factura_id: int):
         if not pdf_bytes:
             return None, None
 
-        filename = f"Factura-{factura.numero_factura}.pdf"
+        filename = f"Factura-{factura.numero_control}.pdf"
 
-        # Guardar en el modelo
-        factura.archivo_pdf.save(filename, ContentFile(pdf_bytes), save=True)
+        # Guardar en el modelo si posee el campo de archivo
+        if hasattr(factura, "archivo_pdf"):
+            factura.archivo_pdf.save(filename, ContentFile(pdf_bytes), save=True)
+        elif hasattr(factura, "pdf_file"):
+            factura.pdf_file.save(filename, ContentFile(pdf_bytes), save=True)
 
-        logger.info(f"PDF para Factura {factura.numero_factura} generado exitosamente.")
+        logger.info(f"PDF para Factura {factura.numero_control} generado exitosamente.")
         return pdf_bytes, filename
 
     except Factura.DoesNotExist:

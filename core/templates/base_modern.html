@@ -21,7 +21,6 @@
             cancelButtonColor: '#d33'
         };
     </script>
-    <script nonce="{{ request.csp_nonce }}" src="{% static 'js/csp-events.js' %}"></script>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/lucide_v2.js' %}"></script>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/chart_v2.js' %}"></script>
     <script nonce="{{ request.csp_nonce }}" src="{% static 'vendor/sweetalert2_v2.js' %}"></script>
@@ -39,7 +38,6 @@
 
     {% include "core/partials/_adaptive_favicon.html" %}
 
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
 
     <style nonce="{{ request.csp_nonce }}">
         [x-cloak] { display: none !important; }
@@ -92,7 +90,7 @@
             <div class="flex items-center gap-2 md:gap-4">
                 <div>
                     <h2 class="text-xs sm:text-base md:text-lg font-bold text-text-main leading-none">{% block page_title %}TravelHub Base{% endblock %}</h2>
-                    <p class="hidden md:block text-[11px] text-text-muted font-medium tracking-wide mt-1 uppercase">{% block page_subtitle %}Motor de Tema Activo: {{ current_agency.get_ui_theme_display|default:'Obsidian Emerald' }}{% endblock %}</p>
+                    <p class="hidden md:block text-[11px] text-text-muted font-medium tracking-wide mt-1 uppercase">{% block page_subtitle %}{% endblock %}</p>
                 </div>
             </div>
 
@@ -115,8 +113,18 @@
                     </div>
                 </div>
 
-                <button class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-surface-2 border border-border-color flex items-center justify-center text-text-muted hover:text-primary transition-colors hover:shadow-sm">
+                <!-- Botón de notificaciones con badge dinámico -->
+                <button id="notif-bell-btn"
+                        @click="$dispatch('open-notif-panel')"
+                        class="relative w-8 h-8 md:w-9 md:h-9 rounded-full bg-surface-2 border border-border-color flex items-center justify-center text-text-muted hover:text-primary transition-colors hover:shadow-sm">
                     <span class="material-symbols-outlined text-[18px] md:text-[20px]">notifications</span>
+                    <!-- Badge de no leídas: actualizado cada 30s por HTMX -->
+                    <span id="notif-badge"
+                          class="hidden absolute -top-1 -right-1 size-4 bg-red-500 text-white text-[8px] font-black rounded-full flex items-center justify-center leading-none border-2 border-surface-base"
+                          hx-get="{% url 'core:notificaciones_badge' %}"
+                          hx-trigger="load, every 60s [document.visibilityState==='visible']"
+                          hx-swap="outerHTML">
+                    </span>
                 </button>
 
                 {# Botón instalar PWA — visible solo cuando el navegador lo permite #}
@@ -166,7 +174,7 @@
     </div>
 
     {% include "core/partials/_ai_panel_slideover.html" %}
-
+    {% include "core/partials/_notif_panel.html" %}
     {% include "core/partials/_mobile_bottom_nav.html" %}
 
     {% block extra_scripts %}{% endblock %}

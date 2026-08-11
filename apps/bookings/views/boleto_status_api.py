@@ -80,6 +80,22 @@ class BoletoStatusAPIView(InternalAPIAuthMixin, APIView):
             if estado == "EN_PROCESO":
                 estado = "PRO"  # Normalizar
 
+            # 🛡️ GUARDA ANTI-ATASCAMIENTO: Si lleva más de 15 segundos en 'PRO', sellar a 'REV'
+            if estado == "PRO" and boleto.updated_at:
+                from django.utils import timezone
+
+                elaps = (timezone.now() - boleto.updated_at).total_seconds()
+                if elaps > 15:
+                    logger.warning(
+                        f"⚠️ [ANTI-STUCK GUARD] Boleto {pk} atascado en 'PRO' por {elaps:.1f}s. Auto-sellando a REV."
+                    )
+                    boleto.estado_parseo = BoletoImportado.EstadoParseo.REVISION_REQUERIDA
+                    boleto.log_parseo = (
+                        boleto.log_parseo or ""
+                    ) + "\n[Auto-Guard] Proceso excedió tiempo máximo (15s). Sellado a revisión."
+                    boleto.save(update_fields=["estado_parseo", "log_parseo", "updated_at"])
+                    estado = "REV"
+
             return Response(
                 {
                     "id": boleto.id_boleto_importado,

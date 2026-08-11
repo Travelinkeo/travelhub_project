@@ -143,6 +143,11 @@ urlpatterns = [
         intelligence_views.GDSInjectERPView.as_view(),
         name="gds_analyzer_inject",
     ),
+    path(
+        "intelligence/gds-analyzer/logo/<str:iata_code>.png",
+        intelligence_views.AirlineLogoProxyView.as_view(),
+        name="airline_logo_proxy",
+    ),
     # Wiki
     path("wiki/gds/", wiki_views.wiki_gds_list, name="wiki_list"),
     path("wiki/gds/<str:category>/", wiki_views.wiki_gds_reader, name="wiki_reader"),
@@ -212,6 +217,17 @@ urlpatterns = [
     ),
     # Notificaciones & Monitor
     path("notifications/live/", notifications.notificaciones_live_view, name="notificaciones_live"),
+    path(
+        "notifications/panel/", notifications.notificaciones_panel_view, name="notificaciones_panel"
+    ),
+    path(
+        "notifications/mark-read/",
+        notifications.notificaciones_marcar_leidas_view,
+        name="notificaciones_marcar_leidas",
+    ),
+    path(
+        "notifications/badge/", notifications.notificaciones_badge_view, name="notificaciones_badge"
+    ),
     path(
         "api/procesar-correos-boletos/",
         email_monitor_views.procesar_correos_boletos,

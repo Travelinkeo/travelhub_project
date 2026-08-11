@@ -1,0 +1,65 @@
+﻿<!-- Panel lateral de Notificaciones -->
+<div id="notif-panel"
+     x-data="{ open: false }"
+     x-show="open"
+     @open-notif-panel.window="open = true"
+     @close-notif-panel.window="open = false"
+     @keydown.escape.window="open = false"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 translate-x-8"
+     x-transition:enter-end="opacity-100 translate-x-0"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100 translate-x-0"
+     x-transition:leave-end="opacity-0 translate-x-8"
+     class="fixed top-0 right-0 h-full w-full max-w-sm z-[300] flex flex-col shadow-2xl bg-surface-1 border-l border-border-color"
+     style="display:none;">
+
+    <div class="flex items-center justify-between px-6 py-5 border-b border-border-color bg-surface-2 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="size-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary text-[18px]">notifications</span>
+            </div>
+            <div>
+                <h2 class="text-sm font-black text-text-main uppercase tracking-wider">Notificaciones</h2>
+                <p class="text-[10px] text-text-muted font-bold"><span id="notif-unread-count-panel">—</span> sin leer</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <form method="post" action="{% url 'core:notificaciones_marcar_leidas' %}" class="inline">
+                {% csrf_token %}
+                <button type="submit"
+                        hx-post="{% url 'core:notificaciones_marcar_leidas' %}"
+                        hx-target="#notif-panel-list"
+                        hx-swap="innerHTML"
+                        hx-on::after-request="document.getElementById('notif-badge')?.classList.add('hidden'); document.getElementById('notif-unread-count-panel').textContent='0';"
+                        class="text-[9px] font-black uppercase text-primary hover:text-primary/80 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 transition-all">
+                    Marcar leídas
+                </button>
+            </form>
+            <button @click="open = false"
+                    class="size-8 rounded-xl bg-surface-2 border border-border-color flex items-center justify-center text-text-muted hover:text-text-main transition-colors">
+                <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="notif-panel-list"
+         class="flex-1 overflow-y-auto p-4 space-y-3"
+         hx-get="{% url 'core:notificaciones_panel' %}"
+         hx-trigger="open-notif-panel from:window"
+         hx-swap="innerHTML">
+        <div class="flex flex-col items-center justify-center h-40 gap-3 text-text-muted">
+            <div class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <span class="text-xs font-bold">Cargando...</span>
+        </div>
+    </div>
+</div>
+
+<div x-data="{ show: false }"
+     @open-notif-panel.window="show = true"
+     @close-notif-panel.window="show = false"
+     x-show="show"
+     @click="('close-notif-panel')"
+     class="fixed inset-0 bg-black/40 z-[290] backdrop-blur-sm"
+     style="display:none;">
+</div>

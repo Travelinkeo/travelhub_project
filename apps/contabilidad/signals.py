@@ -42,13 +42,18 @@ def generar_asiento_desde_factura_signal(sender, instance, created, **kwargs):
         return
 
     try:
-        if not instance.items_factura.exists():
-            logger.debug(f"Factura {instance.numero_factura} sin items, omitiendo asiento")
+        items_qs = getattr(instance, "items", None) or getattr(instance, "items_factura", None)
+        if items_qs is not None and not items_qs.exists():
+            num = getattr(
+                instance, "numero_control", getattr(instance, "numero_factura", instance.pk)
+            )
+            logger.debug(f"Factura {num} sin items, omitiendo asiento")
             return
     except Exception:
+        num = getattr(instance, "numero_control", getattr(instance, "numero_factura", instance.pk))
         logger.warning(
-            "Error verificando items_factura para factura %s",
-            instance.numero_factura,
+            "Error verificando items para factura %s",
+            num,
             exc_info=True,
         )
         return

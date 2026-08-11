@@ -10,7 +10,7 @@
     // Función global para inicializar la lógica después de que HTMX cargue el parcial
     window.inicializarGDSAnalyzer = function() {
 
-        
+
         const dataNode = document.getElementById('gds-analysis-data');
         if (!dataNode) {
 
@@ -39,8 +39,8 @@
             return parseFloat(strVal) || 0;
         }
 
-        const boletos = currentGdsData.boletos && Array.isArray(currentGdsData.boletos) 
-            ? currentGdsData.boletos 
+        const boletos = currentGdsData.boletos && Array.isArray(currentGdsData.boletos)
+            ? currentGdsData.boletos
             : (currentGdsData.itinerario ? [currentGdsData] : []);
 
         let gdsNet = 0;
@@ -52,7 +52,7 @@
         function calcularFinanzasGDS() {
             const iProv = document.getElementById('fee-proveedor');
             const iInt = document.getElementById('fee-interno');
-            
+
             const fProvPax = parseFloat(iProv ? iProv.value : 0) || 0;
             const fIntPax = parseFloat(iInt ? iInt.value : 0) || 0;
 
@@ -94,7 +94,7 @@
             // Clonamos para limpiar listeners previos de HTMX
             const newBtn = btnFoto.cloneNode(true);
             btnFoto.parentNode.replaceChild(newBtn, btnFoto);
-            
+
             newBtn.addEventListener('click', function() {
 
                 const btn = this;
@@ -115,14 +115,17 @@
                     backgroundColor: '#0a0d12',
                     scale: 2,
                     useCORS: true,
-                    logging: false,
-                    allowTaint: true
+                    allowTaint: false,
+                    imageTimeout: 4000,
+                    logging: false
                 }).then(canvas => {
                     let a = document.createElement('a');
                     const pnr = (boletos[0]?.codigo_reserva || currentGdsData.CODIGO_RESERVA || 'Reserva');
                     a.download = 'Confirmacion_' + pnr + '.png';
                     a.href = canvas.toDataURL('image/png');
+                    document.body.appendChild(a);
                     a.click();
+                    document.body.removeChild(a);
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 }).catch(err => {
@@ -166,11 +169,11 @@
                         body: JSON.stringify(payload)
                     });
                     const result = await res.json();
-                    
+
                     if (result.status === 'success') {
                         if (window.Swal) {
-                            Swal.fire({ 
-                                icon: 'success', title: '¡Venta Creada!', 
+                            Swal.fire({
+                                icon: 'success', title: '¡Venta Creada!',
                                 background: '#111827', color: '#fff', confirmButtonColor: '#13ec5b'
                             }).then(() => { if(result.redirect_url) window.location.href = result.redirect_url; });
                         } else {

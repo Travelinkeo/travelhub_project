@@ -250,6 +250,29 @@ class DataNormalizationService:
             except Exception as e:
                 logger.error(f"Error normalizando nombre {raw_name}: {e}")
 
+        # Limpieza de issue_date
+        raw_issue_date = str(normalized.get("issue_date", "") or "")
+        if raw_issue_date:
+            cleaned_date = re.sub(
+                r"^(?:/|\s)*(?:ISSUE DATE|FECHA DE EMISI[OÓ]N|DATE OF ISSUE)\s*[:\s]*",
+                "",
+                raw_issue_date,
+                flags=re.IGNORECASE,
+            ).strip()
+            normalized["issue_date"] = cleaned_date
+            normalized["fecha_emision"] = cleaned_date
+            normalized["FECHA DE EMISION"] = cleaned_date
+
+        # Fallback para localizador de aerolinea
+        if not normalized.get("airline_pnr") or normalized.get("airline_pnr") in [
+            "---",
+            "No encontrado",
+            None,
+        ]:
+            pnr_val = normalized.get("pnr") or normalized.get("reservation_code") or "---"
+            normalized["airline_pnr"] = pnr_val
+            normalized["localizador_aerolinea"] = pnr_val
+
         # 2. Procesamiento de Itinerario
         if (
             "itinerario" in normalized

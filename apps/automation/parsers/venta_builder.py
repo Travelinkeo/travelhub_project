@@ -63,7 +63,6 @@ class VentaBuilderService:
 
         # 3. Procesar cada boleto
         for b_data in boletos_data:
-            # Creamos el registro de BoletoImportado
             pnr_b = str(b_data.get("codigo_reserva", pnr))[:10]
             num_tkt = str(b_data.get("numero_boleto", ""))[:50]
             nombre_pax = str(b_data.get("nombre_pasajero", ""))[:150]
@@ -72,19 +71,37 @@ class VentaBuilderService:
             tarifa_b = Decimal(str(b_data.get("tarifa", 0)))
             impuestos_b = Decimal(str(b_data.get("impuestos", 0)))
 
-            boleto_obj = BoletoImportado.objects.create(
-                agencia=agencia,
-                estado_parseo="COM",
-                localizador_pnr=pnr_b,
-                numero_boleto=num_tkt,
-                nombre_pasajero_completo=nombre_pax,
-                datos_parseados=b_data,
-                log_parseo="Inyectado vía GDS Analyzer (Multi-pax)",
-                tarifa_base=tarifa_b,
-                otros_impuestos_monto=impuestos_b,
-                total_boleto=total_b,
-                venta_asociada=venta,
-            )
+            boleto_obj = None
+            if num_tkt and num_tkt != "N/A":
+                boleto_obj = BoletoImportado.objects.filter(
+                    agencia=agencia, numero_boleto__iexact=num_tkt
+                ).first()
+
+            if boleto_obj:
+                boleto_obj.localizador_pnr = pnr_b
+                boleto_obj.nombre_pasajero_completo = nombre_pax
+                if b_data:
+                    boleto_obj.datos_parseados = b_data
+                boleto_obj.tarifa_base = tarifa_b
+                boleto_obj.otros_impuestos_monto = impuestos_b
+                boleto_obj.total_boleto = total_b
+                boleto_obj.venta_asociada = venta
+                boleto_obj.estado_parseo = "COM"
+                boleto_obj.save()
+            else:
+                boleto_obj = BoletoImportado.objects.create(
+                    agencia=agencia,
+                    estado_parseo="COM",
+                    localizador_pnr=pnr_b,
+                    numero_boleto=num_tkt,
+                    nombre_pasajero_completo=nombre_pax,
+                    datos_parseados=b_data,
+                    log_parseo="Inyectado vía GDS Analyzer (Multi-pax)",
+                    tarifa_base=tarifa_b,
+                    otros_impuestos_monto=impuestos_b,
+                    total_boleto=total_b,
+                    venta_asociada=venta,
+                )
 
             # Inyectar el ItemVenta correspondiente
             VentaBuilderService._crear_item_venta(venta, boleto_obj, b_data)

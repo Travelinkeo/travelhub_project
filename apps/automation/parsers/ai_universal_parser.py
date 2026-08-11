@@ -40,7 +40,7 @@ REGLAS ESTRICTAS DE EXTRACCIÓN ("GOD MODE"):
     - Si el texto solo contiene un contacto (ej. "Contacto MARIO JAVIER ZULUAGA GOMEZ") pero no hay lista de pasajeros explícita, usa al contacto como pasajero en el formato GDS (`ZULUAGA GOMEZ/MARIO JAVIER`).
     - Si el nombre del pasajero contiene palabras como "FOID", "RIF", "C.I." o números adjuntos al final, elimínalos por completo antes de retornar el JSON.
 12. FORMATO VERTICAL DE NOMBRES: Si el texto dice "Nombre\\nJESUS\\nApellido\\nZULOAGA", el nombre del pasajero es "ZULOAGA/JESUS". Siempre dale prioridad a nombres reales sobre textos genéricos.
-13. NÚMERO DE VUELO EN BAJO COSTO (WINGO): Para aerolíneas de bajo costo (como Wingo) donde no se especifique explícitamente el número de vuelo en el texto (ej. solo dice "CCS MDE" o "Caracas Medellín"), genéralo usando el código IATA de la aerolínea ("P5") seguido de un número secuencial o default como "000" (ej. "P5000") para garantizar la correctitud del itinerario.
+14. NOMBRES EN CORREOS Y CABECERAS KIU/AVIOR/RUTACA (CRÍTICO): En boletos de KIU (Avior, Rutaca, Laser, etc.), el cuerpo del correo suele truncar los nombres por límite de caracteres (ej. "CASTANO MONTOYA/RUBE"). DEBES revisar obligatoriamente el Subject o los Headers al inicio del texto (ej: "Subject: E-TICKET ITINERARY RECEIPT - CASTANO MONTOYA/RUBEN ORLEY"). Si el Subject contiene "E-TICKET ITINERARY RECEIPT - <NOMBRE>", ese es el NOMBRE COMPLETO REAL SIN TRUNCAR ("CASTANO MONTOYA/RUBEN ORLEY"). ÚSALO SIEMPRE con máxima prioridad sobre el nombre del cuerpo.
 
 EJEMPLO DE ENTRENAMIENTO (SABRE):
 Entrada: Preparado para QUINTERO RAMIREZ/JHONY ALBERTO [200687777], FOID: IDPP123456789. 1 UX 072 Y 12APR 7 CCSMAD HK1 1210 2140.

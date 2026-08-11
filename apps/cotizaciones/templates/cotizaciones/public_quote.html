@@ -33,8 +33,8 @@
 
         <!-- HERO SECTION (IMAGEN DEL DESTINO) -->
         <div class="relative h-[400px] w-full">
-            <!-- Imagen extraída por la IA -->
-            <img src="{{ quote.image_url|default:'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=800' }}"
+            <!-- Imagen extraída por la IA o catálogo temático por destino -->
+            <img src="{{ quote.get_fallback_image }}"
                  class="w-full h-full object-cover animate-[pulse_1s_ease-in-out_1] origin-center shadow-inner" alt="{{ quote.destino }}">
 
             <!-- Gradiente Oscuro -->
@@ -43,13 +43,15 @@
 
             <!-- Top Nav -->
             <div class="absolute top-0 w-full p-6 flex justify-between items-center z-10">
-                <div class="bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-white font-bold text-[10px] flex items-center gap-1.5 shadow-lg max-w-[200px] overflow-hidden">
-                    {% if current_agency and current_agency.logo %}
-                        <img src="{{ current_agency.logo.url }}" alt="Logo" class="h-4 w-4 object-contain rounded-full shrink-0 bg-white p-[1px]">
+                <div class="bg-slate-900/60 backdrop-blur-md px-3.5 py-2 rounded-full border border-white/20 text-white font-bold text-[11px] flex items-center justify-center gap-2 shadow-lg max-w-[260px] overflow-hidden">
+                    {% if quote.agencia and quote.agencia.logo %}
+                        <img src="{{ quote.agencia.logo.url }}" alt="{{ quote.agencia.nombre }}" class="h-6 w-auto max-w-[140px] object-contain shrink-0 drop-shadow">
+                    {% elif current_agency and current_agency.logo %}
+                        <img src="{{ current_agency.logo.url }}" alt="{{ current_agency.nombre }}" class="h-6 w-auto max-w-[140px] object-contain shrink-0 drop-shadow">
                     {% else %}
-                        <span class="material-symbols-outlined text-[14px] text-emerald-400 shrink-0">verified</span>
+                        <span class="material-symbols-outlined text-[16px] text-emerald-400 shrink-0">verified</span>
+                        <span class="truncate">{{ quote.agencia.nombre_comercial|default:quote.agencia.nombre|default:current_agency.nombre_comercial|default:current_agency.nombre|default:"TravelHub" }}</span>
                     {% endif %}
-                    <span class="truncate">{{ current_agency.nombre_comercial|default:current_agency.nombre|default:"TravelHub Agency" }}</span>
                 </div>
                 <!-- Botón Compartir dinámico con Web Share API o Fallback -->
                 <button @click="shareQuote()" class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white">

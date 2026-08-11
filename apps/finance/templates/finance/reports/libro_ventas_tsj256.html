@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}Libro de Ventas Fiscal — Sentencia TSJ 00256 | TravelHub{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 text-white p-6 rounded-2xl shadow-xl border border-slate-800">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Jurisprudencia TSJ N° 00256
+                </span>
+                <span class="text-slate-400 text-xs">Art. 10 Ley de IVA</span>
+            </div>
+            <h1 class="text-2xl font-bold mt-1">Libro de Ventas Fiscal Especializado</h1>
+            <p class="text-slate-400 text-sm">Segregación de Ventas por Cuenta de Terceros (Boletos) e Ingresos Propios por Intermediación.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold rounded-xl border border-slate-700 flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-[18px]">print</span> Imprimir / Exportar
+            </button>
+        </div>
+    </div>
+
+    <!-- Métrica de Resumen del Período -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl text-white">
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Facturado</p>
+            <p class="text-2xl font-black mt-1">${{ total_ventas_usd|floatformat:2 }}</p>
+            <p class="text-xs text-slate-500 mt-1">Bs. {{ total_ventas_ves|floatformat:2 }}</p>
+        </div>
+        <div class="bg-slate-900 border border-blue-900/50 p-5 rounded-2xl text-white">
+            <p class="text-xs font-medium text-blue-400 uppercase tracking-wider">Ventas por Cuenta de Terceros</p>
+            <p class="text-2xl font-black mt-1 text-blue-400">${{ total_terceros_usd|floatformat:2 }}</p>
+            <p class="text-xs text-slate-500 mt-1">Boletos aéreos / Pasantes (Exento Ingreso)</p>
+        </div>
+        <div class="bg-slate-900 border border-emerald-900/50 p-5 rounded-2xl text-white">
+            <p class="text-xs font-medium text-emerald-400 uppercase tracking-wider">Ingreso Propio por Intermediación</p>
+            <p class="text-2xl font-black mt-1 text-emerald-400">${{ total_ingresos_usd|floatformat:2 }}</p>
+            <p class="text-xs text-slate-500 mt-1">Base Imponible Real (Fee + Comisión)</p>
+        </div>
+        <div class="bg-slate-900 border border-amber-900/50 p-5 rounded-2xl text-white">
+            <p class="text-xs font-medium text-amber-400 uppercase tracking-wider">Aporte 1% INATUR / LOCTEM</p>
+            <p class="text-xl font-bold mt-1 text-amber-300">1% MINTUR: ${{ total_inatur_usd|floatformat:2 }}</p>
+            <p class="text-xs text-slate-400 mt-1">LOCTEM 3%: ${{ total_loctem_usd|floatformat:2 }}</p>
+        </div>
+    </div>
+
+    <!-- Filtro de Fechas -->
+    <div class="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+        <form method="get" class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2">
+                <label class="text-xs font-medium text-slate-400">Desde:</label>
+                <input type="date" name="fecha_inicio" value="{{ fecha_inicio }}" class="bg-slate-900 border border-slate-800 text-white text-xs rounded-lg px-3 py-2">
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-xs font-medium text-slate-400">Hasta:</label>
+                <input type="date" name="fecha_fin" value="{{ fecha_fin }}" class="bg-slate-900 border border-slate-800 text-white text-xs rounded-lg px-3 py-2">
+            </div>
+            <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-all">
+                Filtrar Período
+            </button>
+        </form>
+    </div>
+
+    <!-- Tabla Fiscal del Libro de Ventas -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-800">
+                    <tr>
+                        <th class="p-3">Fecha</th>
+                        <th class="p-3">N° Control</th>
+                        <th class="p-3">Cliente / RIF</th>
+                        <th class="p-3 text-right">Total USD</th>
+                        <th class="p-3 text-right text-blue-400">Cuenta Terceros (Boleto)</th>
+                        <th class="p-3 text-right text-emerald-400">Ingreso Propio (Fee)</th>
+                        <th class="p-3 text-right">IVA USD</th>
+                        <th class="p-3 text-right text-amber-300">1% INATUR</th>
+                        <th class="p-3 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60">
+                    {% for f in facturas %}
+                    <tr class="hover:bg-slate-800/40 transition-colors">
+                        <td class="p-3 text-slate-400 font-mono">{{ f.fecha_emision|date:"Y-m-d" }}</td>
+                        <td class="p-3 font-bold text-white font-mono">{{ f.numero_control }}</td>
+                        <td class="p-3">
+                            <div class="font-medium text-slate-200">{{ f.cliente.get_full_name|default:"Cliente Contado" }}</div>
+                            <div class="text-[10px] text-slate-500 font-mono">{{ f.cliente.documento_identidad|default:"V-00000000-0" }}</div>
+                        </td>
+                        <td class="p-3 text-right font-bold text-white">${{ f.gran_total_usd|floatformat:2 }}</td>
+                        <td class="p-3 text-right font-mono text-blue-400">${{ f.monto_cuenta_terceros_usd|floatformat:2 }}</td>
+                        <td class="p-3 text-right font-bold font-mono text-emerald-400">${{ f.ingreso_propio_agencia_usd|floatformat:2 }}</td>
+                        <td class="p-3 text-right font-mono">${{ f.total_iva_usd|floatformat:2 }}</td>
+                        <td class="p-3 text-right font-mono text-amber-300">${{ f.monto_inatur_1_usd|floatformat:2 }}</td>
+                        <td class="p-3 text-center">
+                            <a href="{% url 'finance:guia_retencion_spe' f.id %}" target="_blank" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-semibold rounded border border-slate-700 inline-flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[12px]">description</span> Guía SPE
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="p-8 text-center text-slate-500">
+                            No se encontraron facturas emitidas en el período seleccionado.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+﻿{% if notificaciones %}
+{% for notif in notificaciones %}
+<div class="group flex items-start gap-4 p-4 rounded-2xl border transition-all
+    {% if not notif.leida %}bg-primary/5 border-primary/20{% else %}bg-surface-2 border-border-color{% %}">
+    <div class="size-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5
+        {% if notif.tipo == 'ai_magic' %}bg-blue-500/15 text-blue-400
+        {% elif notif.tipo == 'success' %}bg-emerald-500/15 text-emerald-400
+        {% elif notif.tipo == 'warning' %}bg-amber-500/15 text-amber-400
+        {% else %}bg-primary/15 text-primary{% endif %}">
+        <span class="material-symbols-outlined text-[20px]">{{ notif.icono }}</span>
+    </div>
+    <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-2">
+            <h4 class="text-sm font-black text-text-main leading-tight">{{ notif.titulo }}</h4>
+            {% if not notif.leida %}
+            <span class="size-2 bg-primary rounded-full shrink-0 mt-1.5"></span>
+            {% endif %}
+        </div>
+        <p class="text-xs text-text-muted leading-relaxed mt-1">{{ notif.mensaje }}</p>
+        <p class="text-[9px] text-text-muted/60 font-bold mt-2 uppercase tracking-wider">{{ notif.creado_en|timesince }} atrás</p>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="flex flex-col items-center justify-center h-48 gap-4 text-text-muted">
+    <span class="material-symbols-outlined text-[48px] opacity-20">notifications_off</span>
+    <p class="text-xs font-black uppercase tracking-widest opacity-50">Sin notificaciones</p>
+</div>
+{% endif %}

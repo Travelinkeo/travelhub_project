@@ -3,9 +3,10 @@ import logging
 from decimal import Decimal
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError, IntegrityError, transaction
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
@@ -33,6 +34,18 @@ class GDSAnalysisAjaxView(LoginRequiredMixin, View):
             terminal_text = request.POST.get("terminal_text")
             gds_type = request.POST.get("gds_type", "SABRE")
 
+            if not terminal_text and request.body:
+                try:
+                    payload = json.loads(request.body)
+                    terminal_text = (
+                        payload.get("terminal_text")
+                        or payload.get("raw_text")
+                        or payload.get("text")
+                    )
+                    gds_type = payload.get("gds_type", gds_type)
+                except Exception:
+                    pass
+
             if not terminal_text:
                 return JsonResponse(
                     {"status": "error", "message": "No se recibió texto."}, status=400
@@ -40,6 +53,12 @@ class GDSAnalysisAjaxView(LoginRequiredMixin, View):
 
             ai_engine = AIEngine()
             analysis_data = ai_engine.analyze_gds_terminal(terminal_text, gds_type)
+
+            # Convertir Pydantic schema a dict para serialización en json_script
+            if hasattr(analysis_data, "model_dump"):
+                analysis_data = analysis_data.model_dump()
+            elif hasattr(analysis_data, "dict"):
+                analysis_data = analysis_data.dict()
 
             # analysis_data ahora contiene {'boletos': [...]}
             return render(
@@ -225,3 +244,60 @@ class GDSInjectERPView(LoginRequiredMixin, View):
                     seg["origen"] = str(seg["origen"])[:3].upper()
                 if "destino" in seg:
                     seg["destino"] = str(seg["destino"])[:3].upper()
+
+
+class AirlineLogoProxyView(View):
+    """Servicio de logo de aerolínea auto-recortado transparente (Estilo Google Flights)."""
+
+    def get(self, request, iata_code, *args, **kwargs):
+        import io
+        import urllib.request
+
+        from PIL import Image
+
+        code = (iata_code or "").strip().upper()[:3]
+        if not code:
+            return HttpResponse(status=404)
+
+        cache_key = f"airline_logo_transparent_v5_{code}"
+        cached_img = cache.get(cache_key)
+        if cached_img:
+            res = HttpResponse(cached_img, content_type="image/png")
+            res["Cache-Control"] = "public, max-age=2592000"
+            res["Access-Control-Allow-Origin"] = "*"
+            return res
+
+        try:
+            url = f"https://pics.avs.io/200/200/{code}.png"
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            resp = urllib.request.urlopen(req, timeout=4)
+            data = resp.read()
+
+            img = Image.open(io.BytesIO(data)).convert("RGBA")
+            bbox = img.getbbox()
+            if bbox:
+                cropped = img.crop(bbox)
+                w, h = cropped.size
+
+                target_h = 80
+                scale = target_h / float(h)
+                new_w, new_h = max(1, int(w * scale)), max(1, int(h * scale))
+
+                resized = cropped.resize((new_w, new_h), Image.Resampling.LANCZOS)
+                canvas = Image.new("RGBA", (new_w + 10, target_h + 10), (0, 0, 0, 0))
+                canvas.paste(resized, (5, 5), resized)
+
+                buf = io.BytesIO()
+                canvas.save(buf, format="PNG")
+                png_bytes = buf.getvalue()
+            else:
+                png_bytes = data
+
+            cache.set(cache_key, png_bytes, timeout=2592000)
+            res = HttpResponse(png_bytes, content_type="image/png")
+            res["Cache-Control"] = "public, max-age=2592000"
+            res["Access-Control-Allow-Origin"] = "*"
+            return res
+        except Exception as e:
+            logger.warning(f"Error cargando logo de aerolínea {code}: {e}")
+            return HttpResponse(status=404)

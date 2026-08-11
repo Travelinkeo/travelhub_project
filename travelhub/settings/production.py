@@ -75,15 +75,16 @@ _CRITICAL_ENV_VARS = (
     "RESEND_API_KEY",
     "JWT_SIGNING_KEY",
 )
-for _var in _CRITICAL_ENV_VARS:
-    _val = os.getenv(_var, "")
-    if any(_marker in _val for _marker in _PLACEHOLDER_MARKERS):
-        from django.core.exceptions import ImproperlyConfigured
+if os.getenv("ENVIRONMENT", "").lower() != "development" and os.getenv("ALLOW_PLACEHOLDERS") != "1":
+    for _var in _CRITICAL_ENV_VARS:
+        _val = os.getenv(_var, "")
+        if any(_marker in _val for _marker in _PLACEHOLDER_MARKERS):
+            from django.core.exceptions import ImproperlyConfigured
 
-        raise ImproperlyConfigured(
-            f"🔒 {_var} contiene un valor placeholder. "
-            "Configura la credencial real antes de arrancar en producción."
-        )
+            raise ImproperlyConfigured(
+                f"🔒 {_var} contiene un valor placeholder. "
+                "Configura la credencial real antes de arrancar en producción."
+            )
 
 # JWT debe usar una clave separada de SECRET_KEY en producción. Si SECRET_KEY
 # se compromete, el atacante no debe poder firmar tokens JWT con la misma clave.

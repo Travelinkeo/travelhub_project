@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Instructivo de Doble Retención SPE — Factura #{{ factura.numero_control }}</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #1e293b; margin: 0; padding: 24px; background: #fff; }
+        .header { border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 20px; }
+        .header h1 { font-size: 18px; margin: 0; color: #0f172a; }
+        .header p { margin: 4px 0 0 0; color: #64748b; font-size: 11px; }
+        .badge-tsj { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 10px; display: inline-block; margin-bottom: 12px; }
+        .box { border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; margin-bottom: 16px; background: #f8fafc; }
+        .box-title { font-weight: bold; font-size: 13px; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        th { text-align: left; background: #e2e8f0; padding: 6px 8px; font-size: 10px; text-transform: uppercase; color: #475569; }
+        td { padding: 6px 8px; border-bottom: 1px solid #f1f5f9; }
+        .text-right { text-align: right; }
+        .note { font-size: 10px; color: #b45309; background: #fef3c7; border: 1px solid #fde68a; padding: 8px; border-radius: 6px; margin-top: 8px; }
+        .footer { margin-top: 30px; font-size: 10px; text-align: center; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 12px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Instructivo de Retención Fiscal para Sujetos Pasivos Especiales (SPE)</h1>
+        <p>Anexo a Factura N° {{ factura.numero_control }} | Fecha de Emisión: {{ factura.fecha_emision|date:"d/m/Y" }} | Tasa BCV: {{ guia.tasa_bcv }} VES/USD</p>
+    </div>
+
+    <div class="badge-tsj">
+        Fundamento Legal: Sentencia N° 00256 del Tribunal Supremo de Justicia (Caso Viajes Escala, C.A.) & Art. 10 Ley de IVA
+    </div>
+
+    <p style="font-size: 11px; line-height: 1.5; color: #334155;">
+        Estimado Cliente / Departamento de Impuestos: De acuerdo con la jurisprudencia vinculante del TSJ y el Art. 10 de la Ley de IVA, las Agencias de Viajes actúan por <strong>cuenta de terceros</strong> en la expedición de boletos aéreos. Por tanto, sírvase emitir los dos (2) comprobantes de retención independientes desglosados a continuación:
+    </p>
+
+    <!-- Comprobante A -->
+    <div class="box">
+        <div class="box-title">1. COMPROBANTE A: Retención de IVA por Pasaje Aéreo (A nombre de la Línea Aérea)</div>
+        <p style="margin: 0 0 6px 0; font-size: 11px; color: #475569;">Este comprobante corresponde al valor del pasaje pasante y debe ser emitido a nombre de la aerolínea correspondiente:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Concepto</th>
+                    <th class="text-right">Base Imponible USD</th>
+                    <th class="text-right">Base Imponible VES</th>
+                    <th class="text-right">Retención 75% VES</th>
+                    <th class="text-right">Retención 100% VES</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ guia.comprobante_a_aerolinea.concepto }}</td>
+                    <td class="text-right">${{ guia.monto_boleto_terceros_usd|floatformat:2 }}</td>
+                    <td class="text-right">Bs. {{ guia.monto_boleto_terceros_ves|floatformat:2 }}</td>
+                    <td class="text-right">Bs. {{ guia.comprobante_a_aerolinea.retencion_iva_75_ves|floatformat:2 }}</td>
+                    <td class="text-right">Bs. {{ guia.comprobante_a_aerolinea.retencion_iva_100_ves|floatformat:2 }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="note">
+            ⚠️ <strong>NO APLICA RETENCIÓN DE ISLR SOBRE ESTE MONTO:</strong> El monto del boleto no constituye ingreso bruto de la agencia de viajes. Retener ISLR sobre esta partida incurre en "Falso Supuesto" de derecho.
+        </div>
+    </div>
+
+    <!-- Comprobante B -->
+    <div class="box">
+        <div class="box-title">2. COMPROBANTE B: Retención de ISLR e IVA por Fee de Gestión (A nombre de la Agencia)</div>
+        <p style="margin: 0 0 6px 0; font-size: 11px; color: #475569;">Este comprobante corresponde a los honorarios e intermediación propia de la agencia:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Concepto</th>
+                    <th class="text-right">Base Imponible USD</th>
+                    <th class="text-right">Base Imponible VES</th>
+                    <th class="text-right">Retención ISLR (2%) VES</th>
+                    <th class="text-right">Retención ISLR (3%) VES</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ guia.comprobante_b_agencia.concepto }}</td>
+                    <td class="text-right">${{ guia.ingreso_agencia_usd|floatformat:2 }}</td>
+                    <td class="text-right">Bs. {{ guia.ingreso_agencia_ves|floatformat:2 }}</td>
+                    <td class="text-right">Bs. {{ guia.comprobante_b_agencia.retencion_islr_2_ves|floatformat:2 }}</td>
+                    <td class="text-right">Bs. {{ guia.comprobante_b_agencia.retencion_islr_3_ves|floatformat:2 }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        Documento generado automáticamente por TravelHub ERP — Cumplimiento Regulatorio SENIAT, MINTUR & LOCTEM
+    </div>
+
+</body>
+</html>

@@ -124,3 +124,7 @@ class WhatsAppEvolutionService:
         except Exception as e:
             logger.error(f" Excepción en send_document: {e}")
             return False
+
+
+# Alias de compatibilidad
+WhatsAppService = WhatsAppEvolutionService

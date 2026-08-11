@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}Dashboard de Regulaciones & Finanzas Turísticas | TravelHub{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 text-white p-6 rounded-2xl shadow-xl border border-slate-800">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                    Control Regulatorio
+                </span>
+                <span class="text-slate-400 text-xs">MINTUR • LOCTEM • SENIAT</span>
+            </div>
+            <h1 class="text-2xl font-bold mt-1">Panel de Regulaciones y Presupuesto ($Ce$)</h1>
+            <p class="text-slate-400 text-sm">Monitoreo en tiempo real del 1% INATUR, Impuesto Municipal LOCTEM (3% máx) e IGTF.</p>
+        </div>
+    </div>
+
+    <!-- Grid de Métricas de Regulaciones -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- 1% INATUR -->
+        <div class="bg-slate-900 border border-emerald-800/60 p-5 rounded-2xl text-white space-y-2">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">1% INATUR / MINTUR</span>
+                <span class="material-symbols-outlined text-emerald-400 text-[20px]">verified_user</span>
+            </div>
+            <p class="text-3xl font-black">${{ inatur_acumulado_usd|floatformat:2 }}</p>
+            <p class="text-xs text-slate-400">Bs. {{ inatur_acumulado_ves|floatformat:2 }} acumulado en {{ mes_nombre }}</p>
+            <div class="pt-2 border-t border-slate-800 text-[10px] text-slate-500">
+                Calculado sobre el ingreso neto por comisión (Art. 13 Num. 6 Ley Turismo).
+            </div>
+        </div>
+
+        <!-- LOCTEM 3% -->
+        <div class="bg-slate-900 border border-blue-800/60 p-5 rounded-2xl text-white space-y-2">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-blue-400 uppercase tracking-wider">Impuesto Municipal LOCTEM</span>
+                <span class="material-symbols-outlined text-blue-400 text-[20px]">account_balance</span>
+            </div>
+            <p class="text-3xl font-black">${{ loctem_estimado_usd|floatformat:2 }}</p>
+            <p class="text-xs text-slate-400">Base Imponible Real: ${{ base_loctem_usd|floatformat:2 }}</p>
+            <div class="pt-2 border-t border-slate-800 text-[10px] text-slate-500">
+                Tope máximo del 3.00% sobre el margen bruto (Gaceta Extraordinaria 6.755).
+            </div>
+        </div>
+
+        <!-- IGTF 3% -->
+        <div class="bg-slate-900 border border-purple-800/60 p-5 rounded-2xl text-white space-y-2">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-purple-400 uppercase tracking-wider">IGTF 3% Efectivo Divisas</span>
+                <span class="material-symbols-outlined text-purple-400 text-[20px]">payments</span>
+            </div>
+            <p class="text-3xl font-black">${{ igtf_acumulado_usd|floatformat:2 }}</p>
+            <p class="text-xs text-slate-400">Bs. {{ igtf_acumulado_ves|floatformat:2 }} a la tasa BCV del día</p>
+            <div class="pt-2 border-t border-slate-800 text-[10px] text-slate-500">
+                Total acumulado para enteramiento semanal al SENIAT.
+            </div>
+        </div>
+
+        <!-- Coeficiente de Estima Ce -->
+        <div class="bg-slate-900 border border-amber-800/60 p-5 rounded-2xl text-white space-y-2">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-amber-400 uppercase tracking-wider">Coeficiente de Estima ($Ce$)</span>
+                <span class="material-symbols-outlined text-amber-400 text-[20px]">trending_up</span>
+            </div>
+            <p class="text-3xl font-black text-amber-300">{{ coeficiente_estima }}</p>
+            <p class="text-xs text-slate-400">Ventas Mes Actual: ${{ ventas_mes_actual|floatformat:2 }}</p>
+            <div class="pt-2 border-t border-slate-800 text-[10px] text-slate-500">
+                Relación de ritmo mensual vs histórico anual (Control Presupuestario).
+            </div>
+        </div>
+    </div>
+
+    <!-- Guía Informativa de Cumplimiento -->
+    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl text-white space-y-4">
+        <h3 class="text-base font-bold text-slate-200 flex items-center gap-2">
+            <span class="material-symbols-outlined text-emerald-400">gavel</span> Matriz de Blindaje Regulatorio en TravelHub
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800">
+                <div class="font-bold text-emerald-400 mb-1">1. Plataforma SIGETUR / MINTUR</div>
+                <p class="text-slate-400 leading-relaxed">Las declaraciones del 1% INATUR se realizan mensualmente ingresando la base imponible exclusiva de fees/comisiones en la plataforma SIGETUR de MINTUR.</p>
+            </div>
+            <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800">
+                <div class="font-bold text-blue-400 mb-1">2. Defensa Municipal LOCTEM</div>
+                <p class="text-slate-400 leading-relaxed">TravelHub emite el resumen de facturación desglosado para presentar ante las Alcaldías, garantizando que el tributo se aplique solo al margen bruto real.</p>
+            </div>
+            <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800">
+                <div class="font-bold text-amber-400 mb-1">3. Clientes Institucionales SPE</div>
+                <p class="text-slate-400 leading-relaxed">Con la Guía de Doble Retención SPE, se previene la retención arbitraria de ISLR sobre pasajes aéreos por parte de empresas compradoras.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

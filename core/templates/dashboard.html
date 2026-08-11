@@ -83,7 +83,6 @@
 </div>
 
 <!-- Chart.js Config -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js" nonce="{{ request.csp_nonce }}"></script>
 <script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('salesChart').getContext('2d');
@@ -111,11 +110,11 @@
                 }]
             },
             options: {
-                responsive: True,
-                maintainAspectRatio: False,
-                plugins: { legend: { display: False } },
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
                 scales: {
-                    x: { grid: { display: False }, ticks: { color: '#6b7280', font: { size: 10, weight: '900' } } },
+                    x: { grid: { display: false }, ticks: { color: '#6b7280', font: { size: 10, weight: '900' } } },
                     y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#6b7280', font: { size: 10 }, callback: value => '$' + value } }
                 }
             }

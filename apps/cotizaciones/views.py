@@ -676,6 +676,93 @@ class MagicQuoterAIView(LoginRequiredMixin, View):
                                 cache.set(cache_key, image_url, 86400)
                     except Exception as e:
                         logger.warning(f"Excepción silenciosa capturada: {e}")
+
+            # Capa 2: Fallback con Google Places API v1 si Unsplash no devuelve imagen
+            if not image_url:
+                google_places_key = getattr(settings, "GOOGLE_PLACES_API_KEY", "")
+                if google_places_key:
+                    try:
+                        gp_url = "https://places.googleapis.com/v1/places:searchText"
+                        gp_headers = {
+                            "Content-Type": "application/json",
+                            "X-Goog-Api-Key": google_places_key,
+                            "X-Goog-FieldMask": "places.photos",
+                        }
+                        gp_resp = requests.post(
+                            gp_url,
+                            headers=gp_headers,
+                            json={"textQuery": f"{destination} {search_query}"},
+                            timeout=3,
+                        )
+                        if gp_resp.status_code == 200:
+                            gp_places = gp_resp.json().get("places", [])
+                            if gp_places and gp_places[0].get("photos"):
+                                photo_ref = gp_places[0]["photos"][0].get("name")
+                                if photo_ref:
+                                    image_url = f"https://places.googleapis.com/v1/{photo_ref}/media?maxWidthPx=1200&key={google_places_key}"
+                                    cache.set(cache_key, image_url, 86400)
+                    except Exception as e_gp:
+                        logger.warning(f"Error consultando Google Places API para foto: {e_gp}")
+
+            if not image_url:
+                dest_str = f"{destination} {search_query}".lower()
+                catalogo_bg = [
+                    (
+                        ["londres", "london", "big ben", "england", "uk", "lhr", "lgw"],
+                        "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=1080&q=80",
+                    ),
+                    (
+                        ["madrid", "espana", "spain", "mad"],
+                        "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=1080&q=80",
+                    ),
+                    (
+                        ["paris", "francia", "france", "eiffel", "cdg"],
+                        "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1080&q=80",
+                    ),
+                    (
+                        ["cancun", "playa", "caribe", "beach", "cun"],
+                        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1080&q=80",
+                    ),
+                    (
+                        ["miami", "florida", "usa", "mia"],
+                        "https://images.unsplash.com/photo-1506966953377-3f9254c870fd?w=1080&q=80",
+                    ),
+                    (
+                        ["istanbul", "estambul", "turquia", "turkey", "ist"],
+                        "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=1080&q=80",
+                    ),
+                    (
+                        ["shanghai", "china", "pvg"],
+                        "https://images.unsplash.com/photo-1538428494232-9c0d8a3ab396?w=1080&q=80",
+                    ),
+                    (
+                        ["dubai", "emirates", "emiratos", "dxb"],
+                        "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1080&q=80",
+                    ),
+                    (
+                        ["roma", "rome", "italia", "italy", "fco"],
+                        "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1080&q=80",
+                    ),
+                    (
+                        ["bogota", "colombia", "bog"],
+                        "https://images.unsplash.com/photo-1583531352515-8884af319dc1?w=1080&q=80",
+                    ),
+                    (
+                        ["buenos aires", "argentina", "eze"],
+                        "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=1080&q=80",
+                    ),
+                    (
+                        ["nueva york", "new york", "nyc", "jfk"],
+                        "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=1080&q=80",
+                    ),
+                ]
+                for kw_list, img_url in catalogo_bg:
+                    if any(k in dest_str for k in kw_list):
+                        image_url = img_url
+                        break
+                if not image_url:
+                    idx = abs(hash(dest_str)) % len(catalogo_bg)
+                    image_url = catalogo_bg[idx][1]
             ai_output = {
                 "destination": destination,
                 "type": data.get("type", "Vuelo"),
@@ -750,7 +837,17 @@ class MagicQuoterSaveView(SaaSMixin, LoginRequiredMixin, View):
             else:
                 nombre_final = getattr(lead, "nombre_cliente", "Prospecto (Lead)")
 
+            # Obtener agencia activa para el aislamiento Multi-Tenant
+            agencia = getattr(request, "agencia", None)
+            if not agencia and hasattr(request.user, "agencia_activa"):
+                agencia = request.user.agencia_activa
+            if not agencia:
+                from core.api import get_user_active_agency
+
+                agencia = get_user_active_agency(request.user)
+
             cotizacion = Cotizacion.objects.create(
+                agencia=agencia,
                 cliente=cliente_vinculado,
                 nombre_cliente_manual=nombre_final,
                 destino=ai_data.get("destination", "Varios"),
@@ -923,16 +1020,19 @@ class PublicQuoteDetailView(DetailView):
             clean_flights.append(f)
         meta["flights"] = clean_flights
 
-        # 4. Asegurar que la agencia esté disponible para el branding (Incluso para anónimos)
-        if not context.get("current_agency"):
+        # 4. Asegurar que la agencia asignada a la cotización esté en el contexto (Aislamiento Multi-Tenant)
+        current_agency = quote.agencia
+        if not current_agency and quote.consultor:
             try:
                 from core.models.agencia import UsuarioAgencia
 
                 ua = UsuarioAgencia.objects.filter(usuario=quote.consultor, activo=True).first()
                 if ua:
-                    context["current_agency"] = ua.agencia
+                    current_agency = ua.agencia
             except Exception as e:
-                logger.warning(f"Excepción silenciosa capturada: {e}")
+                logger.warning(f"Error resolviendo agencia por consultor: {e}")
+
+        context["current_agency"] = current_agency
         # 5. Forzar actualización de imagen si el destino era genérico
         img_url = meta.get("image") or ""
         if "unsplash" not in img_url.lower() and "Varios" not in (meta.get("destination") or ""):

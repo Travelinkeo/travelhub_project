@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.db import models, transaction
+from django.utils import timezone
 
 from apps.common.models import Moneda  # noqa: F401 re-export for backwards compatibility
 from core.models.base import AgenciaMixin
@@ -14,7 +15,8 @@ def generar_numero_factura_atomico(model_cls, fecha_emision, prefix=""):
         prefix = f"F-{fecha_emision.strftime('%Y%m%d')}"
 
     with transaction.atomic():
-        field_name = "numero_factura" if hasattr(model_cls, "numero_factura") else "numero_control"
+        concrete_fields = [f.name for f in model_cls._meta.get_fields()]
+        field_name = "numero_factura" if "numero_factura" in concrete_fields else "numero_control"
         last_obj = (
             model_cls.objects.select_for_update()
             .filter(**{f"{field_name}__startswith": prefix})
@@ -97,6 +99,59 @@ class Factura(AgenciaMixin, models.Model):
     gran_total_usd = models.DecimalField(max_digits=15, decimal_places=4, default=0)
     gran_total_ves = models.DecimalField(max_digits=15, decimal_places=4, default=0)
 
+    # --- CAMPOS FISCALES ESPECIALIZADOS (TSJ 00256, INATUR & LOCTEM) ---
+    monto_cuenta_terceros_usd = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        default=0,
+        help_text="Monto pasante por cuenta de terceros (Boleto/Pasaje) - TSJ 00256",
+    )
+    monto_cuenta_terceros_ves = models.DecimalField(
+        max_digits=15, decimal_places=4, default=0, help_text="Monto pasante en VES a la tasa BCV"
+    )
+    ingreso_propio_agencia_usd = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        default=0,
+        help_text="Ingreso propio real por intermediación/comisión/fee",
+    )
+    ingreso_propio_agencia_ves = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        default=0,
+        help_text="Ingreso propio real en VES a la tasa BCV",
+    )
+    monto_inatur_1_usd = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        default=0,
+        help_text="Aporte 1% INATUR sobre ingreso propio (Art. 13 Num. 6 Ley Turismo)",
+    )
+    monto_inatur_1_ves = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        default=0,
+        help_text="Aporte 1% INATUR en VES a la tasa BCV",
+    )
+    base_impuesto_municipal_usd = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        default=0,
+        help_text="Base imponible municipal LOCTEM (margen bruto real)",
+    )
+    base_impuesto_municipal_ves = models.DecimalField(
+        max_digits=15, decimal_places=4, default=0, help_text="Base imponible municipal en VES"
+    )
+    monto_impuesto_municipal_usd = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        default=0,
+        help_text="Impuesto municipal estimado (hasta 3% LOCTEM)",
+    )
+    monto_impuesto_municipal_ves = models.DecimalField(
+        max_digits=15, decimal_places=4, default=0, help_text="Impuesto municipal estimado en VES"
+    )
+
     class EstadoFactura(models.TextChoices):
         """EstadoFactura."""
 
@@ -114,6 +169,11 @@ class Factura(AgenciaMixin, models.Model):
         verbose_name = "Factura"
         verbose_name_plural = "Facturas"
         ordering = ["-fecha_emision"]
+
+    @property
+    def numero_factura(self):
+        """Alias de compatibilidad para numero_control."""
+        return self.numero_control
 
     def __str__(self):
         """__str__."""
@@ -133,8 +193,12 @@ class ItemFactura(AgenciaMixin, models.Model):
     precio_unitario_usd = models.DecimalField(
         max_digits=15, decimal_places=4, null=True, blank=True
     )
+    precio_unitario_ves = models.DecimalField(
+        max_digits=15, decimal_places=4, null=True, blank=True
+    )
     exento = models.BooleanField(default=False)
     total_linea_usd = models.DecimalField(max_digits=15, decimal_places=4, null=True, blank=True)
+    total_linea_ves = models.DecimalField(max_digits=15, decimal_places=4, null=True, blank=True)
 
     class Meta:
         verbose_name = "Item de Factura"
@@ -143,6 +207,38 @@ class ItemFactura(AgenciaMixin, models.Model):
     def __str__(self):
         """__str__."""
         return f"{self.descripcion} x {self.cantidad}"
+
+    def save(self, *args, **kwargs):
+        if self.factura and self.factura.tasa_bcv_aplicada:
+            tasa = Decimal(str(self.factura.tasa_bcv_aplicada))
+            if self.precio_unitario_usd is not None and not self.precio_unitario_ves:
+                self.precio_unitario_ves = (self.precio_unitario_usd * tasa).quantize(
+                    Decimal("0.01")
+                )
+            if self.total_linea_usd is not None and not self.total_linea_ves:
+                self.total_linea_ves = (self.total_linea_usd * tasa).quantize(Decimal("0.01"))
+        super().save(*args, **kwargs)
+
+    @property
+    def monto_total_usd(self):
+        if self.total_linea_usd is not None:
+            return self.total_linea_usd
+        if self.precio_unitario_usd is not None and self.cantidad is not None:
+            return (self.precio_unitario_usd * self.cantidad).quantize(Decimal("0.01"))
+        return Decimal("0.00")
+
+    @property
+    def monto_total_ves(self):
+        if self.total_linea_ves is not None:
+            return self.total_linea_ves
+        if self.precio_unitario_ves is not None and self.cantidad is not None:
+            return (self.precio_unitario_ves * self.cantidad).quantize(Decimal("0.01"))
+        tasa = (
+            self.factura.tasa_bcv_aplicada
+            if (self.factura and self.factura.tasa_bcv_aplicada)
+            else Decimal("1.00")
+        )
+        return (self.monto_total_usd * tasa).quantize(Decimal("0.01"))
 
 
 class Pago(AgenciaMixin, models.Model):
@@ -252,7 +348,7 @@ class GastoOperativo(AgenciaMixin, models.Model):
         blank=True,
         verbose_name="Registrado por",
     )
-    creado = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    creado = models.DateTimeField(default=timezone.now, null=True, blank=True)
     actualizado = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -304,7 +400,9 @@ class FacturaConsolidada(AgenciaMixin, models.Model):
         INTERMEDIACION = "IN", "Intermediación"
 
     # Identificación fiscal
-    numero_factura = models.CharField(max_length=50, unique=True, verbose_name="Número de Factura")
+    numero_factura = models.CharField(
+        max_length=50, blank=True, default="", verbose_name="Número de Factura"
+    )
     numero_control = models.CharField(
         max_length=50, blank=True, default="", verbose_name="Número de Control"
     )
@@ -411,7 +509,7 @@ class FacturaConsolidada(AgenciaMixin, models.Model):
         verbose_name="PDF de Factura",
     )
     notas = models.TextField(blank=True, default="", verbose_name="Notas")
-    creado = models.DateTimeField(auto_now_add=True)
+    creado = models.DateTimeField(default=timezone.now)
     actualizado = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -640,7 +738,7 @@ class RetencionISLR(AgenciaMixin, models.Model):
         verbose_name="Comprobante PDF",
     )
     observaciones = models.TextField(blank=True, default="", verbose_name="Observaciones")
-    creado = models.DateTimeField(auto_now_add=True)
+    creado = models.DateTimeField(default=timezone.now)
     actualizado = models.DateTimeField(auto_now=True)
 
     class Meta:

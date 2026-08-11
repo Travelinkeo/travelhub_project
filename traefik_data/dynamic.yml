@@ -7,13 +7,14 @@ http:
       service: travelhub
       tls:
         certResolver: letsencryptresolver
+    # Router HTTP: sirve directamente sin redirigir.
+    # Cloudflare Tunnel entrega tráfico en HTTP al puerto 80 y él mismo maneja el HTTPS con el cliente.
+    # Si se añade redirect-https aquí, se crea un bucle infinito (ERR_TOO_MANY_REDIRECTS).
     travelhub-http:
       rule: "Host(`travelhub.cc`) || HostRegexp(`{subdomain:[a-z0-9-]+}.travelhub.cc`)"
       entryPoints:
         - web
       service: travelhub
-      middlewares:
-        - redirect-https
 
 
   services:
@@ -23,9 +24,3 @@ http:
           - url: "http://travelhub_web:8000"
         responseForwarding:
           flushInterval: "100ms"
-
-  middlewares:
-    redirect-https:
-      redirectScheme:
-        scheme: https
-        permanent: true

@@ -18,8 +18,19 @@ class SabreParser(BaseTicketParser):
         """Detecta si es un boleto SABRE"""
         purified = self.purify_text_for_detection(text)
 
-        # Evitar colisión con KIUSYS
-        if "KIUSYS" in purified or "KIU SYSTEM" in purified or "KIU GDS" in purified:
+        # Evitar colisión con KIUSYS / KIU / Recibos KIU (NAME/NOMBRE)
+        if (
+            "KIUSYS" in purified
+            or "KIU SYSTEM" in purified
+            or "KIU GDS" in purified
+            or "NAME/NOMBRE" in purified
+            or "E-TICKET ITINERARY RECEIPT" in purified
+            or "ETICKET ITINERARY RECEIPT" in purified
+            or any(
+                a in purified
+                for a in ["AVIOR", "RUTACA", "LASER", "VENEZOLANA", "ESTELAR", "TURPIAL"]
+            )
+        ):
             return False
 
         has_sabre_marker = (
@@ -431,9 +442,7 @@ class SabreParser(BaseTicketParser):
             vuelo_text,
             flags=re.IGNORECASE,
         )
-        vuelo_text = re.sub(
-            r"L[íi]mite de equipaje\s+\w+.*?\n", "", vuelo_text, flags=re.IGNORECASE
-        )
+        # Preservar bloque de equipaje para extracción precisa por segmento
 
         # Dividir por marcadores de segmento
         # 1. Por fechas (Salida: DD MMM YY)
@@ -556,12 +565,12 @@ class SabreParser(BaseTicketParser):
                 flight["localizador_aerolinea"] = airline_locator
 
             bag_match = re.search(
-                r"(?:Límite de equipaje|Baggage Allowance|Equipaje)[:\s]*([0-9]+\s*[PK]G)",
+                r"(?:L[íi]mite de equipaje|Baggage Allowance|Equipaje)[:\s]*([0-9]+\s*(?:PC|KG|KILOS?))",
                 block,
                 re.IGNORECASE,
             )
             if bag_match:
-                flight["equipaje"] = bag_match.group(1).replace(" ", "")
+                flight["equipaje"] = bag_match.group(1).replace(" ", "").upper()
 
             flights.append(flight)
 

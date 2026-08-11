@@ -2,7 +2,7 @@
 
 from unittest.mock import Mock, patch
 
-from apps.communications.services.notification_dispatcher import (
+from apps.communications.services.notification_router import (
     EmailChannel,
     NotificationDispatcher,
     TelegramChannel,

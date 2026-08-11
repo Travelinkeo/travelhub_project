@@ -221,7 +221,77 @@ class MarketingAIEngine:
                         except Exception as e_unsplash:
                             logger.warning(f"Error consultando Unsplash para '{kw}': {e_unsplash}")
 
-            data["imagenes_inspiracion"] = imágenes_reales[:4]  # Tomar las 4 mejores
+            # 🌟 FALLBACK DINÁMICO DE IMÁGENES HD POR TEMA Y HASH SI NO VIENEN DE UNSPLASH
+            if not imágenes_reales:
+                catalogo_fallback = [
+                    {
+                        "kw": ["cancun", "playa", "beach", "caribe", "tropico", "resort"],
+                        "url": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1080&q=80",
+                        "alt": "Playa Paradisíaca",
+                    },
+                    {
+                        "kw": ["madrid", "paris", "roma", "europa", "ciudad", "spain", "city"],
+                        "url": "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=1080&q=80",
+                        "alt": "Arquitectura Europea",
+                    },
+                    {
+                        "kw": ["vuelo", "pasaje", "avión", "flight", "aerolinea", "sky"],
+                        "url": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1080&q=80",
+                        "alt": "Vuelo Aéreo HD",
+                    },
+                    {
+                        "kw": ["lujo", "vip", "luxury", "piscina", "hotel", "resort"],
+                        "url": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1080&q=80",
+                        "alt": "Resort 5 Estrellas VIP",
+                    },
+                    {
+                        "kw": ["miami", "florida", "usa", "ocean"],
+                        "url": "https://images.unsplash.com/photo-1506966953602-c20cc11f75e3?w=1080&q=80",
+                        "alt": "Skyline Miami",
+                    },
+                    {
+                        "kw": ["montaña", "nieve", "mountain", "aventura", "nature"],
+                        "url": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1080&q=80",
+                        "alt": "Montañas y Naturaleza",
+                    },
+                    {
+                        "kw": ["crucero", "barco", "cruise", "mar"],
+                        "url": "https://images.unsplash.com/photo-1548574505-5e2386903d7f?w=1080&q=80",
+                        "alt": "Crucero en el Océano",
+                    },
+                    {
+                        "kw": ["dubai", "desierto", "emiratos"],
+                        "url": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1080&q=80",
+                        "alt": "Horizonte Dubai",
+                    },
+                    {
+                        "kw": ["roma", "coliseo", "cultura", "historia"],
+                        "url": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1080&q=80",
+                        "alt": "Roma e Historia",
+                    },
+                    {
+                        "kw": ["vacaciones", "viaje", "travel", "pasaporte"],
+                        "url": "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1080&q=80",
+                        "alt": "Experiencia de Viaje",
+                    },
+                ]
+
+                # Buscar coincidencia por palabras clave en la solicitud
+                prompt_lower = prompt_agente.lower()
+                coincidencias = []
+                for item in catalogo_fallback:
+                    if any(k in prompt_lower for k in item["kw"]):
+                        coincidencias.append({"url": item["url"], "alt": item["alt"]})
+
+                if coincidencias:
+                    imágenes_reales = coincidencias
+                else:
+                    # Selección pseudo-aleatoria basada en el hash del prompt para variar siempre
+                    idx = abs(hash(prompt_agente)) % len(catalogo_fallback)
+                    item = catalogo_fallback[idx]
+                    imágenes_reales = [{"url": item["url"], "alt": item["alt"]}]
+
+            data["imagenes_inspiracion"] = imágenes_reales[:4]
 
             return {"modo": "creativo", "contenido": data}
 

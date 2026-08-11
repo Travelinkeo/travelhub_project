@@ -30,6 +30,7 @@ def _register_parsers():
     if _parsers_registered:
         return
     parsers = [
+        KIUParser(),
         AmadeusParser(),
         CopaParser(),
         SabreParser(),
@@ -37,7 +38,6 @@ def _register_parsers():
         TravelportParser(),
         WebReceiptParser(),
         WingoParser(),
-        KIUParser(),
     ]
     for parser in parsers:
         registry.register(parser)

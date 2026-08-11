@@ -530,16 +530,16 @@ class TestContabilidadModelsIsolation(MultiTenantIsolationTestCase):
         asiento1 = AsientoContable.objects.create(
             agencia=self.agency1,
             fecha_contable="2024-01-01",
-            descripcion_general="Asiento A1",
-            tipo_asiento="DIA",
+            glosa="Asiento A1",
+            tipo_asiento="DIARIO",
         )
 
         self.set_current_agency(self.agency2)
         asiento2 = AsientoContable.objects.create(
             agencia=self.agency2,
             fecha_contable="2024-01-01",
-            descripcion_general="Asiento A2",
-            tipo_asiento="DIA",
+            glosa="Asiento A2",
+            tipo_asiento="DIARIO",
         )
 
         # Contexto agencia1 solo ve asiento1

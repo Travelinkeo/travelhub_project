@@ -71,6 +71,8 @@ class ItineraryTranslator:
             if airports_file.exists():
                 with open(airports_file, encoding="utf-8") as f:
                     airports_data = json.load(f)
+                    if isinstance(airports_data, dict):
+                        return airports_data
                     return {airport["code"]: airport["name"] for airport in airports_data}
             else:
                 return self._get_basic_airports()

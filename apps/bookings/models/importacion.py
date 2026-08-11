@@ -138,6 +138,13 @@ class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
         null=True,
         help_text=_("Monto de exchange o diferencial de cambio asociado al boleto."),
     )
+    es_reemision = models.BooleanField(
+        _("Es Reemisión / Exchange"),
+        default=False,
+        help_text=_(
+            "Indica si este boleto es una reemisión o remisión posterior a una factura emitida."
+        ),
+    )
     void_monto = models.DecimalField(
         _("Void / Penalidad"),
         max_digits=10,
@@ -332,6 +339,25 @@ class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
                     self.datos_parseados_actualizado = timezone.now()
             except BoletoImportado.DoesNotExist:
                 pass
+
+        from decimal import Decimal
+
+        if self.tarifa_base is not None and not self.total_boleto:
+            tb_dec = Decimal(str(self.tarifa_base))
+            impuestos = (
+                (self.iva_monto or Decimal("0.00"))
+                + (self.inatur_monto or Decimal("0.00"))
+                + (self.otros_impuestos_monto or Decimal("0.00"))
+            )
+            self.total_boleto = tb_dec + impuestos
+
+        if self.total_boleto:
+            if not self.datos_parseados or not isinstance(self.datos_parseados, dict):
+                self.datos_parseados = {}
+            self.datos_parseados["total_boleto"] = float(self.total_boleto)
+            self.datos_parseados["total"] = float(self.total_boleto)
+            if self.tarifa_base is not None:
+                self.datos_parseados["tarifa_base"] = float(self.tarifa_base)
 
         super().save(*args, **kwargs)
 

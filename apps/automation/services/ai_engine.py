@@ -170,7 +170,7 @@ class AIEngine:
             )
 
             if response_schema:
-                return parsed if isinstance(parsed, dict) else {"data": parsed}
+                return parsed
             return {"text": parsed if isinstance(parsed, str) else result.text}
 
         # 6. Error: incrementar contador y posiblemente abrir circuito

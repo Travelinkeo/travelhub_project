@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 
 import requests
 from celery import shared_task
@@ -263,7 +264,8 @@ def parsear_boleto_individual(boleto_id, **kwargs):
 
     try:
         boleto = BoletoImportado.objects.get(pk=boleto_id)
-        if boleto.estado_parseo in (
+        ignore_manual = kwargs.get("ignore_manual", False)
+        if not ignore_manual and boleto.estado_parseo in (
             BoletoImportado.EstadoParseo.COMPLETADO,
             BoletoImportado.EstadoParseo.ERROR_PARSEO,
         ):
@@ -619,7 +621,7 @@ def generar_pdf_ticket_async_task(boleto_id, **kwargs):
         logger.error(f" Boleto {boleto_id} no encontrado para generar PDF.")
         return f"Boleto {boleto_id} no encontrado."
 
-    if boleto.archivo_pdf_generado:
+    if boleto.archivo_pdf_generado and not kwargs.get("force_notification"):
         logger.info(f" El boleto {boleto_id} ya tiene PDF generado. Omitiendo.")
         return f"PDF ya generado para boleto {boleto_id}."
 
@@ -651,6 +653,101 @@ def generar_pdf_ticket_async_task(boleto_id, **kwargs):
                     else BoletoImportado.EstadoParseo.COMPLETADO
                 )
                 boleto.save(update_fields=["estado_parseo"])
+
+            # 🚀 ENVIAR NOTIFICACIONES TELEGRAM Y WHATSAPP AUTOMÁTICAMENTE (Con Lock de Idempotencia)
+            notif_lock_key = f"notif_sent_boleto_{boleto.pk}"
+            if cache.add(notif_lock_key, "1", timeout=300) or kwargs.get("force_notification"):
+                try:
+                    agencia = boleto.agencia or (
+                        boleto.venta_asociada.agencia if boleto.venta_asociada else None
+                    )
+                    pnr = boleto.localizador_pnr or "N/A"
+                    pasajero = (
+                        boleto.nombre_pasajero_procesado
+                        or boleto.nombre_pasajero_completo
+                        or "Pasajero"
+                    )
+                    caption = (
+                        f"✈️ <b>Boleto Confirmado</b>\n\n"
+                        f"👤 <b>Pasajero:</b> {pasajero}\n"
+                        f"📌 <b>PNR:</b> {pnr}\n"
+                        f"🎟️ <b>Boleto:</b> {boleto.numero_boleto or 'N/A'}\n"
+                        f"🏢 <b>Agencia:</b> {agencia.nombre if agencia else 'TravelHub'}"
+                    )
+
+                    # 1. Dispatch Telegram Notification
+                    from apps.common.tasks.telegram_tasks import send_telegram_document_task
+
+                    if hasattr(boleto.archivo_pdf_generado, "path") and os.path.exists(
+                        boleto.archivo_pdf_generado.path
+                    ):
+                        pdf_path = boleto.archivo_pdf_generado.path
+                    else:
+                        pdf_path = boleto.archivo_pdf_generado.url
+
+                    send_telegram_document_task.delay(
+                        file_path=pdf_path,
+                        caption=caption,
+                        agencia_id=agencia.id if agencia else None,
+                    )
+                    logger.info(f"📲 Notificación de Telegram encolada para Boleto {boleto.pk}")
+
+                    # 2. Dispatch WhatsApp Notification
+                    # Destino primario: cliente (si tiene teléfono registrado)
+                    # Destino de agencia: agencia.whatsapp (siempre enviar a la agencia)
+                    cliente = (
+                        getattr(boleto.venta_asociada, "cliente", None)
+                        if boleto.venta_asociada
+                        else None
+                    )
+                    telefono_cliente = (
+                        getattr(cliente, "telefono_principal", None) if cliente else None
+                    )
+                    if not telefono_cliente:
+                        telefono_cliente = (
+                            getattr(cliente, "telefono_secundario", None) if cliente else None
+                        )
+
+                    # Número de la agencia para recibir el PDF del boleto confirmado
+                    telefono_agencia = getattr(agencia, "whatsapp", None) if agencia else None
+
+                    ws_caption = f"✈️ *Boleto Confirmado* — {pasajero}\n📌 PNR: {pnr}\n🎟️ N° Boleto: {boleto.numero_boleto or 'N/A'}"
+                    try:
+                        from apps.communications.services.whatsapp_service import WhatsAppService
+
+                        pdf_url = boleto.archivo_pdf_generado.url
+
+                        if agencia and telefono_agencia:
+                            ws = WhatsAppService(agencia_id=agencia.id)
+                            ws.send_document(
+                                phone_number=telefono_agencia,
+                                document_url_or_base64=pdf_url,
+                                filename=fname,
+                                caption=ws_caption,
+                            )
+                            logger.info(
+                                f"💬 PDF enviado por WhatsApp a agencia ({telefono_agencia}) para Boleto {boleto.pk}"
+                            )
+
+                        if telefono_cliente and agencia and telefono_cliente != telefono_agencia:
+                            ws = WhatsAppService(agencia_id=agencia.id)
+                            ws.send_document(
+                                phone_number=telefono_cliente,
+                                document_url_or_base64=pdf_url,
+                                filename=fname,
+                                caption=f"Estimado/a {pasajero}, adjuntamos su boleto electrónico PNR {pnr}.",
+                            )
+                            logger.info(
+                                f"💬 PDF enviado por WhatsApp a cliente ({telefono_cliente}) para Boleto {boleto.pk}"
+                            )
+                    except Exception as e_ws:
+                        logger.error(
+                            f"⚠️ Error enviando PDF por WhatsApp para Boleto {boleto.pk}: {e_ws}"
+                        )
+                except Exception as e_notif:
+                    logger.error(
+                        f"⚠️ Error enviando notificaciones automáticas de Telegram/WhatsApp: {e_notif}"
+                    )
 
             return f"PDF generado y guardado para boleto {boleto_id}."
         else:

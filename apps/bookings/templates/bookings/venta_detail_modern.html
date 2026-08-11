@@ -9,12 +9,12 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="flex items-center gap-4">
             <a href="{% url 'bookings:venta_list' %}"
-                class="p-2 bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all">
-                <i data-lucide="arrow-left" class="w-6 h-6"></i>
-            </a>
+            class="p-2 bg-surface-2 rounded-xl text-text-muted hover:text-text-main hover:bg-surface-3 transition-all border border-border-color">
+            <span class="material-symbols-outlined text-[22px]">arrow_back</span>
+        </a>
             <div>
                 <div class="flex items-center gap-3">
-                    <h1 class="text-3xl font-black text-white uppercase tracking-tight">
+                    <h1 class="text-3xl font-black text-text-main uppercase tracking-tight">
                         <span class="bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent">{{ venta.localizador }}</span>
                     </h1>
                     <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
@@ -24,19 +24,19 @@
                         {{ venta.get_estado_display }}
                     </span>
                 </div>
-                <p class="text-gray-400 text-sm mt-1">Registrado el {{ venta.fecha_venta|date:"d M Y, H:i" }}</p>
+                <p class="text-text-muted text-sm mt-1">Registrado el {{ venta.fecha_venta|date:"d M Y, H:i" }}</p>
             </div>
         </div>
         <div class="flex items-center gap-3">
             <a href="{% url 'bookings:venta_timeline' venta.pk %}"
-                class="px-6 py-2.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 rounded-xl font-bold transition-all flex items-center gap-2">
-                <i data-lucide="history" class="w-5 h-5 text-blue-500"></i>
+                class="px-6 py-2.5 bg-status-info/10 hover:bg-status-info/20 text-status-info border border-status-info/30 rounded-xl font-bold transition-all flex items-center gap-2">
+                <span class="material-symbols-outlined text-[20px]">history</span>
                 Línea de Vida
             </a>
 
             <a href="#"
-                class="px-6 py-2.5 bg-dark-700 hover:bg-dark-600 text-gray-300 border border-white/10 rounded-xl font-semibold transition-all flex items-center gap-2">
-                <i data-lucide="credit-card" class="w-5 h-5 text-indigo-400"></i>
+                class="px-6 py-2.5 bg-surface-2 hover:bg-surface-3 text-text-secondary border border-border-color rounded-xl font-semibold transition-all flex items-center gap-2">
+                <span class="material-symbols-outlined text-[20px] text-primary">credit_card</span>
                 Liquidaciones
             </a>
 
@@ -44,21 +44,21 @@
             <div class="flex gap-2">
                 <button hx-post="{% url 'core:venta_facturar' venta.pk %}" hx-target="#modal-content"
                     @click="$dispatch('open-modal')"
-                    class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2">
-                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                    class="px-6 py-2.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--text-on-primary)] rounded-xl font-bold shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[20px]">receipt_long</span>
                     Preparar / Ver Factura
                 </button>
                 <button onclick="generarFacturacionDoble()"
-                    class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-900/20 transition-all flex items-center gap-2">
-                    <i data-lucide="layers" class="w-5 h-5"></i>
+                    class="px-6 py-2.5 bg-surface-2 hover:bg-surface-3 text-text-main border border-border-color rounded-xl font-bold transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[20px] text-primary">layers</span>
                     Doble Facturación
                 </button>
             </div>
             {% else %}
             <button hx-get="{% url 'finance:invoice_detail' venta.factura.pk %}" hx-target="#modal-content"
                 @click="$dispatch('open-modal')"
-                class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-900/20 transition-all flex items-center gap-2">
-                <i data-lucide="eye" class="w-5 h-5"></i>
+                class="px-6 py-2.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--text-on-primary)] rounded-xl font-bold shadow-lg transition-all flex items-center gap-2">
+                <span class="material-symbols-outlined text-[20px]">visibility</span>
                 Ver Factura
             </button>
             {% endif %}
@@ -71,58 +71,58 @@
 
             <!-- Items / Services Card -->
             <div class="glass-panel rounded-3xl overflow-hidden">
-                <div class="p-6 border-b border-white/10 bg-white/5 flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-white flex items-center">
-                        <i data-lucide="package" class="w-5 h-5 mr-3 text-blue-400"></i>
+                <div class="p-6 border-b border-border-color bg-surface-2/50 flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-text-main flex items-center">
+                        <span class="material-symbols-outlined text-[20px] mr-3 text-status-info">package_2</span>
                         Servicios y Productos
                     </h3>
                     <button hx-get="{% url 'bookings:item_venta_add' venta.pk %}" hx-target="#modal-content"
                         @click="$dispatch('open-modal')"
-                        class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white p-1.5 rounded-lg transition-all">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--text-on-primary)] p-1.5 rounded-lg transition-all">
+                        <span class="material-symbols-outlined text-[18px]">add</span>
                     </button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left table-responsive">
-                        <thead class="bg-white/5 border-b border-white/10">
+                        <thead class="bg-surface-2/50 border-b border-border-color">
                             <tr>
-                                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Item</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Cant.</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Precio Unit.</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Total</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right"></th>
+                                <th class="px-6 py-4 text-xs font-semibold text-text-muted uppercase">Item</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-text-muted uppercase">Cant.</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-text-muted uppercase">Precio Unit.</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-text-muted uppercase">Total</th>
+                                <th class="px-6 py-4 text-xs font-semibold text-text-muted uppercase text-right"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
                             {% for item in items %}
                             <tr class="hover:bg-white/5 transition-colors">
                                 <td class="px-6 py-4">
-                                    <div class="font-bold text-white">{{ item.producto_servicio.nombre }}</div>
-                                    <div class="text-xs text-gray-400">{{ item.descripcion_personalizada|default:"" }}
+                                    <div class="font-bold text-text-main">{{ item.producto_servicio.nombre }}</div>
+                                    <div class="text-xs text-text-muted">{{ item.descripcion_personalizada|default:"" }}
                                     </div>
-                                    <div class="flex items-center mt-1 text-[10px] text-gray-500">
-                                        <i data-lucide="truck" class="w-3 h-3 mr-1"></i>
+                                    <div class="flex items-center mt-1 text-[10px] text-text-muted">
+                                        <span class="material-symbols-outlined text-[12px] mr-1">local_shipping</span>
                                         {{ item.proveedor_servicio.nombre|default:"Proveedor no asignado" }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-white font-medium">{{ item.cantidad }}</td>
-                                <td class="px-6 py-4 text-white font-medium">
+                                <td class="px-6 py-4 text-text-main font-medium">{{ item.cantidad }}</td>
+                                <td class="px-6 py-4 text-text-main font-medium">
                                     <span>{{ venta.moneda.simbolo }}</span><span>{{ item.precio_unitario_venta }}</span>
                                 </td>
-                                <td class="px-6 py-4 text-white font-bold">
+                                <td class="px-6 py-4 text-text-main font-bold">
                                     <span>{{ venta.moneda.simbolo }}</span><span>{{ item.total_item_venta }}</span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <button hx-get="{% url 'bookings:item_venta_edit' item.pk %}"
                                         hx-target="#modal-content" @click="$dispatch('open-modal')"
-                                        class="p-2 text-gray-500 hover:text-blue-400 transition-all">
-                                        <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                        class="p-2 text-text-muted hover:text-status-info transition-all">
+                                        <span class="material-symbols-outlined text-[18px]">edit</span>
                                     </button>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="px-6 py-12 text-center text-gray-500 italic">No hay servicios
+                                <td colspan="5" class="px-6 py-12 text-center text-text-muted italic">No hay servicios
                                     agregados.</td>
                             </tr>
                             {% endfor %}
@@ -133,32 +133,32 @@
 
             <!-- Fees & Extra Charges -->
             <div class="glass-panel rounded-3xl overflow-hidden">
-                <div class="p-6 border-b border-white/10 bg-white/5 flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-white flex items-center">
-                        <i data-lucide="plus-square" class="w-5 h-5 mr-3 text-indigo-400"></i>
+                <div class="p-6 border-b border-border-color bg-surface-2/50 flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-text-main flex items-center">
+                        <span class="material-symbols-outlined text-[20px] mr-3 text-primary">add_card</span>
                         Otros Cargos / Fees
                     </h3>
                     <button hx-get="{% url 'bookings:fee_venta_add' venta.pk %}" hx-target="#modal-content"
                         @click="$dispatch('open-modal')"
-                        class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white p-1.5 rounded-lg transition-all">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--text-on-primary)] p-1.5 rounded-lg transition-all">
+                        <span class="material-symbols-outlined text-[18px]">add</span>
                     </button>
                 </div>
                 <div class="p-6">
                     <div class="flex flex-wrap gap-4">
                         {% for fee in fees %}
-                        <div class="bg-white/5 border border-white/10 rounded-2xl p-4 flex-1 min-w-[200px]">
+                        <div class="bg-surface-2 border border-border-color rounded-2xl p-4 flex-1 min-w-[200px]">
                             <div class="flex justify-between items-start">
-                                <span class="text-xs font-bold text-indigo-400 uppercase">
+                                <span class="text-xs font-bold text-primary uppercase">
                                     {{ fee.get_tipo_fee_display }}
                                 </span>
-                                <i data-lucide="info" class="w-3 h-3 text-gray-500"></i>
+                                <span class="material-symbols-outlined text-[14px] text-text-muted">info</span>
                             </div>
-                            <p class="text-lg font-bold text-white mt-1">{{ venta.moneda.simbolo }}{{ fee.monto }}</p>
-                            <p class="text-xs text-gray-500 mt-1 truncate">{{ fee.descripcion }}</p>
+                            <p class="text-lg font-bold text-text-main mt-1">{{ venta.moneda.simbolo }}{{ fee.monto }}</p>
+                            <p class="text-xs text-text-muted mt-1 truncate">{{ fee.descripcion }}</p>
                         </div>
                         {% empty %}
-                        <div class="w-full text-center py-4 text-gray-500 text-sm italic">Sin cargos adicionales
+                        <div class="w-full text-center py-4 text-text-muted text-sm italic">Sin cargos adicionales
                             registrados.</div>
                         {% endfor %}
                     </div>
@@ -167,53 +167,53 @@
 
             <!-- Payments Card -->
             <div class="glass-panel rounded-3xl overflow-hidden">
-                <div class="p-6 border-b border-white/10 bg-white/5 flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-white flex items-center">
-                        <i data-lucide="credit-card" class="w-5 h-5 mr-3 text-green-400"></i>
+                <div class="p-6 border-b border-border-color bg-surface-2/50 flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-text-main flex items-center">
+                        <span class="material-symbols-outlined text-[20px] mr-3 text-status-success">credit_card</span>
                         Registro de Pagos
                     </h3>
                     <button hx-get="{% url 'bookings:pago_venta_add' venta.pk %}" hx-target="#modal-content"
                         @click="$dispatch('open-modal')"
-                        class="bg-green-600 hover:bg-green-500 text-white p-1.5 rounded-lg transition-all">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        class="bg-status-success hover:bg-status-success/80 text-white p-1.5 rounded-lg transition-all">
+                        <span class="material-symbols-outlined text-[18px]">add</span>
                     </button>
                 </div>
                 <div class="p-6 space-y-4">
                     {% for pago in pagos %}
-                    <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+                    <div class="flex items-center justify-between p-4 bg-surface-2 rounded-2xl border border-border-color">
                         <div class="flex items-center gap-4">
                             <div
-                                class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-400">
-                                <i data-lucide="check" class="w-5 h-5"></i>
+                                class="w-10 h-10 rounded-full bg-status-success/10 flex items-center justify-center text-status-success">
+                                <span class="material-symbols-outlined text-[20px]">check_circle</span>
                             </div>
                             <div>
-                                <p class="text-white font-bold">{{ venta.moneda.simbolo }}{{ pago.monto }}</p>
-                                <p class="text-xs text-gray-500">
+                                <p class="text-text-main font-bold">{{ venta.moneda.simbolo }}{{ pago.monto }}</p>
+                                <p class="text-xs text-text-muted">
                                     {{ pago.get_metodo_display }} - Ref: <span>{{ pago.referencia|default:"--" }}</span>
                                 </p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-xs text-gray-400">{{ pago.fecha_pago|date:"d M, Y" }}</p>
+                            <p class="text-xs text-text-muted">{{ pago.fecha_pago|date:"d M, Y" }}</p>
                             <span class="text-[10px] font-bold text-green-400 uppercase">Confirmado</span>
                         </div>
                     </div>
                     {% empty %}
-                    <div class="text-center py-8 text-gray-500 italic">No hay pagos registrados aún.</div>
+                    <div class="text-center py-8 text-text-muted italic">No hay pagos registrados aún.</div>
                     {% endfor %}
                 </div>
             </div>
 
             <!-- Audit Logs / History -->
             <div class="glass-panel rounded-3xl overflow-hidden">
-                <div class="p-6 border-b border-white/10 bg-white/5 flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-white flex items-center">
-                        <i data-lucide="history" class="w-5 h-5 mr-3 text-amber-400"></i>
+                <div class="p-6 border-b border-border-color bg-surface-2/50 flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-text-main flex items-center">
+                        <span class="material-symbols-outlined text-[20px] mr-3 text-status-warning">history</span>
                         Historial de Cambios
                     </h3>
                     <button onclick="cargarAuditLogs('Venta', '{{ venta.pk }}')"
-                        class="p-1.5 text-gray-400 hover:text-white transition-all">
-                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        class="p-1.5 text-text-muted hover:text-text-main transition-all">
+                        <span class="material-symbols-outlined text-[18px]">refresh</span>
                     </button>
                 </div>
                 <div id="audit-logs-container" class="p-6 space-y-4 max-h-[400px] overflow-y-auto">
@@ -234,12 +234,12 @@
 
             <!-- Client Info Card -->
             <div class="glass-panel rounded-3xl p-8 space-y-6">
-                <h3 class="text-lg font-bold text-white flex items-center">
-                    <i data-lucide="user" class="w-5 h-5 mr-3 text-gray-400"></i>
+                <h3 class="text-lg font-bold text-text-main flex items-center">
+                    <span class="material-symbols-outlined text-[20px] mr-3 text-text-muted">person</span>
                     Cliente Pagador
                 </h3>
                 {% if venta.cliente %}
-                <div class="flex flex-col items-center text-center p-4 bg-white/5 rounded-2xl border border-white/10">
+                <div class="flex flex-col items-center text-center p-4 bg-surface-2 rounded-2xl border border-border-color">
                     <div
                         class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold mb-4 shadow-lg overflow-hidden">
                         {% if venta.cliente.foto_perfil %}
@@ -248,14 +248,14 @@
                         {{ venta.cliente.nombres|slice:":1" }}{{ venta.cliente.apellidos|slice:":1" }}
                         {% endif %}
                     </div>
-                    <h4 class="text-white font-bold truncate w-full">{{ venta.cliente.get_nombre_completo }}</h4>
-                    <p class="text-xs text-gray-500 mt-1">{{ venta.cliente.email }}</p>
+                    <h4 class="text-text-main font-bold truncate w-full">{{ venta.cliente.get_nombre_completo }}</h4>
+                    <p class="text-xs text-text-muted mt-1">{{ venta.cliente.email }}</p>
                     <a href="{% url 'crm:cliente_detail' venta.cliente.pk %}"
                         class="mt-4 text-xs text-blue-400 hover:text-blue-300 font-bold transition-all uppercase tracking-widest">Ver
                         Historial del Cliente</a>
                 </div>
                 {% else %}
-                <div class="text-center p-8 border-2 border-dashed border-white/10 rounded-2xl">
+                <div class="text-center p-8 border-2 border-dashed border-border-color rounded-2xl">
                     <p class="text-gray-500 text-sm mb-4">No hay un cliente principal asignado a esta venta.</p>
                     <!-- TODO: Implementar asignación de cliente -->
                     <button class="text-blue-400 font-bold text-sm" disabled>Asignar Cliente</button>
@@ -266,28 +266,28 @@
             <!-- Internal Notes & AI Report -->
             <div class="glass-panel rounded-3xl p-8 space-y-6">
                 <div class="space-y-4">
-                    <h3 class="text-lg font-bold text-white flex items-center">
-                        <i data-lucide="sticky-note" class="w-5 h-5 mr-3 text-amber-400"></i>
+                    <h3 class="text-lg font-bold text-text-main flex items-center">
+                        <span class="material-symbols-outlined text-[20px] mr-3 text-status-warning">sticky_note_2</span>
                         Notas de Oficina
                     </h3>
-                    <div class="text-sm text-gray-400 leading-relaxed {% if not venta.notas_manuales %}italic{% endif %}">
+                    <div class="text-sm text-text-secondary leading-relaxed {% if not venta.notas_manuales %}italic{% endif %}">
                         {{ venta.notas_manuales|default:"Sin notas internas registradas." }}
                     </div>
                 </div>
 
                 {% if venta.ai_report %}
                 <div class="border-t border-white/10 pt-6 space-y-4">
-                    <h3 class="text-lg font-bold text-white flex items-center">
-                        <i data-lucide="sparkles" class="w-5 h-5 mr-3 text-emerald-400"></i>
+                    <h3 class="text-lg font-bold text-text-main flex items-center">
+                        <span class="material-symbols-outlined text-[20px] mr-3 text-status-success animate-pulse">auto_awesome</span>
                         Inteligencia de Ventas (IA)
                     </h3>
                     {% if "La inteligencia de ventas IA no pudo ejecutarse" in venta.ai_report %}
-                    <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 flex items-start gap-3">
-                        <i data-lucide="alert-triangle" class="w-4 h-4 mt-0.5 shrink-0"></i>
+                    <div class="p-4 rounded-2xl bg-status-warning/10 border border-status-warning/20 text-xs text-status-warning flex items-start gap-3">
+                        <span class="material-symbols-outlined text-[16px] mt-0.5 shrink-0">warning</span>
                         <div>{{ venta.ai_report }}</div>
                     </div>
                     {% else %}
-                    <div class="text-sm text-gray-300 leading-relaxed bg-emerald-500/5 border border-emerald-500/10 p-4 rounded-2xl">
+                    <div class="text-sm text-text-secondary leading-relaxed bg-status-success/5 border border-status-success/10 p-4 rounded-2xl">
                         {{ venta.ai_report|linebreaksbr }}
                     </div>
                     {% endif %}
@@ -305,26 +305,26 @@
     <div x-show="open" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-        class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm" @click="open = false"></div>
+        class="fixed inset-0 bg-surface-base/80 backdrop-blur-sm" @click="open = false"></div>
 
     <div x-show="open" x-transition:enter="ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-        class="relative bg-gray-800 border border-white/10 rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
+        class="relative bg-surface-1 border border-border-color rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
 
-        <div class="p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
-            <h3 class="text-xl font-bold text-white">Editar Información</h3>
-            <button @click="open = false" class="text-gray-400 hover:text-white transition-colors">
-                <i data-lucide="x" class="w-6 h-6"></i>
+        <div class="p-6 border-b border-border-color flex items-center justify-between bg-surface-2/50">
+            <h3 class="text-xl font-bold text-text-main">Editar Información</h3>
+            <button @click="open = false" class="text-text-muted hover:text-text-main transition-colors">
+                <span class="material-symbols-outlined text-[22px]">close</span>
             </button>
         </div>
 
         <div id="modal-content" class="p-8">
             <!-- HTMX will load content here -->
             <div class="flex justify-center py-8">
-                <i data-lucide="loader-2" class="w-8 h-8 text-blue-500 animate-spin"></i>
+                <span class="material-symbols-outlined text-[32px] text-status-info animate-spin">progress_activity</span>
             </div>
         </div>
     </div>
@@ -333,15 +333,7 @@
 
 {% block extra_scripts %}
 <script nonce="{{ request.csp_nonce }}">
-    document.addEventListener('DOMContentLoaded', function () {
-        lucide.createIcons();
-    });
-
-    // Refresh icons after HTMX swaps
-    document.body.addEventListener('htmx:afterSwap', function () {
-        lucide.createIcons();
-    });
-
+    // Material Symbols son renderizados por el browser via webfont; no hay init necesario.
     const VENTA_ID = "{{ venta.pk }}";
 
     async function generarFacturacionDoble() {

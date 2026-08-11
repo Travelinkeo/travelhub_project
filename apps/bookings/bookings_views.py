@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import DecimalField, F, Q, Sum, Value
+from django.db.models import Avg, Count, DecimalField, F, Q, Sum, Value
 from django.db.models.functions import Coalesce, TruncDate
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -69,7 +69,40 @@ class VentaListView(ExportMixin, HtmxResponseMixin, BookingBaseMixin, ListView):
                 | Q(cliente__nombres__icontains=q)
                 | Q(cliente__apellidos__icontains=q)
             )
+        estado = self.request.GET.get("estado")
+        if estado:
+            queryset = queryset.filter(estado=estado)
         return queryset
+
+    def get_context_data(self, **kwargs):
+        """Calcula KPIs reales del mes actual para el panel de ventas."""
+        from core.api import get_user_active_agency
+
+        context = super().get_context_data(**kwargs)
+        ahora = timezone.now()
+        agencia = get_user_active_agency(self.request.user)
+        qs_base = Venta.objects.all()
+        if agencia:
+            qs_base = qs_base.filter(agencia=agencia)
+        qs_mes = qs_base.filter(
+            fecha_venta__year=ahora.year,
+            fecha_venta__month=ahora.month,
+        )
+        agregados = qs_mes.aggregate(
+            total_mes=Coalesce(Sum("total_venta"), Value(0), output_field=DecimalField()),
+            pendientes_count=Count("id_venta", filter=Q(saldo_pendiente__gt=0)),
+            margen_prom=Coalesce(Avg("margen_estimado"), Value(0), output_field=DecimalField()),
+            ventas_count=Count("id_venta"),
+        )
+        total_mes = float(agregados["total_mes"] or 0)
+        margen_prom = float(agregados["margen_prom"] or 0)
+        margen_pct = round(margen_prom / total_mes * 100, 1) if total_mes > 0 else 0.0
+        context["kpi_ventas_mes"] = agregados["ventas_count"]
+        context["kpi_ingresos_brutos"] = total_mes
+        context["kpi_pendientes_pago"] = agregados["pendientes_count"]
+        context["kpi_margen_pct"] = margen_pct
+        context["kpi_mes_nombre"] = ahora.strftime("%b").upper()
+        return context
 
 
 class VentaDetailView(BookingBaseMixin, DetailView):

@@ -446,7 +446,7 @@ services:
   # 9. WHATSAPP MICROSERVICE (Evolution API v2)
   # ---------------------------------------------------------------------------
   evolution:
-    image: atendai/evolution-api:v2.2.3
+    image: atendai/evolution-api:latest
     container_name: travelhub_evolution
     restart: unless-stopped
     logging: *default-logging
@@ -473,7 +473,9 @@ services:
       - CACHE_REDIS_ENABLED=true
       - CACHE_REDIS_URI=redis://redis_evolution:6379/0
       - CACHE_REDIS_PREFIX_KEY=travelhub_evolution
-      - CONFIG_SESSION_PHONE_VERSION=2.3000.1035194821
+      - CONFIG_SESSION_PHONE_CLIENT=Ubuntu
+      - CONFIG_SESSION_PHONE_NAME=Chrome
+      - CONFIG_SESSION_PHONE_VERSION=2.3000.1043857760
       - LOG_LEVEL=INFO
       - LOG_BAILEYS=debug
     depends_on:

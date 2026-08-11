@@ -161,19 +161,30 @@ class FastDeterministicParsers:
         # 3. Extraer Nombre del Pasajero y Documento
         # Soporta: NOMBRE [DOCUMENTO] o NOMBRE FOID: XXX
         # Mejorado para evitar capturar FOID/RIF como parte del nombre
-        name_match = re.search(
-            r"(?:PREPARADO PARA|PASAJERO|PASSENGER|NAME|PAX)[:\s]+([^[\n\r<]{3,60})", text_upper
+        subj_name_match = re.search(
+            r"(?:SUBJECT:\s*)?(?:E-TICKET|ETICKET|PASSENGER)\s+ITINERARY\s+RECEIPT\s*-\s*([^[\n\r<]{3,80})",
+            text_upper,
         )
-        if name_match:
-            raw_name = name_match.group(1).strip()
-            # Limpiar ruidos comunes (FOID, RIF, etc.) y detenerse en el primer marcador de metadatos
-            # Añadimos más marcadores para evitar que el nombre "se coma" otros campos
-            clean_name = re.split(
+        if subj_name_match:
+            raw_subj_name = subj_name_match.group(1).strip()
+            clean_subj_name = re.split(
                 r"\s+(?:FOID|RIF|DNI|DOCUMENTO|DOC|TKTN|C\.I|V-|ADDRESS|TEL|PHONE|IATA|ISSUING|AGENTE|OFFICE)\b",
-                raw_name,
+                raw_subj_name,
                 flags=re.IGNORECASE,
             )[0]
-            data["nombre_pasajero"] = clean_name.strip()
+            data["nombre_pasajero"] = clean_subj_name.strip()
+        else:
+            name_match = re.search(
+                r"(?:PREPARADO PARA|PASAJERO|PASSENGER|NAME|PAX)[:\s]+([^[\n\r<]{3,60})", text_upper
+            )
+            if name_match:
+                raw_name = name_match.group(1).strip()
+                clean_name = re.split(
+                    r"\s+(?:FOID|RIF|DNI|DOCUMENTO|DOC|TKTN|C\.I|V-|ADDRESS|TEL|PHONE|IATA|ISSUING|AGENTE|OFFICE)\b",
+                    raw_name,
+                    flags=re.IGNORECASE,
+                )[0]
+                data["nombre_pasajero"] = clean_name.strip()
 
             # Extraer ID (Buscamos dentro de corchetes o después de FOID:)
             # Usamos negative lookahead para ignorar IDs de sistema (imágenes, oficinas)

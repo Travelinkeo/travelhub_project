@@ -46,10 +46,10 @@
                 <div class="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
                     <span class="material-symbols-outlined text-[24px]">shopping_cart</span>
                 </div>
-                <span class="text-[10px] font-black text-primary bg-primary/10 px-2 py-1 rounded-full uppercase tracking-widest">+12.5%</span>
+                <span class="text-[10px] font-black text-primary bg-primary/10 px-2 py-1 rounded-full uppercase tracking-widest">{{ kpi_mes_nombre }}</span>
             </div>
             <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Ventas del Mes</p>
-            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter">{{ ventas.count }}</h2>
+            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter">{{ kpi_ventas_mes }}</h2>
         </div>
 
         <!-- KPI 2 -->
@@ -58,10 +58,10 @@
                 <div class="size-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
                     <span class="material-symbols-outlined text-[24px]">payments</span>
                 </div>
-                <span class="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full uppercase tracking-widest">+5%</span>
+                <span class="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full uppercase tracking-widest">{{ kpi_mes_nombre }}</span>
             </div>
             <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Ingresos Brutos</p>
-            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter">$45,200</h2>
+            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter tabular-nums">${{ kpi_ingresos_brutos|floatformat:0 }}</h2>
         </div>
 
         <!-- KPI 3 -->
@@ -70,10 +70,14 @@
                 <div class="size-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
                     <span class="material-symbols-outlined text-[24px]">hourglass_empty</span>
                 </div>
-                <span class="text-[10px] font-black text-amber-500 bg-amber-500/10 px-2 py-1 rounded-full uppercase tracking-widest">URGENTE</span>
+                {% if kpi_pendientes_pago > 0 %}
+                <span class="text-[10px] font-black text-amber-500 bg-amber-500/10 px-2 py-1 rounded-full uppercase tracking-widest animate-pulse">URGENTE</span>
+                {% else %}
+                <span class="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full uppercase tracking-widest">AL DÍA ✓</span>
+                {% endif %}
             </div>
             <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Pendientes Pago</p>
-            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter">8</h2>
+            <h2 class="text-3xl font-black {% if kpi_pendientes_pago > 0 %}text-amber-500{% else %}text-text-main{% endif %} mt-1 tracking-tighter">{{ kpi_pendientes_pago }}</h2>
         </div>
 
         <!-- KPI 4 -->
@@ -82,10 +86,10 @@
                 <div class="size-12 rounded-2xl bg-violet-500/10 flex items-center justify-center text-violet-500 border border-violet-500/20">
                     <span class="material-symbols-outlined text-[24px]">query_stats</span>
                 </div>
-                <span class="text-[10px] font-black text-violet-500 bg-violet-500/10 px-2 py-1 rounded-full uppercase tracking-widest">TARGET 90%</span>
+                <span class="text-[10px] font-black text-violet-500 bg-violet-500/10 px-2 py-1 rounded-full uppercase tracking-widest">{{ kpi_mes_nombre }}</span>
             </div>
             <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Margen Prom.</p>
-            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter">14.5%</h2>
+            <h2 class="text-3xl font-black text-text-main mt-1 tracking-tighter tabular-nums">{{ kpi_margen_pct }}%</h2>
         </div>
     </div>
 
@@ -102,11 +106,16 @@
                         hx-target="#sales-list-body" hx-swap="innerHTML">
                 </div>
                 <div class="flex gap-3">
-                    <select class="input-base w-48 !bg-surface-1">
-                        <option>Todos los estados</option>
-                        <option>Pendientes</option>
-                        <option>Pagadas</option>
-                        <option>Canceladas</option>
+                    <select id="estado-filter" name="estado" class="input-base w-48 !bg-surface-1"
+                        hx-get="{% url 'bookings:venta_list' %}"
+                        hx-trigger="change"
+                        hx-target="#sales-list-body"
+                        hx-swap="innerHTML"
+                        hx-include="[name='q']">
+                        <option value="">Todos los estados</option>
+                        <option value="PEN">Pendientes</option>
+                        <option value="PAG">Pagadas</option>
+                        <option value="CAN">Canceladas</option>
                     </select>
                     <a href="?export=excel" class="btn-secondary flex items-center justify-center !w-12 !p-0 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10" title="Exportar Excel">
                         <span class="material-symbols-outlined">download</span>
@@ -202,11 +211,12 @@
                                     title="Editar">
                                     <span class="material-symbols-outlined text-[20px]">edit</span>
                                 </a>
-                                <a href="{% url 'bookings:venta_delete' v.pk %}"
+                                <button
+                                    onclick="confirmarEliminar('{% url 'bookings:venta_delete' v.pk %}', '{{ v.localizador|default:v.id_venta }}')"
                                     class="size-8 flex items-center justify-center text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all border border-transparent hover:border-red-500/20"
                                     title="Eliminar">
                                     <span class="material-symbols-outlined text-[20px]">delete</span>
-                                </a>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -259,4 +269,33 @@
         {% endif %}
     </div>
 </main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script nonce="{{ request.csp_nonce }}">
+function confirmarEliminar(url, localizador) {
+    Swal.fire({
+        title: '¿Eliminar venta?',
+        html: `La venta <strong>${localizador}</strong> se eliminará permanentemente.<br>Esta acción no se puede deshacer.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: 'var(--status-danger)',
+        cancelButtonColor: 'var(--surface-3)',
+        background: 'var(--surface-1)',
+        color: 'var(--text-main)',
+        iconColor: 'var(--status-danger)',
+        customClass: {
+            popup: 'rounded-3xl',
+            confirmButton: 'rounded-xl font-bold',
+            cancelButton: 'rounded-xl font-bold',
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = url;
+        }
+    });
+}
+</script>
 {% endblock %}

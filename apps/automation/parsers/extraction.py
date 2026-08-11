@@ -36,6 +36,24 @@ class ExtractionService:
                 return ExtractionService._extract_pdf(file_obj)
             elif filename.endswith(".eml"):
                 return ExtractionService._extract_eml(file_obj)
+            elif filename.endswith(".html") or filename.endswith(".htm"):
+                content = file_obj.read()
+                raw_str = (
+                    content.decode("utf-8", errors="ignore")
+                    if isinstance(content, bytes | bytearray)
+                    else str(content)
+                )
+                # Si el archivo comienza con un bloque de cabeceras inyectado, preservarlo
+                # antes de limpiar el HTML (el bloque empieza con texto plano, no HTML)
+                if raw_str.lstrip().startswith("--- HEADERS START ---"):
+                    headers_end_tag = "--- HEADERS END ---"
+                    end_idx = raw_str.find(headers_end_tag)
+                    if end_idx != -1:
+                        end_idx += len(headers_end_tag)
+                        header_block = raw_str[:end_idx]
+                        html_body = raw_str[end_idx:]
+                        return header_block + "\n" + ExtractionService._clean_html(html_body)
+                return ExtractionService._clean_html(raw_str)
             else:
                 content = file_obj.read()
                 if isinstance(content, bytes | bytearray):

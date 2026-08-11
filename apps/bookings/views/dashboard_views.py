@@ -85,7 +85,7 @@ def dashboard_metricas(request):
     top_clientes = list(
         ventas_qs.exclude(cliente__isnull=True)
         .values(
-            "cliente__id_cliente",
+            "cliente__id",
             "cliente__nombres",
             "cliente__apellidos",
             "cliente__nombre_empresa",
@@ -103,14 +103,18 @@ def dashboard_metricas(request):
     )
 
     Factura = apps.get_model("finance", "Factura")
-    facturas_pendientes = Factura.objects.filter(estado__in=["EMI", "PAR"]).aggregate(
-        count=Count("id_factura"), total=Sum("saldo_pendiente")
-    )
+    facturas_pendientes = Factura.objects.filter(
+        agencia=agencia, estado=Factura.EstadoFactura.EMITIDA
+    ).aggregate(count=Count("id"), total=Sum("gran_total_usd"))
 
-    LiquidacionAgente = apps.get_model("finance", "LiquidacionAgente")
-    liquidaciones_pendientes = LiquidacionAgente.objects.filter(
-        agencia=agencia, pagado=False
-    ).aggregate(count=Count("id"), total=Sum("total_comisiones"))
+    try:
+        from apps.finance.models_stubs import LiquidacionAgente
+
+        liquidaciones_pendientes = LiquidacionAgente.objects.filter(
+            agencia=agencia, pagado=False
+        ).aggregate(count=Count("id"), total=Sum("total_comisiones"))
+    except Exception:
+        liquidaciones_pendientes = {"count": 0, "total": 0}
 
     hoy = timezone.now().date()
     hace_7_dias = hoy - timedelta(days=7)

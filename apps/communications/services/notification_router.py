@@ -782,14 +782,39 @@ def notificar_alerta_migratoria(check_instance):
         notification_router.notify(context, channels=[NotificationChannel.TELEGRAM])
 
 
+def enviar_recordatorio_vuelo(boleto, horas_antes=24):
+    """Envia recordatorio de vuelo por WhatsApp (compatibilidad legacy)."""
+    venta = getattr(boleto, "venta_asociada", None)
+    if not venta or not getattr(venta, "cliente", None):
+        return False
+    cliente = venta.cliente
+    phone = getattr(cliente, "telefono_principal", None)
+    if not phone:
+        return False
+    from apps.common.tasks import send_whatsapp_task
+
+    send_whatsapp_task.delay(
+        sender_id=phone,
+        recipient_number=phone,
+        message_text=f"Recordatorio de vuelo para {boleto.localizador_pnr} en {horas_antes} horas",
+        agencia_id=getattr(venta, "agencia_id", None),
+    )
+    return True
+
+
+# Legacy compat alias
+NotificationDispatcher = NotificationRouter
+
 # Export
 __all__ = [
     "NotificationRouter",
+    "NotificationDispatcher",
     "NotificationEvent",
     "NotificationChannel",
     "NotificationRecipient",
     "NotificationContext",
     "notification_router",
+    "enviar_recordatorio_vuelo",
     # Legacy compat
     "notificar_confirmacion_pago",
     "notificar_recordatorio_pago",

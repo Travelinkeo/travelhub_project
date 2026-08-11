@@ -434,7 +434,7 @@ class SecurityHeadersMiddleware:
                 "img-src": (
                     f"'self' data: blob: "
                     f"{static_origin} https://res.cloudinary.com {r2_wildcard} "
-                    "https://images.unsplash.com https://pics.avs.io "
+                    "https://images.unsplash.com https://pics.avs.io https://images.kiwi.com https://assets.duffel.com "
                     "https://ui-avatars.com https://placehold.co"
                 ),
                 "frame-src": "'self' https://js.stripe.com http://evolution:8080",

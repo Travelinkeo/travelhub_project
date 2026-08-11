@@ -1,59 +1,102 @@
 ---
 name: evolution-troubleshooting
-description: Troubleshooting and recovery guide for Evolution API v2.2.3 and WhatsApp integration in TravelHub, including QR code issues and Docker container reloading.
+description: Troubleshooting and recovery guide for Evolution API v2.2.3 and WhatsApp integration in TravelHub, including Baileys Web client version synchronization, ffmpeg installer patches, and Docker container recovery.
 ---
 
-# Evolution API / WhatsApp QR Troubleshooting Skill
+# Evolution API / WhatsApp QR Troubleshooting & Maintenance Skill
 
-Use this skill whenever the user reports issues with the WhatsApp QR code not loading (e.g. 404 Not Found, spinning indefinitely) or Evolution API connection problems.
+Use this skill whenever the user reports issues with the WhatsApp QR code not loading (e.g., stuck on placeholder, 404 Not Found, WebSocket connection errors, or connection failure loops in Baileys).
+
+---
 
 ## 1. Quick Diagnostics & Health Checks
 
-Before taking action, check the system health:
-- Query the Django health-check endpoint (no auth required):
-  `curl -s http://localhost:8000/system/whatsapp/health/<slug>/`
-  - **ok**: QR is ready in Redis cache or generable from Evolution.
-  - **degraded**: Evolution is up but cache is empty (usually regenerates in ~60s via Celery Beat).
-  - **down**: Evolution container is down or credentials are bad.
-  - **not_configured**: Instance is missing, call `EvolutionService.create_instance()`.
-
-## 2. Emergency Recovery Steps
-
-If the QR doesn't appear or the integration is failing:
-
-### A. Check WhatsApp Protocol Version
-Ensure `CONFIG_SESSION_PHONE_VERSION` in the Evolution container is exactly `2.3000.1035194821`:
+### A. Query Django WhatsApp Health Endpoint
+Run from host terminal or container:
 ```bash
-docker exec travelhub_evolution cat /evolution/.env | grep CONFIG_SESSION_PHONE_VERSION
+curl -s http://localhost:8000/system/whatsapp/health/<slug>/
 ```
-If incorrect, update it and restart the container (`docker restart travelhub_evolution`). Wait ~60s for startup.
+- **ok**: QR is cached in Redis or ready to fetch from Evolution.
+- **degraded**: Evolution container is running, but QR cache is empty (will auto-refresh in ~60s via Celery Beat).
+- **down**: Evolution API container is stopped or DB credentials failed.
+- **not_configured**: Instance missing in Evolution API. Create it using `EvolutionService.create_instance()`.
 
-### B. Force QR Cache Refresh
-If the container is running properly but the QR doesn't show in the Django UI, force a refresh:
+### B. Inspect Evolution API Logs
+Check live Baileys socket handshake and connection state:
 ```bash
-docker exec travelhub_web python3 /app/trigger_qr.py
+docker logs travelhub_evolution --tail 30
 ```
-If it succeeds, it will print "Evolution QR cached via HTTP". If it says "Not Found", the instance may need to be recreated via Evolution API (`/instance/create`).
+Look for:
+- `msg: "connected to WA"` -> Baileys socket initialized.
+- `msg: "connection errored"` -> Old/unsupported Baileys WhatsApp client version.
 
-### C. Verify Django Services
-- **Celery Worker**: Check if `travelhub_worker` is crashing or stuck. Run `docker logs travelhub_worker --tail 30` and ensure tasks are processing. A crashed worker means the QR cache never updates.
-- **Celery Beat**: Check if `travelhub_beat` is running. It triggers the `fetch_evolution_qr_task` every 60s.
-- **URL Configuration**: Check that the QR proxy points to `core:evolution_qr_image` (the PNG view) and NOT `core:evolution_qr_proxy` (the Manager UI).
-  ```bash
-  docker exec travelhub_web python3 -c "from django.urls import reverse; print(reverse('core:evolution_qr_image', kwargs={'instance_name':'travelinkeo'}))"
-  ```
+---
 
-## 3. Important Endpoint Changes (Evolution v2.2.3 vs v1)
-- **CORRECT QR Endpoint**: `/instance/connect/<slug>` (Returns `{qrcode: {base64: "..."}}`).
-- **DEPRECATED**: `/instance/qrcode/<slug>/` or `/manager/qr/<slug>/` (Will return 404).
+## 2. Mandatory Repairs & Common Issues
 
-## 4. Deploying Python Fixes (Without full docker build)
-If you need to edit `.py` or `.html` files in Django (`travelhub_web`) to fix an issue, use the included deployment script to sync changes without a 3-minute rebuild:
+### Issue 1: WhatsApp Invalidation (`Connection Failure` / `connection errored`)
+WhatsApp periodically invalidates outdated Web client versions. When invalidated, Baileys logs `Error: Connection Failure` continuously.
+
+**Solution:**
+1. Discover the latest WhatsApp Web client version using Node inside the container:
+   ```bash
+   docker exec travelhub_evolution node -e "const { fetchLatestBaileysVersion } = require('baileys'); fetchLatestBaileysVersion().then(v => console.log('LATEST:', v.version.join('.')));"
+   ```
+2. Update `CONFIG_SESSION_PHONE_VERSION` in both `docker-compose.yml` and `/evolution/.env` inside the container:
+   - File 1: [docker-compose.yml](file:///C:/Users/ARMANDO/travelhub_project/docker-compose.yml) (`CONFIG_SESSION_PHONE_VERSION=2.3000.1043857760`)
+   - File 2: Update `/evolution/.env` inside `travelhub_evolution` container using node/sed.
+3. Restart the container:
+   ```bash
+   docker restart travelhub_evolution
+   ```
+
+### Issue 2: `@ffmpeg-installer` Missing Architecture Error
+When `travelhub_evolution` starts up, `@ffmpeg-installer/ffmpeg` may throw an error if the platform architecture tag does not match Alpine/Linux.
+
+**Solution:**
+Inject dummy native ffmpeg patch:
 ```bash
-bash docs/troubleshooting/deploy_local_changes.sh
+docker exec travelhub_evolution sh -c "cat << 'EOF' > /evolution/node_modules/@ffmpeg-installer/ffmpeg/index.js
+'use strict';
+module.exports = { path: '/usr/bin/ffmpeg', version: '4.x' };
+EOF"
+docker restart travelhub_evolution
 ```
-This script:
-1. Copies changed files via `docker cp`.
-2. Clears `__pycache__`.
-3. Sends `SIGHUP` to the Gunicorn master process to gracefully reload workers.
-*(Note: If you change `models.py` schemas, `urls_system.py`, or `package.json`, you must perform a full rebuild: `docker compose up -d --build web`)*
+
+### Issue 3: Database Authentication Error (`P1000: Authentication failed against database server`)
+If `/evolution/.env` inside the container resets its `DATABASE_CONNECTION_URI` to default placeholder credentials (`user:pass`), Prisma migrations will fail.
+
+**Solution:**
+Verify credentials in `travelhub_evolution_db` environment:
+```bash
+docker exec travelhub_evolution_db env
+```
+If needed, reset the Postgres role password:
+```bash
+docker exec travelhub_evolution_db psql -U evolution -d evolution_v2 -c "ALTER USER evolution WITH PASSWORD 'a1_N8Vvfo-yE0LYJpO6QwNcLCPEsQ8C9N4-uIpC-t3w';"
+```
+And update `DATABASE_CONNECTION_URI` in `/evolution/.env` to match.
+
+---
+
+## 3. Force Cache Refresh & Verification
+
+Once Evolution logs show `connected to WA` without errors:
+1. Verify base64 QR generation via HTTP endpoint:
+   ```bash
+   docker exec travelhub_evolution node -e "const http=require('http'); http.get('http://localhost:8080/instance/connect/travelinkeo', {headers:{apiKey: process.env.AUTHENTICATION_API_KEY}}, r=>{let d=''; r.on('data',c=>d+=c); r.on('end',()=>{const j=JSON.parse(d); console.log('base64 len:', j.base64?j.base64.length:'NONE');});});"
+   ```
+2. Trigger Django QR cache task:
+   ```bash
+   docker exec travelhub_web python manage.py shell -c "from apps.common.tasks import fetch_evolution_qr_task; print('Cached length:', len(fetch_evolution_qr_task('travelinkeo')))"
+   ```
+3. Confirm Redis key presence:
+   ```bash
+   docker exec travelhub_web python manage.py shell -c "from django.core.cache import cache; print('In Cache:', bool(cache.get('evo_qr:travelinkeo')))"
+   ```
+
+---
+
+## 4. Architectural Rules & Best Practices
+- **Do not recreate container without volume persistence**: `evolution_data` and `evolution_db_data` keep instance tokens.
+- **WebSocket Fallback in Django**: Always catch `WebSocketBadStatusException` in `apps/common/tasks/evolution.py` so HTTP fallback generates the QR seamlessly.

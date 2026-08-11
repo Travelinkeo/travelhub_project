@@ -38,28 +38,74 @@ class ConsoleParser:
         ):
             logger.info("ConsoleParser: Detectado formato KIU Raw")
             result = self._parse_kiu_raw(text)
-            result["time_limit"] = self._extract_time_limit(text)
-            return result
+            if result.get("vuelos"):
+                result["time_limit"] = self._extract_time_limit(text)
+                return result
 
         # 2. Detectar Sabre Raw
         # Regex: 1 AV4816K 03DEC...
         sabre_pattern = r"^\s*\d+\s+[A-Z0-9]{2}\s*\d+[A-Z]?\s+\d{2}[A-Z]{3}"
         if re.search(sabre_pattern, text, re.MULTILINE):
             logger.info("ConsoleParser: Detectado formato Sabre Raw")
-            # Nota: Sabre y KIU (patrón 2) son muy similares.
-            # Si KIU no parsea nada, podríamos intentar Sabre, pero por ahora asumimos KIU si coincide.
             result = self._parse_sabre_raw(text)
-            result["time_limit"] = self._extract_time_limit(text)
-            return result
+            if result.get("vuelos"):
+                result["time_limit"] = self._extract_time_limit(text)
+                return result
 
-        # 3. Detectar Amadeus Raw (Placeholder - patrones comunes)
-        # 1  IB6500 J 10DEC 7 MADBOG HK1       1210 1635   346 E 0
-        # (Similar a KIU/Sabre, a veces hay que diferenciar por contexto)
+        # 3. Fallback a IA Neuronal para itinerarios libres, WhatsApp o consolas complejas
+        return self._parse_ai_fallback(text)
+
+    def _parse_ai_fallback(self, text: str) -> dict[str, Any]:
+        """
+        Fallback neuronal mediante IA cuando los patrones de consola rígidos no coinciden.
+        Permite procesar itinerarios copiados de WhatsApp, emails o consolas complejas.
+        """
+        logger.info("🤖 ConsoleParser: Invocando IA Universal para análisis de itinerario libre...")
+        try:
+            from apps.automation.providerchain.fallback_router import fallback_router
+
+            prompt = (
+                "Eres un Analista Experto en GDS. Extrae los tramos/segmentos de vuelo del siguiente itinerario libre o de consola.\n"
+                "Responde ÚNICAMENTE con un JSON con la estructura:\n"
+                "{\n"
+                '  "vuelos": [\n'
+                "    {\n"
+                '      "aerolinea": "AV",\n'
+                '      "numero_vuelo": "AV11",\n'
+                '      "clase": "Y",\n'
+                '      "fecha_salida": "13JUN",\n'
+                '      "origen": "MAD",\n'
+                '      "destino": "BOG",\n'
+                '      "hora_salida": "17:30",\n'
+                '      "hora_llegada": "20:59"\n'
+                "    }\n"
+                "  ]\n"
+                "}\n\n"
+                f"TEXTO DEL ITINERARIO:\n{text}"
+            )
+            res = fallback_router.generate(prompt=prompt, feature="gds_analyzer")
+            if res.success and res.text:
+                import json
+
+                cleaned = re.sub(
+                    r"^```(?:json)?\s*|\s*```$", "", res.text.strip(), flags=re.MULTILINE
+                )
+                parsed = json.loads(cleaned)
+                vuelos = parsed.get("vuelos", [])
+                if vuelos:
+                    logger.info(f"✅ ConsoleParser AI Fallback extrajo {len(vuelos)} vuelos.")
+                    return {
+                        "source_system": "AI_ANALYZER",
+                        "vuelos": vuelos,
+                        "time_limit": self._extract_time_limit(text),
+                    }
+        except Exception as e:
+            logger.error(f"⚠️ ConsoleParser AI Fallback error: {e}")
 
         return {
             "source_system": "UNKNOWN",
             "vuelos": [],
-            "error": "No se pudo detectar un formato de consola conocido.",
+            "error": "No se pudo interpretar el itinerario. Por favor verifique el texto ingresado.",
         }
 
     def _parse_kiu_raw(self, text: str) -> dict[str, Any]:

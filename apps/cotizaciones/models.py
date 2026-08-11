@@ -96,8 +96,72 @@ class Cotizacion(AgenciaMixin, SoftDeleteModel):
         _("Fee de Agencia (Markup)"), max_digits=12, decimal_places=2, default=0
     )
 
-    # Campos de seguimiento
-    fecha_envio = models.DateTimeField(_("Fecha de Envío"), blank=True, null=True)
+    @property
+    def get_fallback_image(self):
+        """Devuelve una imagen HD representativa según el destino o un hash dinámico."""
+        if self.image_url:
+            return self.image_url
+
+        dest_str = f"{self.destino or ''}".lower()
+
+        catalogo_bg = [
+            (
+                ["londres", "london", "big ben", "england", "uk", "lhr", "lgw"],
+                "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=1080&q=80",
+            ),
+            (
+                ["madrid", "espana", "spain", "mad"],
+                "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=1080&q=80",
+            ),
+            (
+                ["paris", "francia", "france", "eiffel", "cdg"],
+                "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1080&q=80",
+            ),
+            (
+                ["cancun", "playa", "caribe", "beach", "cun"],
+                "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1080&q=80",
+            ),
+            (
+                ["miami", "florida", "usa", "mia"],
+                "https://images.unsplash.com/photo-1506966953377-3f9254c870fd?w=1080&q=80",
+            ),
+            (
+                ["istanbul", "estambul", "turquia", "turkey", "ist"],
+                "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=1080&q=80",
+            ),
+            (
+                ["shanghai", "china", "pvg"],
+                "https://images.unsplash.com/photo-1538428494232-9c0d8a3ab396?w=1080&q=80",
+            ),
+            (
+                ["dubai", "emirates", "emiratos", "dxb"],
+                "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1080&q=80",
+            ),
+            (
+                ["roma", "rome", "italia", "italy", "fco"],
+                "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1080&q=80",
+            ),
+            (
+                ["bogota", "colombia", "bog"],
+                "https://images.unsplash.com/photo-1583531352515-8884af319dc1?w=1080&q=80",
+            ),
+            (
+                ["buenos aires", "argentina", "eze"],
+                "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=1080&q=80",
+            ),
+            (
+                ["nueva york", "new york", "nyc", "jfk"],
+                "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=1080&q=80",
+            ),
+        ]
+
+        for kw_list, img_url in catalogo_bg:
+            if any(k in dest_str for k in kw_list):
+                return img_url
+
+        idx = abs(hash(dest_str)) % len(catalogo_bg)
+        return catalogo_bg[idx][1]
+
     fecha_vista = models.DateTimeField(_("Fecha Vista por Cliente"), blank=True, null=True)
     fecha_respuesta = models.DateTimeField(_("Fecha de Respuesta"), blank=True, null=True)
     email_enviado = models.BooleanField(_("Email Enviado"), default=False)

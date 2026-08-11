@@ -1,6 +1,6 @@
 {% load core_tags %}
 <div class="bg-surface-1 border border-border-color rounded-3xl p-8 shadow-sm animate-fade-in-up">
-    
+
     <div class="flex items-center justify-between mb-8">
         <div class="flex items-center gap-3">
             <div class="w-12 h-12 bg-violet-500/15 rounded-2xl flex items-center justify-center">
@@ -17,7 +17,7 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         <!-- Columna Izquierda: El Texto Generado -->
         <div class="lg:col-span-2 space-y-6">
             <div class="prose prose-invert max-w-none text-text-muted leading-relaxed">
@@ -35,7 +35,7 @@
 
         <!-- Columna Derecha: Inspiración y Sugerencias -->
         <div class="space-y-6">
-            
+
             <!-- MOODBOARD: Imágenes Reales de Unsplash -->
             {% if contenido.imagenes_inspiracion %}
             <div class="bg-surface-2 rounded-2xl p-4 border border-border-color">
@@ -83,11 +83,37 @@
             </div>
 
             <!-- Boton de Acción Rápida -->
-            <button class="w-full py-4 bg-surface-2 border-2 border-dashed border-border-color rounded-2xl text-text-muted hover:text-text-main hover:border-violet-500/50 transition-all flex flex-col items-center justify-center gap-1 group">
-                <span class="material-symbols-outlined text-3xl group-hover:scale-110 transition-transform">content_copy</span>
-                <span class="text-xs font-bold">Copiar Contenido</span>
+            <button type="button" data-action="copy-creative-content" class="w-full py-4 bg-surface-2 border-2 border-dashed border-border-color rounded-2xl text-text-muted hover:text-text-main hover:border-violet-500/50 transition-all flex flex-col items-center justify-center gap-1 group cursor-pointer active:scale-95">
+                <span class="material-symbols-outlined text-3xl group-hover:scale-110 transition-transform text-violet-400">content_copy</span>
+                <span class="text-xs font-bold btn-text">Copiar Contenido</span>
             </button>
 
+        </div>
+    </div>
+
+    <!-- BANNER Y FLYER PUBLICITARIO ENSAMBLADO EN TIEMPO REAL -->
+    <div class="mt-8 pt-8 border-t border-border-color">
+        <div class="bg-gradient-to-r from-purple-900/30 to-indigo-900/30 border border-purple-500/20 rounded-3xl p-6 shadow-lg">
+            <div class="flex flex-col md:flex-row items-center gap-6">
+                <div class="w-48 aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl border-2 border-purple-500/40 shrink-0 bg-slate-900 relative">
+                    <img src="{% url 'crm:generate_marketing_flyer' %}?titulo={{ contenido.titulo|urlencode }}&subtitulo={{ contenido.hashtags|join:' '|urlencode }}&bg_url={{ contenido.imagenes_inspiracion.0.url|urlencode }}"
+                         alt="Flyer Promocional" class="w-full h-full object-cover">
+                </div>
+                <div class="flex-1 space-y-3 text-left">
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-500/20 text-purple-300 text-[10px] font-bold rounded-full border border-purple-500/30 uppercase tracking-wider">
+                        ✨ Flyer Diseñado por la IA (1080x1920 HD)
+                    </div>
+                    <h4 class="text-xl font-black text-white">Flyer Publicitario para Instagram Stories & WhatsApp</h4>
+                    <p class="text-xs text-slate-300 leading-relaxed">Hemos ensamblado automáticamente esta imagen promocional en alta resolución lista para publicar. Incluye la fotografía seleccionada, la paleta de color y el logo oficial de la agencia.</p>
+                    <div class="pt-2">
+                        <a href="{% url 'crm:generate_marketing_flyer' %}?titulo={{ contenido.titulo|urlencode }}&subtitulo={{ contenido.hashtags|join:' '|urlencode }}&bg_url={{ contenido.imagenes_inspiracion.0.url|urlencode }}&download=1"
+                           class="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-black text-xs rounded-xl shadow-lg shadow-purple-600/30 transition-all active:scale-95 cursor-pointer">
+                            <span class="material-symbols-outlined text-lg">download</span>
+                            Descargar Flyer Promocional (HD)
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

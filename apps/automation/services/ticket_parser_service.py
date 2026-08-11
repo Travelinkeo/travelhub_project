@@ -323,6 +323,13 @@ class TicketParserService:
                     if raw_file_html:
                         raw_file_html.close()
 
+            if texto and texto.startswith("--- HEADERS START ---"):
+                headers_end = texto.find("--- HEADERS END ---")
+                if headers_end != -1:
+                    header_block = texto[: headers_end + len("--- HEADERS END ---")]
+                    if html_text and not html_text.startswith("--- HEADERS START ---"):
+                        html_text = f"{header_block}\n\n{html_text}"
+
             # 3. 🔥 CACHÉ REDIS: Verificar si ya parseamos texto idéntico
             texto_hash = hashlib.sha256(texto.encode("utf-8", errors="ignore")).hexdigest()
             cache_key = f"parseo_result_{texto_hash}"
@@ -344,103 +351,121 @@ class TicketParserService:
                 except Exception as e:
                     logger.warning(f"No se pudo obtener ruta fisica del archivo: {e}")
 
-                # ⚡ PASO 1: INTENTAR REGEX/GDS LOCAL PRIMERO (Fast-First)
-                try:
-                    logger.info(f" Usando Motor Regex/GDS Local para Boleto {boleto_id}...")
-                    regex_start = time.time()
-                    datos_regex = extract_data_from_text(
-                        texto, html_text=html_text, pdf_path=path_pdf, bypass_cache=bypass_cache
+                # ⚡ PASO 1: SI ES RE-EXTRACCIÓN IA (bypass_cache=True) -> IR DIRECTAMENTE A IA UNIVERSAL
+                if bypass_cache:
+                    logger.info(
+                        f"🧠 [FORCED IA MODE] bypass_cache=True — Invocando directamente IA Universal (Gemini) para Boleto {boleto_id}..."
                     )
-                    regex_duration = time.time() - regex_start
-                    logger.info(f" [PROFILING] Regex parse duration: {regex_duration:.2f}s")
+                    from apps.automation.parsers.ai_universal_parser import UniversalAIParser
 
-                    # Validación de Contrato de Calidad Mínimo para evitar pasar a la IA
-                    if datos_regex and not datos_regex.get("error"):
-                        if datos_regex.get("is_multi_pax"):
-                            tickets_list = datos_regex.get("tickets", [])
-                            has_all_pax = len(tickets_list) > 0 and all(
-                                t.get("NOMBRE_DEL_PASAJERO") or t.get("passenger_name")
-                                for t in tickets_list
-                            )
-                            has_pnr = all(
-                                t.get("CODIGO_RESERVA") or t.get("pnr") or t.get("codigo_reserva")
-                                for t in tickets_list
-                            )
-                            has_flights = all(
-                                len(
-                                    t.get("vuelos", [])
-                                    or t.get("flights", [])
-                                    or t.get("segmentos", [])
+                    datos = UniversalAIParser().parse(texto, pdf_path=path_pdf, bypass_cache=True)
+                    boleto.log_parseo = (
+                        boleto.log_parseo or ""
+                    ) + " | 🔥 Re-extracción IA (Structured Outputs) completada."
+                    boleto.save(update_fields=["log_parseo"])
+
+                # ⚡ PASO 2: SI NO ES RE-EXTRACCIÓN FORZADA -> INTENTAR REGEX/GDS LOCAL PRIMERO
+                if datos is None:
+                    try:
+                        logger.info(f" Usando Motor Regex/GDS Local para Boleto {boleto_id}...")
+                        regex_start = time.time()
+                        datos_regex = extract_data_from_text(
+                            texto, html_text=html_text, pdf_path=path_pdf, bypass_cache=bypass_cache
+                        )
+                        regex_duration = time.time() - regex_start
+                        logger.info(f" [PROFILING] Regex parse duration: {regex_duration:.2f}s")
+
+                        # Validación de Contrato de Calidad Mínimo para evitar pasar a la IA
+                        if datos_regex and not datos_regex.get("error"):
+                            if datos_regex.get("is_multi_pax"):
+                                tickets_list = datos_regex.get("tickets", [])
+                                has_all_pax = len(tickets_list) > 0 and all(
+                                    t.get("NOMBRE_DEL_PASAJERO") or t.get("passenger_name")
+                                    for t in tickets_list
                                 )
-                                > 0
-                                for t in tickets_list
-                            )
-                            has_times = all(
-                                any(
+                                has_pnr = all(
+                                    t.get("CODIGO_RESERVA")
+                                    or t.get("pnr")
+                                    or t.get("codigo_reserva")
+                                    for t in tickets_list
+                                )
+                                has_flights = all(
+                                    len(
+                                        t.get("vuelos", [])
+                                        or t.get("flights", [])
+                                        or t.get("segmentos", [])
+                                    )
+                                    > 0
+                                    for t in tickets_list
+                                )
+                                has_times = all(
+                                    any(
+                                        f.get("hora_salida")
+                                        or f.get("hora_llegada")
+                                        or (
+                                            isinstance(f.get("departure"), dict)
+                                            and f.get("departure").get("time")
+                                        )
+                                        for f in (
+                                            t.get("vuelos", [])
+                                            or t.get("flights", [])
+                                            or t.get("segmentos", [])
+                                        )
+                                    )
+                                    for t in tickets_list
+                                )
+                                is_regex_reliable = (
+                                    has_all_pax and has_pnr and has_flights and has_times
+                                )
+                            else:
+                                has_pax = bool(
+                                    datos_regex.get("passenger_name")
+                                    or datos_regex.get("nombre_pasajero")
+                                )
+                                has_pnr = bool(
+                                    datos_regex.get("pnr")
+                                    or datos_regex.get("codigo_reserva")
+                                    or datos_regex.get("localizador")
+                                )
+                                flights_list = (
+                                    datos_regex.get("segments", [])
+                                    or datos_regex.get("segmentos", [])
+                                    or datos_regex.get("flights", [])
+                                    or datos_regex.get("vuelos", [])
+                                )
+                                has_flights = len(flights_list) > 0
+                                has_times = any(
                                     f.get("hora_salida")
                                     or f.get("hora_llegada")
                                     or (
                                         isinstance(f.get("departure"), dict)
                                         and f.get("departure").get("time")
                                     )
-                                    for f in (
-                                        t.get("vuelos", [])
-                                        or t.get("flights", [])
-                                        or t.get("segmentos", [])
-                                    )
+                                    for f in flights_list
                                 )
-                                for t in tickets_list
-                            )
-                            is_regex_reliable = (
-                                has_all_pax and has_pnr and has_flights and has_times
-                            )
-                        else:
-                            has_pax = bool(
-                                datos_regex.get("passenger_name")
-                                or datos_regex.get("nombre_pasajero")
-                            )
-                            has_pnr = bool(
-                                datos_regex.get("pnr")
-                                or datos_regex.get("codigo_reserva")
-                                or datos_regex.get("localizador")
-                            )
-                            flights_list = (
-                                datos_regex.get("segments", [])
-                                or datos_regex.get("segmentos", [])
-                                or datos_regex.get("flights", [])
-                                or datos_regex.get("vuelos", [])
-                            )
-                            has_flights = len(flights_list) > 0
-                            has_times = any(
-                                f.get("hora_salida")
-                                or f.get("hora_llegada")
-                                or (
-                                    isinstance(f.get("departure"), dict)
-                                    and f.get("departure").get("time")
+                                is_regex_reliable = (
+                                    has_pax and has_pnr and has_flights and has_times
                                 )
-                                for f in flights_list
-                            )
-                            is_regex_reliable = has_pax and has_pnr and has_flights and has_times
 
-                        if is_regex_reliable:
-                            datos = datos_regex
-                            logger.info(
-                                "✅ Extracción exitosa y completa con motor Regex/GDS local."
-                            )
-                            boleto.log_parseo = "Regex/GDS local exitoso (completo)."
-                            boleto.save(update_fields=["log_parseo"])
+                            if is_regex_reliable and not bypass_cache:
+                                datos = datos_regex
+                                logger.info(
+                                    "✅ Extracción exitosa y completa con motor Regex/GDS local."
+                                )
+                                boleto.log_parseo = "Regex/GDS local exitoso (completo)."
+                                boleto.save(update_fields=["log_parseo"])
+                            else:
+                                logger.info(
+                                    "⚠️ Forzando motor IA (bypass_cache=True) o Regex incompleto."
+                                )
                         else:
                             logger.info(
-                                "⚠️ Regex local incompleto o no verificado. Se requiere fallback a IA."
+                                "⚠️ Regex local no pudo parsear el archivo. Se requiere fallback a IA."
                             )
-                    else:
-                        logger.info(
-                            "⚠️ Regex local no pudo parsear el archivo. Se requiere fallback a IA."
-                        )
-                except Exception as e_reg:
-                    logger.error(f" Error en motor de Regex: {e_reg}")
-                    boleto.log_parseo = f"Error en Regex local: {str(e_reg)}. Intentando IA..."
-                    boleto.save(update_fields=["log_parseo"])
+                    except Exception as e_reg:
+                        logger.error(f" Error en motor de Regex: {e_reg}")
+                        boleto.log_parseo = f"Error en Regex local: {str(e_reg)}. Intentando IA..."
+                        boleto.save(update_fields=["log_parseo"])
 
                 # 🧠 PASO 2: FALLBACK A IA (Solo si el regex no fue suficiente o confiable)
                 if datos is None:
@@ -675,7 +700,7 @@ class TicketParserService:
                     from core.tasks import generar_pdf_ticket_async_task
 
                     b_pk = boleto.pk
-                    transaction.on_commit(lambda: safe_delay(generar_pdf_ticket_async_task, b_pk))
+                    safe_delay(generar_pdf_ticket_async_task, b_pk)
                 else:
                     logger.info(
                         f"📄 Celery no disponible — generando PDF síncronamente para Boleto {boleto.pk}..."
@@ -778,24 +803,29 @@ class TicketParserService:
         """_finalize_error."""
         logger.error(f" Error Boleto {boleto.pk}: {error_msg}")
         # Si ya está marcado como REV (Revisión Requerida), lo mantenemos
-        # De lo contrario, marcamos como ERR
-        if boleto.estado_parseo not in (
-            BoletoImportado.EstadoParseo.REVISION_REQUERIDA,
-            BoletoImportado.EstadoParseo.ERROR_PARSEO,
-        ):
-            boleto.estado_parseo = BoletoImportado.EstadoParseo.REVISION_REQUERIDA
-        boleto.log_parseo = _safe_concat_log(boleto.log_parseo, error_msg)
+        # De lo contrario, marcamos como REV por defecto para dar oportunidad de corregir
+        nuevo_estado = (
+            boleto.estado_parseo
+            if boleto.estado_parseo
+            in (
+                BoletoImportado.EstadoParseo.REVISION_REQUERIDA,
+                BoletoImportado.EstadoParseo.ERROR_PARSEO,
+            )
+            else BoletoImportado.EstadoParseo.REVISION_REQUERIDA
+        )
+        log_concatenado = _safe_concat_log(boleto.log_parseo, error_msg)
+
+        # Usar update directo en base de datos para evitar 'An error occurred in the current transaction'
         try:
-            boleto.save(update_fields=["estado_parseo", "log_parseo"])
-        except Exception as e_save:
-            logger.error(f" Error guardando estado de error en boleto {boleto.pk}: {e_save}")
-            try:
+            from django.db import transaction as db_transaction
+
+            with db_transaction.atomic():
                 BoletoImportado.all_objects.filter(pk=boleto.pk).update(
-                    estado_parseo=BoletoImportado.EstadoParseo.ERROR_PARSEO,
-                    log_parseo=str(error_msg)[:200],
+                    estado_parseo=nuevo_estado,
+                    log_parseo=log_concatenado,
                 )
-            except Exception as e_final:
-                logger.error(f"Error final en boleto {boleto.pk}: {e_final}")
+        except Exception as e_final:
+            logger.error(f"Error final registrando log de parseo en boleto {boleto.pk}: {e_final}")
         return None
 
     def _notify_success(self, venta):

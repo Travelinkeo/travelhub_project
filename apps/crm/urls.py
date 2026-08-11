@@ -19,7 +19,13 @@ from .views import (
 )
 from .views.ai_chat_views import GenerateSuggestedReplyView
 from .views.inbox_views import ChatThreadView, InboxSearchView, InboxView, SendMessageView
-from .views.marketing_views import AnalyzeCampaignPromptView, DispatchCampaignView, MarketingHubView
+from .views.marketing_views import (
+    AnalyzeCampaignPromptView,
+    DispatchCampaignView,
+    GenerateMarketingFlyerView,
+    MarketingHubView,
+    SendTestCampaignEmailView,
+)
 
 app_name = "crm"
 
@@ -128,6 +134,16 @@ urlpatterns = [
     path("marketing/", MarketingHubView.as_view(), name="marketing_hub"),
     path("marketing/analyze/", AnalyzeCampaignPromptView.as_view(), name="analyze_campaign"),
     path("marketing/dispatch/", DispatchCampaignView.as_view(), name="dispatch_campaign"),
+    path(
+        "marketing/send-test-email/",
+        SendTestCampaignEmailView.as_view(),
+        name="send_test_campaign_email",
+    ),
+    path(
+        "marketing/generate-flyer/",
+        GenerateMarketingFlyerView.as_view(),
+        name="generate_marketing_flyer",
+    ),
     # --- INBOX OMNICANAL (WA + CRM + IA) ---
     path("inbox/", InboxView.as_view(), name="inbox"),
     path("inbox/search/", InboxSearchView.as_view(), name="inbox_search"),

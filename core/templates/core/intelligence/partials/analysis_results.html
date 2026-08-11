@@ -8,34 +8,32 @@
         boletos: [],
         resumenGDS: { tarifa: 0, impuestos: 0, total: 0 },
         pagadorId: null,
-        fProvPax: 0, // Fee Mayorista POR PASAJERO
-        fIntPax: 0,  // Fee Agencia POR PASAJERO
+        fProvPax: 0,
+        fIntPax: 0,
         subtotal: 0,
         igtf: 0,
         totalFinal: 0,
         btnFotoText: 'DESCARGAR CONFIRMACIÓN',
         btnErpText: 'INYECTAR VENTA AL ERP',
         processing: false,
-        
+
         init() {
             window.addEventListener('set-pagador', (e) => { this.pagadorId = e.detail; });
 
             const rawResponse = JSON.parse(document.getElementById('gds-analysis-data').textContent);
-            
-            // Si la IA devolvió el formato nuevo, usamos 'boletos'. Si es viejo, lo envolvemos.
+
             if (rawResponse.boletos && Array.isArray(rawResponse.boletos)) {
                 this.boletos = rawResponse.boletos;
             } else if (rawResponse.itinerario) {
                 this.boletos = [rawResponse];
             }
 
-            // Consolidar totales del GDS de todos los pasajeros
             this.boletos.forEach(b => {
                 this.resumenGDS.tarifa += this.p(b.tarifa);
                 this.resumenGDS.impuestos += this.p(b.impuestos);
                 this.resumenGDS.total += this.p(b.total);
             });
-            
+
             this.recalc();
         },
 
@@ -49,7 +47,6 @@
         },
 
         recalc() {
-            // El usuario coloca el fee de un pasajero, lo multiplicamos por el número de pasajeros
             const numPax = this.boletos.length || 1;
             const totalFProv = (Number(this.fProvPax) || 0) * numPax;
             const totalFInt = (Number(this.fIntPax) || 0) * numPax;
@@ -59,17 +56,39 @@
             this.totalFinal = this.subtotal + this.igtf;
         },
 
-        fmt(n) { 
+        fmt(n) {
             return (n || 0).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         },
-        
+
+        getVueloTexto(seg) {
+            if (!seg) return '';
+            const num = (seg.numero_vuelo || '').trim();
+            if (num) {
+                const match = num.match(/([A-Z0-9]{2}\s?\d+[A-Z]?)/i);
+                if (match) return match[1].toUpperCase();
+                return num;
+            }
+            return (seg.aerolinea || '').trim();
+        },
+
+        getLogoUrl(seg) {
+            if (!seg) return '';
+            let code = (seg.aerolinea || '').trim().toUpperCase();
+            if (seg.numero_vuelo && (!code || code.length > 3)) {
+                const matchVuelo = (seg.numero_vuelo || '').trim().match(/^[A-Z0-9]{2}/i);
+                if (matchVuelo) code = matchVuelo[0].toUpperCase();
+            }
+            const match = code.match(/^[A-Z0-9]{2}/);
+            if (match) code = match[0];
+            if (!code || code.length !== 2) return '';
+            return '/system/intelligence/gds-analyzer/logo/' + code + '.png';
         }
-     }" 
+     }"
      class="flex flex-col gap-6 animate-slide-up w-full">
-    
+
     <!-- ZONA DE LA FOTO (Captura todos los pasajeros) -->
     <div id="panel-a-capturar" class="space-y-6 bg-[#0a0d12] p-6 rounded-xl border border-gray-800 relative z-10">
-        
+
         <!-- Header de la Agencia en la captura -->
         <div class="flex justify-between items-center border-b border-gray-800 pb-4">
             <!-- Código de reserva movido a la izquierda (antes era TRAVELHUB OBSIDIAN) -->
@@ -120,16 +139,19 @@
                         <template x-for="seg in boleto.itinerario" :key="seg.numero_vuelo">
                             <div class="bg-[#111827] rounded-xl p-6 border border-gray-800 shadow-inner relative overflow-hidden">
                                 <div class="flex justify-between items-center w-full relative z-10">
-                                    <div class="flex flex-col w-1/3">
+                                    <div class="flex flex-col w-1/4 shrink-0">
                                         <span class="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-1">SALIDA</span>
                                         <span class="font-mono font-black text-blue-400 text-2xl leading-none" x-text="seg.hora_salida || '--:--'"></span>
                                         <span class="text-[11px] text-gray-300 font-bold" x-text="seg.origen_ciudad"></span>
                                         <span class="text-[10px] text-gray-500 font-mono" x-text="seg.fecha_salida"></span>
                                     </div>
 
-                                    <div class="flex flex-col items-center justify-center w-1/3 px-2">
-                                        <div class="flex items-center gap-1 text-primary text-[10px] font-black mb-1 p-1 bg-primary/5 rounded border border-primary/10">
-                                            <span x-text="seg.aerolinea + ' ' + seg.numero_vuelo"></span>
+                                    <div class="flex-1 flex flex-col items-center justify-center px-3 z-10">
+                                        <div class="inline-flex items-center gap-3 px-4 py-1.5 bg-[#1f2937] rounded-full border border-gray-700/80 shadow-md text-white text-xs font-mono font-bold mb-1 whitespace-nowrap z-20">
+                                            <template x-if="getLogoUrl(seg)">
+                                                <img :src="getLogoUrl(seg)" class="h-5 max-w-[85px] object-contain shrink-0" @error="$el.style.display='none'" />
+                                            </template>
+                                            <span class="text-blue-400 font-mono font-black text-xs tracking-wider" x-text="getVueloTexto(seg)"></span>
                                         </div>
                                         <div class="relative w-full flex items-center justify-center py-2">
                                             <div class="absolute inset-0 flex items-center"><div class="w-full border-b border-dashed border-gray-700"></div></div>
@@ -137,7 +159,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="flex flex-col w-1/3 text-right">
+                                    <div class="flex flex-col w-1/4 shrink-0 text-right">
                                         <span class="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-1">LLEGADA</span>
                                         <span class="font-mono font-black text-orange-400 text-2xl leading-none" x-text="seg.hora_llegada || '--:--'"></span>
                                         <span class="text-[11px] text-gray-300 font-bold" x-text="seg.destino_ciudad"></span>
@@ -150,7 +172,7 @@
                 </template>
             </div>
         </template>
-    </div> 
+    </div>
 
     <!-- Tarjeta Financiera (Consolidada) -->
     <div class="bg-surface-1 rounded-xl p-6 border-t-4 border-t-primary shadow-lg border border-gray-800">
@@ -158,7 +180,7 @@
             <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest">Resumen Financiero Grupal</h3>
             <span class="text-[10px] font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full border border-primary/20" x-text="boletos.length + ' PASAJERO(S)'"></span>
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="space-y-4 bg-[#111827] p-5 rounded-xl border border-gray-800/50">
                 <div class="flex justify-between items-center text-sm">
@@ -179,7 +201,7 @@
             <!-- Calculadora Interactiva -->
             <div class="p-5 rounded-xl bg-[#0a140e] border border-primary/20 space-y-5">
                 <!-- SELECCIÓN DE PAGADOR (CRM) -->
-                <div class="space-y-3" x-data="{ 
+                <div class="space-y-3" x-data="{
                     search: '', results: [], selected: null, open: false,
                     async find() {
                         if(this.search.length < 3) { this.results = []; return; }
@@ -190,13 +212,13 @@
                     <label class="block text-[10px] uppercase font-black text-primary tracking-widest mb-1">Cliente Pagador de la Reserva</label>
                     <div class="relative">
                         <input type="hidden" id="pagador-id-hidden" :value="pagadorId">
-                        <input type="text" x-model="search" @input.debounce.300ms="find(); open = true" 
+                        <input type="text" x-model="search" @input.debounce.300ms="find(); open = true"
                                placeholder="Buscar pagador (Titular o Empresa)..."
                                class="w-full bg-[#111827] border border-gray-700 rounded-lg py-3 pl-10 pr-4 text-sm text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">search</span>
                         <div x-show="open && results.length > 0" @click.away="open = false" class="absolute z-50 w-full mt-2 bg-[#1f2937] border border-gray-700 rounded-xl shadow-2xl max-h-40 overflow-y-auto">
                             <template x-for="c in results" :key="c.id">
-                                <div @click="selected = c; open = false; search = c.text; $dispatch('set-pagador', c.id)" 
+                                <div @click="selected = c; open = false; search = c.text; $dispatch('set-pagador', c.id)"
                                      class="p-3 hover:bg-primary/10 cursor-pointer border-b border-gray-800 last:border-none">
                                     <span class="text-sm font-bold text-white" x-text="c.text"></span>
                                 </div>
@@ -239,7 +261,7 @@
                 </div>
             </div>
         </div>
-    </div> 
+    </div>
 
     <!-- Acciones -->
     <div class="flex flex-col sm:flex-row gap-4 mt-2">

@@ -170,8 +170,8 @@ def fetch_evolution_qr_task(self, instance_name):
                         logger.info(f"Evolution QR cached via WebSocket for {instance_name}")
                         ws.close()
                         return qr["base64"]
-                except Exception:
-                    pass
+                except Exception as message_err:
+                    logger.debug(f"Error procesando mensaje WebSocket QR: {message_err}")
             ws.close()
         except Exception as ws_err:
             logger.debug(f"WebSocket connection skipped: {ws_err}")

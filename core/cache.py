@@ -80,6 +80,47 @@ def invalidate_cache_pattern(pattern):
             if cursor == 0:
                 break
         logger.info(f"Invalidated {deleted} cache keys matching pattern: {pattern}")
-    except ImportError:
-        # Si no está Redis, limpiar todo el caché
-        cache.clear()
+    except Exception as e:
+        logger.warning(f"No se pudo invalidar caché por patrón ({pattern}): {e}")
+        try:
+            cache.clear()
+        except Exception:
+            pass
+
+
+def invalidate_cache(key_pattern):
+    """Invalida caché por patrón de clave (alias de compatibilidad)"""
+    return invalidate_cache_pattern(key_pattern)
+
+
+def cache_queryset(timeout=3600, key_prefix=""):
+    """
+    Decorator para cachear resultados de querysets o funciones complejas.
+
+    Args:
+        timeout: Tiempo en segundos (default: 1 hora)
+        key_prefix: Prefijo para la clave de caché
+    """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            cache_key = f"{key_prefix}:{func.__name__}"
+            if args:
+                cache_key += f":{':'.join(str(arg) for arg in args[1:])}"
+            if kwargs:
+                cache_key += f":{':'.join(f'{k}={v}' for k, v in sorted(kwargs.items()))}"
+
+            result = cache.get(cache_key)
+            if result is not None:
+                logger.debug(f"Cache HIT: {cache_key}")
+                return result
+
+            logger.debug(f"Cache MISS: {cache_key}")
+            result = func(*args, **kwargs)
+            cache.set(cache_key, result, timeout)
+            return result
+
+        return wrapper
+
+    return decorator

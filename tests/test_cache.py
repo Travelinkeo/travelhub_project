@@ -2,7 +2,7 @@
 
 from django.core.cache import cache
 
-from core.cache_utils import cache_queryset, invalidate_cache
+from core.cache import cache_queryset, invalidate_cache
 
 
 class TestCacheUtils:

@@ -43,8 +43,8 @@ class GDSAnalysisAjaxView(LoginRequiredMixin, View):
                         or payload.get("text")
                     )
                     gds_type = payload.get("gds_type", gds_type)
-                except Exception:
-                    pass
+                except Exception as parse_err:
+                    logger.debug("No se pudo decodificar JSON en body de la petición GDS: %s", parse_err)
 
             if not terminal_text:
                 return JsonResponse(

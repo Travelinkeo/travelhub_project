@@ -8,13 +8,12 @@
 # en lugar de realizar importaciones directas desde sub-módulos internos.
 # ==============================================================================
 
-# --- Multi-Tenancy & Context ---
-from core.cache import cache_api_response
-
 # --- Performance & Caching ---
-from core.cache_utils import (
+from core.cache import (
+    cache_api_response,
     cache_queryset,
     invalidate_cache,
+    invalidate_cache_pattern,
 )
 from core.dashboard_stats import get_dashboard_stats
 

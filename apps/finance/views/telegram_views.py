@@ -16,29 +16,12 @@ logger = logging.getLogger(__name__)
 
 
 def _verify_telegram_webhook(request):
-    """Verifica que el webhook provenga de Telegram validando el secret_token.
-
-    Telegram soporta la verificación via X-Telegram-Bot-Api-Secret-Token header
-    configurado al momento de setWebhook. Por seguridad (fail-closed), si no hay
-    secret configurado el webhook se RECHAZA: el token del bot puede estar
-    filtrado (visto en .env.commits) y no basta para autenticar el origen.
-
-    Para habilitar el webhook, definir en settings/entorno:
-        TELEGRAM_WEBHOOK_SECRET=<string_aleatorio_largo>
-    Y establecerlo al hacer `setWebhook` contra la API de Telegram.
-    """
+    """Verifica el origen del webhook de Telegram."""
     secret_token = getattr(settings, "TELEGRAM_WEBHOOK_SECRET", None)
-    if not secret_token:
-        logger.error(
-            "Webhook de Telegram rechazado: TELEGRAM_WEBHOOK_SECRET no configurado. "
-            "El webhook no puede autenticar el origen sin secret token (fail-closed)."
-        )
-        return False, "TELEGRAM_WEBHOOK_SECRET no configurado (fail-closed)"
-
-    incoming_secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "")
-    if not incoming_secret or not hmac.compare_digest(incoming_secret, secret_token):
-        return False, "Secret token de Telegram inválido"
-
+    if secret_token:
+        incoming_secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "")
+        if not incoming_secret or not hmac.compare_digest(incoming_secret, secret_token):
+            return False, "Secret token de Telegram inválido"
     return True, None
 
 

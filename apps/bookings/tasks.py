@@ -4,6 +4,7 @@ import os
 
 import requests
 from celery import shared_task
+from django.core.cache import cache
 
 from apps.common.utils.celery_utils import idempotent_task, tenant_task
 
@@ -621,162 +622,159 @@ def generar_pdf_ticket_async_task(boleto_id, **kwargs):
         logger.error(f" Boleto {boleto_id} no encontrado para generar PDF.")
         return f"Boleto {boleto_id} no encontrado."
 
-    if boleto.archivo_pdf_generado and not kwargs.get("force_notification"):
-        logger.info(f" El boleto {boleto_id} ya tiene PDF generado. Omitiendo.")
-        return f"PDF ya generado para boleto {boleto_id}."
+    fname = (
+        os.path.basename(boleto.archivo_pdf_generado.name)
+        if boleto.archivo_pdf_generado
+        else f"Boleto_{boleto.pk}.pdf"
+    )
 
-    if not boleto.datos_parseados:
-        logger.warning(
-            f"⚠️ El boleto {boleto_id} no tiene datos parseados. No se puede generar PDF."
-        )
-        return f"Sin datos parseados para boleto {boleto_id}."
-
-    try:
-        logger.info(f" Generando TKT PDF asíncrono para Boleto {boleto.pk}")
-        pdf_start = time.time()
-        datos_norm = DataNormalizationService.normalize_ticket_data(boleto.datos_parseados)
-        pdf_bytes, fname = PdfGenerationService.generate_ticket(
-            datos_norm, agencia_obj=boleto.agencia, boleto_obj=boleto
-        )
-        pdf_duration = time.time() - pdf_start
-        logger.info(f" [PROFILING] PDF Generation duration (asíncrono): {pdf_duration:.2f}s")
-
-        if pdf_bytes and len(pdf_bytes) > 100:
-            boleto.archivo_pdf_generado.save(fname, ContentFile(pdf_bytes), save=True)
-            logger.info(f" PDF guardado (asíncrono): {fname} ({len(pdf_bytes)} bytes)")
-
-            if boleto.estado_parseo == BoletoImportado.EstadoParseo.ERROR_PARSEO:
-                es_parcial = bool(datos_norm.get("_requiere_revision", False))
-                boleto.estado_parseo = (
-                    BoletoImportado.EstadoParseo.REVISION_REQUERIDA
-                    if es_parcial
-                    else BoletoImportado.EstadoParseo.COMPLETADO
-                )
-                boleto.save(update_fields=["estado_parseo"])
-
-            # 🚀 ENVIAR NOTIFICACIONES TELEGRAM Y WHATSAPP AUTOMÁTICAMENTE (Con Lock de Idempotencia)
-            notif_lock_key = f"notif_sent_boleto_{boleto.pk}"
-            if cache.add(notif_lock_key, "1", timeout=300) or kwargs.get("force_notification"):
-                try:
-                    agencia = boleto.agencia or (
-                        boleto.venta_asociada.agencia if boleto.venta_asociada else None
-                    )
-                    pnr = boleto.localizador_pnr or "N/A"
-                    pasajero = (
-                        boleto.nombre_pasajero_procesado
-                        or boleto.nombre_pasajero_completo
-                        or "Pasajero"
-                    )
-                    caption = (
-                        f"✈️ <b>Boleto Confirmado</b>\n\n"
-                        f"👤 <b>Pasajero:</b> {pasajero}\n"
-                        f"📌 <b>PNR:</b> {pnr}\n"
-                        f"🎟️ <b>Boleto:</b> {boleto.numero_boleto or 'N/A'}\n"
-                        f"🏢 <b>Agencia:</b> {agencia.nombre if agencia else 'TravelHub'}"
-                    )
-
-                    # 1. Dispatch Telegram Notification
-                    from apps.common.tasks.telegram_tasks import send_telegram_document_task
-
-                    if hasattr(boleto.archivo_pdf_generado, "path") and os.path.exists(
-                        boleto.archivo_pdf_generado.path
-                    ):
-                        pdf_path = boleto.archivo_pdf_generado.path
-                    else:
-                        pdf_path = boleto.archivo_pdf_generado.url
-
-                    send_telegram_document_task.delay(
-                        file_path=pdf_path,
-                        caption=caption,
-                        agencia_id=agencia.id if agencia else None,
-                    )
-                    logger.info(f"📲 Notificación de Telegram encolada para Boleto {boleto.pk}")
-
-                    # 2. Dispatch WhatsApp Notification
-                    # Destino primario: cliente (si tiene teléfono registrado)
-                    # Destino de agencia: agencia.whatsapp (siempre enviar a la agencia)
-                    cliente = (
-                        getattr(boleto.venta_asociada, "cliente", None)
-                        if boleto.venta_asociada
-                        else None
-                    )
-                    telefono_cliente = (
-                        getattr(cliente, "telefono_principal", None) if cliente else None
-                    )
-                    if not telefono_cliente:
-                        telefono_cliente = (
-                            getattr(cliente, "telefono_secundario", None) if cliente else None
-                        )
-
-                    # Número de la agencia para recibir el PDF del boleto confirmado
-                    telefono_agencia = getattr(agencia, "whatsapp", None) if agencia else None
-
-                    ws_caption = f"✈️ *Boleto Confirmado* — {pasajero}\n📌 PNR: {pnr}\n🎟️ N° Boleto: {boleto.numero_boleto or 'N/A'}"
-                    try:
-                        from apps.communications.services.whatsapp_service import WhatsAppService
-
-                        pdf_url = boleto.archivo_pdf_generado.url
-
-                        if agencia and telefono_agencia:
-                            ws = WhatsAppService(agencia_id=agencia.id)
-                            ws.send_document(
-                                phone_number=telefono_agencia,
-                                document_url_or_base64=pdf_url,
-                                filename=fname,
-                                caption=ws_caption,
-                            )
-                            logger.info(
-                                f"💬 PDF enviado por WhatsApp a agencia ({telefono_agencia}) para Boleto {boleto.pk}"
-                            )
-
-                        if telefono_cliente and agencia and telefono_cliente != telefono_agencia:
-                            ws = WhatsAppService(agencia_id=agencia.id)
-                            ws.send_document(
-                                phone_number=telefono_cliente,
-                                document_url_or_base64=pdf_url,
-                                filename=fname,
-                                caption=f"Estimado/a {pasajero}, adjuntamos su boleto electrónico PNR {pnr}.",
-                            )
-                            logger.info(
-                                f"💬 PDF enviado por WhatsApp a cliente ({telefono_cliente}) para Boleto {boleto.pk}"
-                            )
-                    except Exception as e_ws:
-                        logger.error(
-                            f"⚠️ Error enviando PDF por WhatsApp para Boleto {boleto.pk}: {e_ws}"
-                        )
-                except Exception as e_notif:
-                    logger.error(
-                        f"⚠️ Error enviando notificaciones automáticas de Telegram/WhatsApp: {e_notif}"
-                    )
-
-            return f"PDF generado y guardado para boleto {boleto_id}."
-        else:
-            # 🔑 PDF vacío — marcar como ERROR para que el frontend salga del bucle de polling
+    if not boleto.archivo_pdf_generado:
+        if not boleto.datos_parseados:
             logger.warning(
-                f"⚠️ PDF generado vacío o muy pequeño ({len(pdf_bytes) if pdf_bytes else 0} bytes). "
-                f"Marcando boleto {boleto_id} como ERROR para que la UI muestre botón de reintento."
+                f"⚠️ El boleto {boleto_id} no tiene datos parseados. No se puede generar PDF."
             )
+            return f"Sin datos parseados para boleto {boleto_id}."
+
+        try:
+            logger.info(f" Generando TKT PDF asíncrono para Boleto {boleto.pk}")
+            pdf_start = time.time()
+            datos_norm = DataNormalizationService.normalize_ticket_data(boleto.datos_parseados)
+            pdf_bytes, fname = PdfGenerationService.generate_ticket(
+                datos_norm, agencia_obj=boleto.agencia, boleto_obj=boleto
+            )
+            pdf_duration = time.time() - pdf_start
+            logger.info(f" [PROFILING] PDF Generation duration (asíncrono): {pdf_duration:.2f}s")
+
+            if pdf_bytes and len(pdf_bytes) > 100:
+                boleto.archivo_pdf_generado.save(fname, ContentFile(pdf_bytes), save=True)
+                logger.info(f" PDF guardado (asíncrono): {fname} ({len(pdf_bytes)} bytes)")
+
+                if boleto.estado_parseo == BoletoImportado.EstadoParseo.ERROR_PARSEO:
+                    es_parcial = bool(datos_norm.get("_requiere_revision", False))
+                    boleto.estado_parseo = (
+                        BoletoImportado.EstadoParseo.REVISION_REQUERIDA
+                        if es_parcial
+                        else BoletoImportado.EstadoParseo.COMPLETADO
+                    )
+                    boleto.save(update_fields=["estado_parseo"])
+            else:
+                logger.warning(
+                    f"⚠️ PDF generado vacío o muy pequeño ({len(pdf_bytes) if pdf_bytes else 0} bytes). "
+                    f"Marcando boleto {boleto_id} como ERROR para que la UI muestre botón de reintento."
+                )
+                try:
+                    BoletoImportado.objects.filter(pk=boleto_id).update(
+                        estado_parseo=BoletoImportado.EstadoParseo.ERROR_PARSEO,
+                        log_parseo=f"PDF vacío generado ({len(pdf_bytes) if pdf_bytes else 0} bytes). Usa Reintentar.",
+                    )
+                except Exception as e_upd:
+                    logger.error(f"No se pudo marcar boleto {boleto_id} como ERR: {e_upd}")
+                return f"PDF vacío generado para boleto {boleto_id}."
+        except Exception as e:
+            logger.exception(f"❌ Error en tarea asíncrona de PDF para Boleto {boleto_id}: {e}")
             try:
                 BoletoImportado.objects.filter(pk=boleto_id).update(
                     estado_parseo=BoletoImportado.EstadoParseo.ERROR_PARSEO,
-                    log_parseo=f"PDF vacío generado ({len(pdf_bytes) if pdf_bytes else 0} bytes). Usa Reintentar.",
+                    log_parseo=f"Error en generación de PDF: {str(e)}",
                 )
-            except Exception as e_upd:
-                logger.error(f"No se pudo marcar boleto {boleto_id} como ERR: {e_upd}")
-            return f"PDF vacío generado para boleto {boleto_id}."
-    except Exception as e:
-        logger.exception(f"❌ Error en tarea asíncrona de PDF para Boleto {boleto_id}: {e}")
+            except Exception as e_inner:
+                logger.error(
+                    f"No se pudo actualizar estado_parseo a ERR para boleto {boleto_id}: {e_inner}"
+                )
+            raise e
+
+    # 🚀 ENVIAR NOTIFICACIONES TELEGRAM Y WHATSAPP AUTOMÁTICAMENTE (Con Lock de Idempotencia)
+    notif_lock_key = f"notif_sent_boleto_{boleto.pk}"
+    if cache.add(notif_lock_key, "1", timeout=300) or kwargs.get("force_notification"):
         try:
-            BoletoImportado.objects.filter(pk=boleto_id).update(
-                node_code="",
-                estado_parseo=BoletoImportado.EstadoParseo.ERROR_PARSEO,
-                log_parseo=f"Error en generación de PDF: {str(e)}",
+            agencia = boleto.agencia or (
+                boleto.venta_asociada.agencia if boleto.venta_asociada else None
             )
-        except Exception as e_inner:
+            pnr = boleto.localizador_pnr or "N/A"
+            pasajero = (
+                boleto.nombre_pasajero_procesado
+                or boleto.nombre_pasajero_completo
+                or "Pasajero"
+            )
+            caption = (
+                f"✈️ <b>Boleto Confirmado</b>\n\n"
+                f"👤 <b>Pasajero:</b> {pasajero}\n"
+                f"📌 <b>PNR:</b> {pnr}\n"
+                f"🎟️ <b>Boleto:</b> {boleto.numero_boleto or 'N/A'}\n"
+                f"🏢 <b>Agencia:</b> {agencia.nombre if agencia else 'TravelHub'}"
+            )
+
+            # 1. Dispatch Telegram Notification
+            from apps.common.tasks.telegram_tasks import send_telegram_document_task
+
+            if hasattr(boleto.archivo_pdf_generado, "path") and os.path.exists(
+                boleto.archivo_pdf_generado.path
+            ):
+                pdf_path = boleto.archivo_pdf_generado.path
+            else:
+                pdf_path = boleto.archivo_pdf_generado.url
+
+            send_telegram_document_task.delay(
+                file_path=pdf_path,
+                caption=caption,
+                agencia_id=agencia.id if agencia else None,
+            )
+            logger.info(f"📲 Notificación de Telegram encolada para Boleto {boleto.pk}")
+
+            # 2. Dispatch WhatsApp Notification
+            cliente = (
+                getattr(boleto.venta_asociada, "cliente", None)
+                if boleto.venta_asociada
+                else None
+            )
+            telefono_cliente = (
+                getattr(cliente, "telefono_principal", None) if cliente else None
+            )
+            if not telefono_cliente:
+                telefono_cliente = (
+                    getattr(cliente, "telefono_secundario", None) if cliente else None
+                )
+
+            telefono_agencia = getattr(agencia, "whatsapp", None) if agencia else None
+            ws_caption = f"✈️ *Boleto Confirmado* — {pasajero}\n📌 PNR: {pnr}\n🎟️ N° Boleto: {boleto.numero_boleto or 'N/A'}"
+            try:
+                from apps.communications.services.whatsapp_service import WhatsAppService
+
+                pdf_url = boleto.archivo_pdf_generado.url
+
+                if agencia and telefono_agencia:
+                    ws = WhatsAppService(agencia_id=agencia.id)
+                    ws.send_document(
+                        phone_number=telefono_agencia,
+                        document_url_or_base64=pdf_url,
+                        filename=fname,
+                        caption=ws_caption,
+                    )
+                    logger.info(
+                        f"💬 PDF enviado por WhatsApp a agencia ({telefono_agencia}) para Boleto {boleto.pk}"
+                    )
+
+                if telefono_cliente and agencia and telefono_cliente != telefono_agencia:
+                    ws = WhatsAppService(agencia_id=agencia.id)
+                    ws.send_document(
+                        phone_number=telefono_cliente,
+                        document_url_or_base64=pdf_url,
+                        filename=fname,
+                        caption=f"Estimado/a {pasajero}, adjuntamos su boleto electrónico PNR {pnr}.",
+                    )
+                    logger.info(
+                        f"💬 PDF enviado por WhatsApp a cliente ({telefono_cliente}) para Boleto {boleto.pk}"
+                    )
+            except Exception as e_ws:
+                logger.error(
+                    f"⚠️ Error enviando PDF por WhatsApp para Boleto {boleto.pk}: {e_ws}"
+                )
+        except Exception as e_notif:
             logger.error(
-                f"No se pudo actualizar estado_parseo a ERR para boleto {boleto_id}: {e_inner}"
+                f"⚠️ Error enviando notificaciones automáticas de Telegram/WhatsApp: {e_notif}"
             )
-        raise e
+
+    return f"PDF procesado y notificado para boleto {boleto_id}."
 
 
 @shared_task(queue="celery", time_limit=300)

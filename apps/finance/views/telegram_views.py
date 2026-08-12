@@ -173,12 +173,21 @@ class TelegramBotWebhookView(View):
         try:
             from apps.automation.services.ai_agent import TravelHubAgent
             from apps.common.tasks import send_telegram_task
-            from core.models import Agencia
+            from core.api import agency_context
+            from core.models import Agencia, AgenciaConfiguracion
 
-            agencia = Agencia.objects.first()
-            agent = TravelHubAgent(agency=agencia)
+            str_chat = str(chat_id)
+            agencia = Agencia.objects.filter(configuracion__telegram_chat_id=str_chat).first()
+            if not agencia:
+                agencia = (
+                    Agencia.objects.filter(nombre__icontains="Travelinkeo").first()
+                    or Agencia.objects.first()
+                )
 
-            response_text = agent.process_query(user_text)
+            with agency_context(agencia):
+                agent = TravelHubAgent(agency=agencia)
+                response_text = agent.process_query(user_text)
+
             formatted_response = self._clean_telegram_html(response_text)
 
             send_telegram_task.delay(
@@ -186,7 +195,7 @@ class TelegramBotWebhookView(View):
                 chat_id=chat_id,
                 parse_mode="HTML"
             )
-            return JsonResponse({"status": "processed_by_brain", "chat_id": chat_id})
+            return JsonResponse({"status": "processed_by_brain", "chat_id": chat_id, "agencia": agencia.nombre if agencia else None})
         except Exception as e:
             logger.error(f"Error procesando mensaje de Telegram con Brain Assistant: {e}")
             from apps.common.tasks import send_telegram_task

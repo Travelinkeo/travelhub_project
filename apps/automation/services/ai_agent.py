@@ -28,6 +28,15 @@ class TravelHubAgent:
     def __init__(self, agency=None):
         """__init__."""
         from apps.automation.services.ai_engine import get_gemini_api_key
+        from core.models import Agencia
+
+        if not agency:
+            agency = (
+                Agencia.objects.filter(nombre__icontains="Travelinkeo").first()
+                or Agencia.objects.first()
+            )
+
+        self.agency = agency
 
         api_key = get_gemini_api_key(agency)
         if not api_key:
@@ -65,9 +74,11 @@ class TravelHubAgent:
 
     def _get_system_prompt(self) -> str:
         """_get_system_prompt."""
-        return """
-        Usted es el Agente Inteligente de TravelHub, el cerebro contable y operativo de Travelinkeo.
+        nombre_agencia = self.agency.nombre if self.agency else "Travelinkeo"
+        return f"""
+        Usted es el Agente Inteligente de TravelHub, el cerebro contable y operativo de la agencia {nombre_agencia}.
         Su misión es ayudar a los agentes de viajes y contadores a gestionar la agencia de forma eficiente.
+        Usted está sirviendo a la agencia '{nombre_agencia}'.
 
         USTED TIENE ACCESO A DATOS REALES:
         - Puede consultar estadísticas de ventas.
@@ -86,17 +97,11 @@ class TravelHubAgent:
         - Puede verificar requisitos de visa, pasaporte y vacunas entre dos países usando 'get_travel_requirements'.
 
         REGLAS CRÍTICAS DE COMPORTAMIENTO Y TONO:
-        1. TONO OBLIGATORIO: Su tono debe ser estrictamente formal, profesional, sobrio y neutro.
-        2. TRATO FORMAL: Debe dirigirse al usuario únicamente con el trato de "usted" (por ejemplo: "usted necesita", "su pasaporte", "consulte"). Está ABSOLUTAMENTE PROHIBIDO tutear al usuario.
-        3. SIN COLOQUIALISMOS NI REGIONALISMOS: NUNCA utilice palabras coloquiales, modismos, expresiones informales o regionalismos (como "epa", "chévere", "mi pana", "brutal", "hola amigo", "ojo", etc.).
-        4. Si se le pregunta por el flujo de dinero general, utilice 'get_cash_flow_summary' o 'get_cashflow_forecast'.
-        5. Si le solicitan analizar por qué un reporte de proveedor no coincide, utilice 'get_reconciliation_summary' y luego 'get_reconciliation_discrepancies' para boletos específicos.
-        6. Para KPIs rápidos de utilidad y ventas del mes, utilice 'get_financial_kpis'.
-        7. Si le solicitan escribir un artículo para el blog, genere el contenido en formato Markdown y guárdelo utilizando 'generate_cms_content'.
-        8. Si le solicitan un post para redes sociales o promocionar un hotel, utilice 'generate_marketing_copy'.
-        9. Si le solicitan codificar o decodificar un aeropuerto, buscar aeropuertos cercanos, o verificar visados y vacunas requeridos, utilice las herramientas correspondientes ('encode_iata_location', 'decode_iata_code', 'find_nearest_airports', 'get_travel_requirements').
-        10. Si las herramientas no encuentran datos, complementa con tu conocimiento general (por ejemplo, códigos IATA de ciudades conocidas). Siempre indica cuándo la información viene de la base de datos y cuándo de tu conocimiento general.
-        11. Utilice Markdown para estructurar sus respuestas (especialmente tablas y listas).
+        1. TONO OBLIGATORIO: Su tono debe ser strictly formal, profesional, sobrio y neutro.
+        2. TRATO FORMAL: Debe dirigirse al usuario únicamente con el trato de "usted". Está ABSOLUTAMENTE PROHIBIDO tutear al usuario.
+        3. SIN COLOQUIALISMOS NI REGIONALISMOS: NUNCA utilice palabras coloquiales o modismos.
+        4. Si le preguntan por ventas, boletos emitidos, clientes o finanzas, SIEMPRE ejecute la herramienta adecuada ('get_sales_stats', 'get_financial_kpis', etc.).
+        5. Utilice Markdown para estructurar sus respuestas.
         """
 
     def process_query(self, user_message: str):
@@ -104,24 +109,28 @@ class TravelHubAgent:
         Procesa una consulta del usuario usando Gemini con function calling.
         """
         try:
+            from core.api import agency_context
+
             types = _get_genai_types()
             self.history.append({"role": "user", "parts": [{"text": user_message}]})
 
-            response = self.client.models.generate_content(
-                model=self.model_name,
-                contents=self.history,
-                config=types.GenerateContentConfig(
-                    system_instruction=self._system_prompt,
-                    tools=self.tools,
-                    automatic_function_calling=types.AutomaticFunctionCallingConfig(
-                        maximum_remote_calls=10
+            with agency_context(self.agency):
+                response = self.client.models.generate_content(
+                    model=self.model_name,
+                    contents=self.history,
+                    config=types.GenerateContentConfig(
+                        system_instruction=self._system_prompt,
+                        tools=self.tools,
+                        automatic_function_calling=types.AutomaticFunctionCallingConfig(
+                            maximum_remote_calls=10
+                        ),
                     ),
-                ),
-            )
+                )
 
-            reply = response.text
-            self.history.append({"role": "model", "parts": [{"text": reply}]})
-            return reply
+            if response and response.text:
+                self.history.append({"role": "model", "parts": [{"text": response.text}]})
+                return response.text
+            return "No pude obtener una respuesta."
         except Exception as e:
-            logger.error(f"Error en TravelHubAgent: {str(e)}", exc_info=True)
-            return f"Disculpe, ocurrió un error técnico al procesar su solicitud: {str(e)}"
+            logger.error(f"Error procesando consulta en TravelHubAgent: {e}")
+            return f"Ocurrió un error consultando la Inteligencia Artificial: {str(e)}"

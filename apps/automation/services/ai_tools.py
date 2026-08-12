@@ -40,7 +40,7 @@ class AgentTools:
             stats = Venta.objects.filter(agencia=agencia, fecha_venta__gte=since).aggregate(
                 total=Sum("total_venta"),
                 cantidad=Count("id_venta"),
-                utilidad=Sum("utilidad_estimada"),
+                utilidad=Sum("margen_estimado"),
             )
 
             result = {

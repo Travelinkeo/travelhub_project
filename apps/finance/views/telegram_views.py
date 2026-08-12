@@ -67,7 +67,10 @@ class TelegramBotWebhookView(View):
 
         callback_query = payload.get("callback_query")
         if not callback_query:
-            # Es una actualización normal de Telegram (no callback_query), la ignoramos de forma exitosa
+            # Procesar mensajes de chat entrantes con Brain Assistant (TravelHubAgent)
+            incoming_message = payload.get("message")
+            if incoming_message:
+                return self._handle_brain_telegram_message(incoming_message)
             return JsonResponse({"status": "ignored"})
 
         query_id = callback_query.get("id")
@@ -170,3 +173,54 @@ class TelegramBotWebhookView(View):
         from apps.common.tasks import edit_telegram_message_task
 
         edit_telegram_message_task.delay(bot_token, chat_id, message_id, text)
+
+    def _handle_brain_telegram_message(self, message: dict) -> JsonResponse:
+        """
+        Procesa mensajes de texto entrantes de Telegram utilizando Brain Assistant (TravelHubAgent).
+        """
+        chat_id = message.get("chat", {}).get("id")
+        user_text = message.get("text") or message.get("caption") or ""
+
+        if not chat_id:
+            return JsonResponse({"status": "ignored_no_chat_id"})
+
+        if not user_text:
+            return JsonResponse({"status": "no_text_content"})
+
+        try:
+            from apps.automation.services.ai_agent import TravelHubAgent
+            from apps.common.tasks import send_telegram_task
+            from core.models import Agencia
+
+            agencia = Agencia.objects.first()
+            agent = TravelHubAgent(agency=agencia)
+
+            response_text = agent.process_query(user_text)
+            formatted_response = self._clean_telegram_html(response_text)
+
+            send_telegram_task.delay(
+                message=formatted_response,
+                chat_id=chat_id,
+                parse_mode="HTML"
+            )
+            return JsonResponse({"status": "processed_by_brain", "chat_id": chat_id})
+        except Exception as e:
+            logger.error(f"Error procesando mensaje de Telegram con Brain Assistant: {e}")
+            from apps.common.tasks import send_telegram_task
+            send_telegram_task.delay(
+                message=f"⚠️ <b>Brain Assistant:</b> Ocurrió un error al procesar tu solicitud: {html.escape(str(e))}",
+                chat_id=chat_id,
+                parse_mode="HTML"
+            )
+            return JsonResponse({"error": str(e)}, status=500)
+
+    def _clean_telegram_html(self, text: str) -> str:
+        """Limpia el texto convirtiendo markdown básico a HTML compatible con Telegram"""
+        if not text:
+            return ""
+        import re
+
+        clean = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", text)
+        clean = re.sub(r"\*(.*?)\*", r"<i>\1</i>", clean)
+        clean = re.sub(r"`(.*?)`", r"<code>\1</code>", clean)
+        return clean

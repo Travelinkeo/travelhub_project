@@ -1,0 +1,11 @@
+DD25AUG/330
+para ver los dias despues
+
+
+*AV79/19OCTCCS-COLMENAREZ/ULISES
+
+
+SRDOCS AW HK1/P/VE/058104156/VE/17MAR79/M/15MAY17/DAVILA/JUAN/CARLOS/P1
+
+
+SRDOCS AW HK1(constante)/P(pasaporte)/VE(nacionalidad del pasaporte)/058104156(número de pasaporte)/VE(nacionalidad del pasajero)/17MAR79(fecha de nacimiento /M(genero)/15MAY17(fecha de expiración del pasaporte)/DAVILA(primer apellido)/JUAN(primer nombre)/CARLOS(segundo nombre)/P1(numero del pasajero)

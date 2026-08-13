@@ -58,6 +58,25 @@ debug_*.py
 temp_*.py
 *.out.txt
 showmig.txt
+
+# Large documentation assets / GDS raw binaries
+docs/manuales_gds/**/*.zip
+docs/manuales_gds/**/*.pptx
+docs/manuales_gds/**/*.mp4
+docs/manuales_gds/**/*.pdf
+docs/manuales_gds/**/*.jpg
+docs/manuales_gds/**/*.jpeg
+docs/manuales_gds/**/*.png
+docs/manuales_gds/**/*.doc
+docs/manuales_gds/**/*.docx
+docs/manuales_gds/**/*.xlsx
+docs/manuales_gds/*.zip
+docs/manuales_gds/*.pptx
+docs/manuales_gds/*.mp4
+docs/manuales_gds/*.jpg
+docs/manuales_gds/*.png
+docs/manuales_gds/*.doc
+docs/manuales_gds/*.xlsx
 makemig_out.txt
 final_prod_out.txt
 db_check_out.txt

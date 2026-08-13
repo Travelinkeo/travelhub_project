@@ -2,8 +2,8 @@
 
 import pytest
 
+from apps.automation.parsers.amadeus_parser import AmadeusParser
 from apps.automation.parsers.base_parser import ParsedTicketData
-from apps.automation.parsers.legacy.amadeus_parser import AmadeusParser
 
 
 @pytest.fixture

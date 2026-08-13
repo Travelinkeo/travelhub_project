@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
+from apps.automation.parsers.amadeus_parser import AmadeusParser
 from apps.automation.parsers.base_parser import ParsedTicketData
-from apps.automation.parsers.legacy.amadeus_parser import AmadeusParser
 
 # Ticket Amadeus completo y bien formateado que puede parsear por Regex
 SAMPLE_AMADEUS_TICKET_REGEX = """

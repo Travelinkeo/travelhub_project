@@ -1,35 +1,19 @@
-"""Tests adicionales para aumentar cobertura de parsers"""
-
+from apps.automation.parsers.amadeus_parser import AmadeusParser
 from apps.automation.parsers.kiu_parser import KIUParser
-from apps.automation.parsers.legacy.amadeus_parser import AmadeusParser
-from apps.automation.parsers.legacy.sabre_parser import SabreParser
 
 
-class TestSabreParserCoverage:
-    """Tests adicionales para SabreParser"""
+class TestKIUParserCoverageExtended:
+    """Tests adicionales para KIUParser"""
 
     def test_parse_with_minimal_data(self):
         """test_parse_with_minimal_data."""
-        parser = SabreParser()
+        parser = KIUParser()
         text = (
-            "ETICKET RECEIPT\nRESERVATION CODE: ABC123\nPASSENGER: PEREZ/JUAN\n"
+            "KIUSYS ITINERARY RECEIPT\nBOOKING REF: ABC123\nPASSENGER: PEREZ/JUAN\n"
             "TICKET NUMBER: 1234567890123\n"
         )
         result = parser.parse(text)
-        assert result.source_system == "SABRE"
         assert result.pnr == "ABC123"
-
-    def test_parse_flights_empty(self):
-        """test_parse_flights_empty."""
-        parser = SabreParser()
-        flights = parser._parse_flights("")
-        assert flights == []
-
-    def test_extract_currency_with_commas(self):
-        """test_extract_currency_with_commas."""
-        parser = SabreParser()
-        currency, amount = parser.extract_currency_amount("USD 1,234.56")
-        assert str(amount) == "1234.56"
 
 
 class TestAmadeusParserCoverage:

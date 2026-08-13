@@ -1,0 +1,15 @@
+5858141E         CCSV13214
+
+AREA  TM  MOD SG/DT.LG TIME      ACT.Q   STATUS     NAME
+A-IN      PRD AA/SU.SP  24             SIGNED
+B-OUT 54M PRD AA/SU.SP  24             SIGNED
+C-OUT 54M PRD AA/SU.SP  24             SIGNED
+D-OUT 54M PRD AA/SU.SP  24             SIGNED
+E-OUT 54M PRD AA/SU.SP  24             SIGNED
+F-OUT 54M PRD AA/SU.SP  24             SIGNED
+>
+
+
+ATID: 58 58141E CID: 767802494934
+
+http://certificates.amadeusvista.com/certificateinfo/default.htm

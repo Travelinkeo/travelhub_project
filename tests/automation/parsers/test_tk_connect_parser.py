@@ -1,39 +1,17 @@
-"""Tests para TK Connect Parser."""
+"""Tests para TK Connect / Console Parser."""
 
 import pytest
 
-from apps.automation.parsers.base_parser import ParsedTicketData
-from apps.automation.parsers.legacy.tk_connect_parser import TKConnectParser
+from apps.automation.parsers.console_parser import ConsoleParser
 
 
 @pytest.fixture
-def tk_parser():
-    return TKConnectParser()
+def console_parser():
+    return ConsoleParser()
 
 
-class TestTKConnectParserDetection:
-    def test_can_parse_tkconnect(self, tk_parser):
-        text = "IDENTIFICACIÓN DEL PEDIDO\nTK CONNECT"
-        assert tk_parser.can_parse(text) is True
-
-    def test_can_parse_turkish(self, tk_parser):
-        text = "IDENTIFICACIÓN DEL PEDIDO\nTURKISH AIRLINES"
-        assert tk_parser.can_parse(text) is True
-
-    def test_rejects_non_tk(self, tk_parser):
-        text = "SABRE RECEIPT\nPNR ABC123"
-        assert tk_parser.can_parse(text) is False
-
-
-class TestTKConnectParserFields:
-    def test_extract_pnr(self, tk_parser):
-        result = tk_parser.parse(
-            "IDENTIFICACIÓN DEL PEDIDO\nTK CONNECT\nCÓDIGO DE RESERVACIÓN ABC123"
-        )
-        assert isinstance(result, ParsedTicketData)
-
-
-class TestTKConnectParserEdgeCases:
-    def test_empty_text_returns_dto(self, tk_parser):
-        result = tk_parser.parse("")
-        assert isinstance(result, ParsedTicketData)
+class TestTKConnectConsole:
+    def test_parse_tk_text(self, console_parser):
+        text = "TURKISH AIRLINES CONNECT RECEIPT\nPNR: TK1234"
+        result = console_parser.parse(text)
+        assert isinstance(result, dict)

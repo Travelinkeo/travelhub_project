@@ -183,6 +183,8 @@ class ParsedTicketData:
 
         res = {
             "SOURCE_SYSTEM": self.source_system,
+            "_parser_version": "2.5.0",
+            "_parsed_at": __import__("django.utils.timezone", fromlist=["now"]).now().isoformat(),
             # LLAVES MANDATORIAS (BIBLIA DEL PARSEO)
             "NOMBRE DEL PASAJERO": self.passenger_name,
             "CODIGO IDENTIFICACION": self.passenger_document

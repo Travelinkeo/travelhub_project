@@ -1,764 +1,663 @@
 # CONTEXT_MAP.md — Mapa Cerebral de TravelHub
 
-> **Ultima verificacion contra codigo real:** 2026-07-26
-> **Rama/commit revisado:** `hardening/operational-risks` @ `d35a1bfc`
-> **Verificado por:** IA (Antigravity) — lectura directa de archivos en sesion activa
+> **Última verificación contra código real:** 2026-08-13
+> **Rama/commit revisado:** `main` @ `a226bd5911f590fafd0464c9e198e9b4d1b531e3`
+> **Verificado por:** IA (Gemini 3.6 Flash) — lectura directa de archivos en sesión activa
 
 ---
 
 ## PROTOCOLO DE LECTURA PARA OTRA IA
 
-Este documento describe **codigo real verificado** en esta sesion. Cada afirmacion esta respaldada
-por lectura directa de archivos. Donde hay incertidumbre, se usa `[VERIFICAR]`.
+Este documento describe **código real verificado** en esta sesión. Cada afirmación está respaldada por lectura directa de archivos en el repositorio `travelhub_project`. Donde hay incertidumbre o supuestos no confirmados directamente por lectura de código, se marca explícitamente con `[VERIFICAR]`.
 
-**Regla de uso:** Si vas a modificar algo descrito aqui, lee el archivo original antes de hacerlo.
-Este documento puede quedar desfasado. Los archivos siempre son la fuente de verdad.
+**Regla de uso:** Si vas a modificar o construir sobre algún componente descrito aquí, lee el archivo fuente original primero. Este documento es la arquitectura mapeada; los archivos del repositorio son la fuente de verdad definitiva.
 
 ---
 
-## 1. PROPOSITO DEL SISTEMA
+## 1. PROPÓSITO DEL SISTEMA
 
-**TravelHub** es un CRM/ERP SaaS B2B multi-tenant para **agencias de viajes venezolanas**. Cada
-instancia de cliente (agencia) corre en el mismo servidor Django pero con datos 100% aislados
-mediante Row-Level Security (RLS) a nivel de ORM y PostgreSQL.
+**TravelHub** es un CRM/ERP SaaS B2B multi-tenant diseñado para **agencias de viajes venezolanas**. Permite gestionar boletos aéreos (GDS KIU, Sabre, Amadeus), paquetes turísticos, hoteles, vehículos, alquileres, liquidación a proveedores con cálculo de diferencial cambiario (USD/VES a tasa BCV), facturación bimoneda con cumplimiento fiscal SENIAT e IGTF, y automatización multicanal (WhatsApp vía Evolution API y Telegram Bot).
+
+Cada agencia consumidora del SaaS opera como un tenant aislado con su propia marca (white-label), usuarios, clientes, cotizaciones y estados financieros, compartiendo la misma infraestructura Django/PostgreSQL mediante **Row-Level Security (RLS)** y aislamiento a nivel de ORM.
 
 ### Modelo de negocio SaaS
 
-| Plan       | Usuarios | Ventas/mes | Storage    |
-|------------|----------|------------|------------|
-| FREE       | 1        | 20         | 100 MB     |
-| BASIC      | 2        | 50         | 500 MB     |
-| PRO        | 10       | 500        | 5 GB       |
-| ENTERPRISE | 999      | ilimitado  | ilimitado  |
+El control de cuotas y límites por agencia está definido centralmente en `travelhub/settings/base.py:540-550`:
 
-> Definido en `travelhub/settings/base.py:527-537` — `SAAS_PLAN_LIMITS`
+| Plan | Usuarios (`users`) | Almacenamiento (`storage_mb`) | Leads / mes (`leads_per_month`) | Ventas / mes (`sales_per_month`) |
+| :--- | :--- | :--- | :--- | :--- |
+| **FREE** | 1 | 100 MB | 20 | 20 |
+| **BASIC** | 2 | 500 MB | 50 | 50 |
+| **PRO** | 10 | 5.000 MB (5 GB) | 500 | 500 |
+| **ENTERPRISE** | 999 | 99.999 MB | 99.999 | 99.999 |
 
-### Flujo de dinero (Stripe)
+Lógica de enforcement:
+- El middleware `SaaSLimitMiddleware` (`core/middleware_saas.py`) intercepta las peticiones y throttling por plan.
+- El servicio `SaaSQuotaService` (`apps/common/services/saas_limits.py`) valida límites de usuarios, almacenamiento y volumen mensual antes de permitir operaciones de creación.
+- `AgenciaConfiguracion.fecha_fin_trial` asigna automáticamente 14 días de prueba al crear la configuración inicial (`core/models/agencia.py:472`).
 
-El sistema tiene la **infraestructura Stripe configurada** (`stripe_customer_id`,
-`stripe_subscription_id` en `AgenciaConfiguracion`; variables `STRIPE_PRICE_ID_BASIC/PRO/ENTERPRISE`
-en settings) pero **[VERIFICAR]** el flujo completo de checkout a webhook a activacion de plan.
-Se detecto riesgo activo en `TECH_DEBT_REMEDIATION.md P0-005`: los webhooks Stripe pueden no
-estar validando firma en todos los endpoints.
+### Flujo de pago y suscripciones (Stripe)
 
-Lo que SI esta verificado:
-- `AgenciaConfiguracion.plan` (CharField, default `"FREE"`) controla el plan activo
-- `AgenciaConfiguracion.plan_status` controla estado (`active`, etc.)
-- `AgenciaConfiguracion.fecha_fin_trial` se auto-asigna a `now() + 14 dias` al crear configuracion
-- El middleware `SaaSLimitMiddleware` (`core/middleware_saas.py`) aplica throttling por plan en cada request
+La integración con Stripe se gestiona a través de `StripeService` (`apps/finance/services/stripe_service.py`):
+1. **Creación de Checkout Session**: `StripeService.create_checkout_session()` genera una sesión de pago para upgrades/downgrades de plan asociando la agencia vía `stripe_customer_id`.
+2. **Customer Portal**: `StripeService.create_customer_portal_session()` permite a la agencia gestionar sus tarjetas y facturas directamente en Stripe.
+3. **Webhooks Fail-Closed con Idempotencia**: El endpoint `/system/webhooks/stripe/` expuesto por `StripeWebhookView` (`apps/finance/views/views_webhooks.py:180`) valida obligatoriamente la firma HMAC con `stripe.Webhook.construct_event()`. Si falta el secret de webhook responde con `503`, y si la firma es inválida o ausente responde con `401`.
+4. **Procesamiento de eventos**:
+   - `customer.subscription.created` / `customer.subscription.updated`: Actualiza `AgenciaConfiguracion.plan` (FREE, BASIC, PRO, ENTERPRISE) y `plan_status` (`active`, `past_due`, `canceled`).
+   - `customer.subscription.deleted`: Transiciona la agencia a plan `FREE` y `plan_status="canceled"`.
+   - `invoice.payment_succeeded`: Renueva `fecha_fin_suscripcion`.
+   - `invoice.payment_failed`: Marca el estado como `past_due` / `unpaid` para activar restricción de funciones avanzadas.
 
 ---
 
 ## 2. GLOSARIO DE DOMINIO
 
-| Termino              | Definicion |
-|----------------------|-----------|
-| **Agencia**          | Tenant. Una empresa agencia de viajes. Tiene su propio plan SaaS, usuarios, datos y branding. |
-| **GDS**              | Global Distribution System. Software de emision de boletos. TravelHub soporta: KIU, Sabre, Amadeus (WIP), Copa SPRK, Estelar Web, Rutaca Web. |
-| **PNR**              | Passenger Name Record. Codigo de reserva de 6 caracteres alfanumericos (ej: WPYVSD). Asignado por el GDS. |
-| **Boleto**           | E-ticket electronico emitido por el GDS. Tiene numero de 13 digitos (ej: 1347258019382). |
-| **Fee de agencia**   | Comision o cargo de servicio que la agencia cobra al cliente sobre el precio base del boleto. |
-| **Boleto de tercero**| Boleto emitido por otro proveedor (aerolinea directa, OTA) que la agencia importa al sistema para gestionar el servicio. |
-| **Diferencial cambiario** | Ganancia que la agencia obtiene al cobrar en USD al mercado paralelo y liquidar al proveedor a la tasa BCV. Logica critica venezolana. |
-| **IGTF**             | Impuesto a las Grandes Transacciones Financieras (Venezuela). Se aplica sobre pagos en divisa extranjera. |
-| **BCV**              | Banco Central de Venezuela. El sistema sincroniza tasas USD/VES 2x/dia via `core.tasks.sync_bcv_rates`. |
-| **Localizador aerolinea** | Secondary PNR asignado por la aerolinea operadora (distinto del PNR del GDS). |
-| **RIF**              | Registro de Informacion Fiscal. Equivalente venezolano al NIT/RFC. Campo obligatorio en facturas. |
-| **Venta**            | Unidad de negocio central. Contiene uno o mas items (boletos, hoteles, autos, servicios). |
-| **ItemVenta**        | Linea dentro de una Venta. Puede ser un BoletoImportado u otro servicio. |
-| **Liquidacion**      | Proceso de pago al proveedor. Calcula tarifa neta vs. lo cobrado al cliente. |
-| **White-label**      | Personalizacion de la plataforma con marca propia de la agencia (logo, colores, dominio). |
-| **Evolution API**    | Microservicio de WhatsApp (v2.2.3). Cada agencia tiene su instancia auto-provisionada. |
-| **Mailbot**          | Monitor IMAP que lee el correo de emisiones de la agencia y detecta boletos entrantes automaticamente. |
+| Término | Definición |
+| :--- | :--- |
+| **Agencia** | Tenant. Entidad legal/comercial cliente del SaaS. Posee branding, usuarios, finanzas e instancias de mensajería aisladas. |
+| **GDS** | *Global Distribution System*. Sistemas de emisión de pasajes. TravelHub soporta parseo de: KIU, Sabre, Amadeus, Copa SPRK, Estelar Web y Rutaca Web. |
+| **PNR** | *Passenger Name Record*. Código de reserva alfanumérico de 6 caracteres (ej. `WPYVSD` o `4K3I2J`) asignado por el GDS. |
+| **Boleto** | E-Ticket electrónico de 13 dígitos (ej. `1347258019382` o `139-2401829384`). Entidad `BoletoImportado`. |
+| **Fee de agencia** | Comisión o cargo de servicio que la agencia añade sobre la tarifa neta del boleto/servicio. |
+| **Boleto de tercero** | Pasaje emitido por consolidadores u otras agencias que se importa para gestión de cobro/itinerario. |
+| **Diferencial cambiario** | Utilidad neta generada por la diferencia entre la tasa cobrada en divisa/mercado paralelo y la tasa oficial BCV a la que se liquida al proveedor. |
+| **IGTF** | Impuesto a las Grandes Transacciones Financieras (3% en Venezuela sobre pagos en divisas/criptoactivos). |
+| **BCV** | Banco Central de Venezuela. Tasa oficial USD/VES sincronizada automáticamente 2 veces al día por `core.tasks.sync_bcv_rates`. |
+| **Localizador aerolínea** | PNR secundario emitido por la línea aérea operadora cuando difiere del PNR del GDS emisor. |
+| **RIF** | Registro de Información Fiscal. Documento de identificación tributario en Venezuela (ej. `J-40249698-2`). |
+| **Venta** | Entidad financiera y comercial agrupadora (`apps/bookings/models/venta.py:Venta`). Contiene `ItemVenta`, `PagoVenta`, `FeeVenta`. |
+| **ItemVenta** | Línea de detalle dentro de una venta. Representa un boleto importado, hotel, vehículo o servicio adicional. |
+| **Liquidación** | Proceso contable de cierre y pago hacia el proveedor de turismo, calculando comisiones y netos a pagar. |
+| **White-label** | Capacidad del sistema para personalizar dominios, logos, colores primarios/secundarios y encabezados de PDF por agencia. |
+| **Evolution API** | Microservicio externo REST/WebSocket (v2.2.3 en Docker) para integración directa con WhatsApp Web sin API Business oficial. |
+| **Mailbot** | Worker asíncrono que monitorea casillas IMAP para procesar automáticamente e-tickets entrantes en PDF/HTML/EML. |
 
 ---
 
-## 3. STACK TECNOLOGICO EXACTO
+## 3. STACK TECNOLÓGICO EXACTO
 
-### Backend
-```
-Python:          [VERIFICAR -- no inspeccionado .python-version; probablemente 3.11+]
-Django:          5.2.14  (requirements/base.txt:3)
-DRF:             3.15.2  (djangorestframework)
-Celery:          5.5.3
-PostgreSQL:      15-alpine (docker-compose.yml:40)
-Redis:           7-alpine  (docker-compose.yml:95)
-PgBouncer:       edoburu/pgbouncer (connection pooler, transaction mode)
-```
+### Backend & Core
+- **Lenguaje:** Python 3.11.15
+- **Framework Principal:** Django 5.2.14 (`requirements/base.txt:3`)
+- **API REST:** Django REST Framework 3.15.2 (`requirements/base.txt:10`)
+- **Tareas Asíncronas & Tareas Programadas:** Celery 5.5.3 + `django-celery-beat` 2.8.1 + `django-celery-results` 2.6.0
+- **Base de Datos:** PostgreSQL 15-alpine (`docker-compose.yml:40`)
+- **Cache & Message Broker:** Redis 7-alpine (`docker-compose.yml:95`)
+- **Pool de Conexiones DB:** PgBouncer (modo `transaction`, `edoburu/pgbouncer`)
 
-### Librerias clave (requirements/base.txt)
+### Librerías Clave (`requirements/base.txt`)
 ```
-cryptography:      46.0.7   -- Fernet para EncryptedCharField/EncryptedTextField
-google-genai:      1.59.0   -- SDK oficial de Google AI (Gemini)
-openai:            2.48.0   -- Proveedor fallback (ProviderChain)
-PyMuPDF:           1.26.3   -- Extraccion de texto PDF (fitz)
-weasyprint:        68.0     -- Generacion de PDF desde HTML
-stripe:            13.0.1   -- Pagos SaaS
-django-axes:       7.0.1    -- Proteccion brute-force
-django-unfold:     0.91.0   -- Admin UI premium
-django-waffle:     4.1.0    -- Feature flags
-amadeus:           12.0.0   -- SDK aerolinea Amadeus [VERIFICAR integracion activa]
-sentry-sdk:        2.50.0   -- Error tracking en produccion
-django-prometheus: 2.3.1    -- Metricas /prometheus/
+cryptography==46.0.7       # Cifrado Fernet simétrico para campos sensibles
+google-genai==1.59.0       # SDK oficial de Google Gemini (Gemini 2.5 Flash / Pro)
+openai==2.48.0             # Fallback secundario en ProviderChain + DeepSeek HTTP compatibility
+PyMuPDF==1.26.3            # Extracción rápida de texto/metadatos PDF (fitz)
+pypdf==6.10.2              # Parser secundario de documentos estructurados
+weasyprint==68.0           # Generador de PDF a partir de templates HTML/CSS
+stripe==13.0.1             # SDK de pagos SaaS y gestión de suscripciones
+django-axes==7.0.1         # Protección anti-bruteforce en autenticación
+django-unfold==0.91.0      # Panel de administración Django moderno (UI Dark Mode)
+django-waffle==4.1.0       # Feature Flags dinámicos
+amadeus==12.0.0            # SDK oficial GDS Amadeus
+sentry-sdk==2.50.0         # Monitoreo y reporte de excepciones en producción
+django-prometheus==2.3.1   # Exposición de métricas en /prometheus/
+python-telegram-bot==21.11 # Bot bidireccional y notificaciones de Telegram
+opentelemetry-api==1.27.0  # Trazabilidad distribuida APM
+defusedxml==0.7.1          # Parser seguro XML anti-XXE / Billion Laughs (retenciones SENIAT)
 ```
 
 ### Frontend
-```
-Motor:        Django Templates + HTMX + Alpine.js
-Alpine.js:    v2/v3 (archivo local en raiz del proyecto)
-Tailwind CSS: CDN (no compilado localmente)
-Admin:        django-unfold (dark mode)
-```
+- **Arquitectura UI:** Django Server-Side Rendering (SSR) + HTMX + Alpine.js
+- **Estilos CSS:** Tailwind CSS
+- **Admin UI:** Django Unfold (con personalizaciones en `apps/common/urls_admin.py`)
 
-### Variables de entorno obligatorias
+### Variables de Entorno Obligatorias (`.env.example`)
 
-| Variable                          | Proposito |
-|-----------------------------------|-----------|
-| SECRET_KEY                        | Clave maestra Django (min 50 chars en prod) |
-| ENCRYPTION_KEY                    | Clave Fernet para campos cifrados |
-| DATABASE_URL                      | PostgreSQL connection string |
-| REDIS_URL                         | Redis (broker Celery + cache) |
-| GEMINI_API_KEY                    | API key de Google AI Studio (fallback global) |
-| STRIPE_SECRET_KEY                 | Clave secreta Stripe (pagos SaaS) |
-| STRIPE_WEBHOOK_SECRET             | Secret para verificar firmas de webhooks Stripe |
-| STRIPE_PRICE_ID_BASIC/PRO/ENTERPRISE | IDs de precios en Stripe |
-| R2_ACCESS_KEY_ID                  | Credencial Cloudflare R2 |
-| R2_SECRET_ACCESS_KEY              | Credencial Cloudflare R2 |
-| R2_BUCKET_NAME                    | Bucket de medios |
-| R2_ENDPOINT_URL                   | Endpoint R2 |
-| WHATSAPP_MICROSERVICE_URL         | URL de Evolution API |
-| WHATSAPP_MICROSERVICE_TOKEN       | Token global de Evolution API |
-| EVOLUTION_INSTANCE_TOKEN          | Token de instancia Evolution |
-| RESEND_API_KEY                    | API key de Resend (emails transaccionales) |
-| SENTRY_DSN                        | DSN de Sentry para error tracking |
-| JWT_SIGNING_KEY                   | Clave firma JWT |
-| TELEGRAM_BOT_TOKEN                | Bot de Telegram para notificaciones internas |
-| TELEGRAM_ADMIN_ID                 | Chat ID del administrador del sistema |
-| GCP_JSON_CREDENTIALS              | Credenciales Google Cloud |
-| USE_PGBOUNCER                     | true/false -- activa CONN_MAX_AGE=0 para RLS-safe |
-| DATABASE_REPLICA_URL              | URL replica PostgreSQL |
-| GOTENBERG_URL                     | Servicio Gotenberg para PDF headless |
-| BINANCE_PAY_API_KEY               | Pagos con Binance Pay |
-| ENVIRONMENT                       | production/development |
-| GIT_SHA                           | SHA del commit actual (para Sentry release) |
+| Variable | Propósito |
+| :--- | :--- |
+| `SECRET_KEY` | Clave criptográfica maestra de Django (mínimo 50 caracteres en producción). |
+| `ENCRYPTION_KEY` | Clave Fernet base64 url-safe para `EncryptedCharField` y `EncryptedTextField`. |
+| `DATABASE_URL` | String de conexión PostgreSQL (`postgres://user:pass@host:5432/dbname`). |
+| `REDIS_URL` | String de conexión Redis (`redis://host:6379/0`) para broker Celery y cache. |
+| `GEMINI_API_KEY` | API Key global de Google AI Studio para motor `AIEngine` / `UniversalAIParser`. |
+| `STRIPE_SECRET_KEY` | Clave secreta de Stripe para cobros y Checkout Sessions. |
+| `STRIPE_WEBHOOK_SECRET` | Secreto para verificación de firma HMAC de webhooks Stripe. |
+| `STRIPE_PRICE_ID_BASIC/PRO/ENTERPRISE` | IDs de los planes configurados en Stripe Dashboard. |
+| `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | Credenciales de acceso a Cloudflare R2 Storage. |
+| `R2_BUCKET_NAME` / `R2_ENDPOINT_URL` | Nombre del bucket y endpoint S3-compatible de Cloudflare R2. |
+| `WHATSAPP_MICROSERVICE_URL` | URL base del microservicio Evolution API v2 (`http://evolution:8080`). |
+| `WHATSAPP_MICROSERVICE_TOKEN` | Token de autenticación global para Evolution API. |
+| `EVOLUTION_INSTANCE_TOKEN` | Token asignado a la instancia predeterminada de WhatsApp. |
+| `RESEND_API_KEY` | API Key de Resend para envío de correos transaccionales. |
+| `SENTRY_DSN` | URL DSN de Sentry para captura de errores en tiempo real. |
+| `JWT_SIGNING_KEY` | Clave de firma para tokens JWT (`djangorestframework-simplejwt`). |
+| `TELEGRAM_BOT_TOKEN` | Token HTTP API del bot de Telegram de la agencia / plataforma. |
+| `TELEGRAM_ADMIN_ID` | Chat ID de Telegram para alertas críticas de sistema. |
+| `USE_PGBOUNCER` | Flag `true`/`false`. Forza `CONN_MAX_AGE=0` para prevenir fugas de RLS. |
+| `ALLOW_SYSTEM_CONTEXT` | Flag `1`/`true`. Permite ejecutar `system_context()` en tareas Celery. |
+| `ENVIRONMENT` | Entorno de ejecución (`production` / `development` / `testing`). |
 
 ---
 
 ## 4. INFRAESTRUCTURA Y DEPLOY
 
-### Produccion
+### Topología de Producción (`docker-compose.yml`)
 
 ```
-Dominio principal:  travelhub.cc
-Hosting:            [VERIFICAR -- probablemente VPS con Docker]
-Proxy:              Traefik v3.0 (Let's Encrypt automatico via CF_DNS_API_TOKEN)
-Base de datos:      PostgreSQL 15-alpine (contenedor Docker interno)
-Cache/Broker:       Redis 7-alpine (contenedor Docker interno)
-Pool de conexiones: PgBouncer (transaction mode, MAX_CLIENT_CONN=100, DEFAULT_POOL_SIZE=25)
-Media:              Cloudflare R2 (USE_R2=True en produccion)
-Estaticos:          WhiteNoise (servidos por Gunicorn/Django directamente)
-PDF headless:       Gotenberg (contenedor separado, http://gotenberg:3000)
-WhatsApp:           Evolution API v2 (contenedor evolution, puerto 8080)
-Monitoring:         Sentry + Prometheus /prometheus/ + OpenTelemetry
+                        [ Cliente Web / Móvil ]
+                                  │
+                                  ▼
+                      ┌──────────────────────┐
+                      │    Traefik v3.0      │ (Reverse Proxy + SSL Let's Encrypt)
+                      └──────────┬───────────┘
+                                  │
+         ┌────────────────────────┼────────────────────────┐
+         │                        │                        │
+         ▼                        ▼                        ▼
+┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│  Django Web      │    │  Celery Worker   │    │   Celery Beat    │
+│  (Gunicorn WSGI) │    │  (Async tasks)   │    │  (Cron Scheduler)│
+└────────┬─────────┘    └────────┬─────────┘    └────────┬─────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+         ┌───────────────────────┼───────────────────────┐
+         ▼                       ▼                       ▼
+┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│    PgBouncer     │    │     Redis 7      │    │  Evolution API   │
+│(Pool Transaction)│    │(Broker & Cache)  │    │  (WhatsApp v2)   │
+└────────┬─────────┘    └──────────────────┘    └──────────────────┘
+         │
+         ▼
+┌──────────────────┐
+│  PostgreSQL 15   │ (RLS enabled on tenant tables)
+└──────────────────┘
 ```
 
-### Servicios Docker (docker-compose.yml)
-```
-traefik        -> Proxy + SSL (red: travelhub_public)
-db             -> PostgreSQL 15 (red: travelhub_private)
-pgbouncer      -> Connection pooler (red: travelhub_private)
-redis          -> Broker/cache (red: travelhub_private)
-web            -> Django + Gunicorn (WSGI)
-celery-worker  -> Worker asincrono (cola default + notifications)
-celery-beat    -> Scheduler de tareas programadas
-evolution      -> WhatsApp Evolution API v2
-```
+### Contenedores y Redes Docker
+- **Proxy Inverso:** Traefik v3.0 en red `travelhub_public`.
+- **Backend & Workers:** `web`, `celery-worker`, `celery-beat` en red `travelhub_private`.
+- **Bases de Datos & Caching:** `db` (PostgreSQL 15), `pgbouncer`, `redis` en red aislada `travelhub_private`.
+- **Integraciones:** Gotenberg (puerto 3000 para renderizado PDF headless) y Evolution API (puerto 8080).
+- **Medios Persistentes:** Cloudflare R2 (`django-storages` + `boto3`).
 
-### Deploy local (desde cero)
-```bash
-git clone <repo>
-cd travelhub_project
-python -m venv .venv && .venv\Scripts\activate
-pip install -r requirements/base.txt -r requirements/dev.txt
-cp .env.example .env.local  # Editar con valores reales
-python manage.py migrate
-python manage.py createsuperuser
-DJANGO_SETTINGS_MODULE=travelhub.settings.development python manage.py runserver
-# En otra terminal:
-celery -A travelhub worker -l info
-celery -A travelhub beat -l info
-```
+### Pasos Mínimos para Entorno de Desarrollo Local
+
+1. Clonar el repositorio y crear el entorno virtual:
+   ```bash
+   git clone <repo_url>
+   cd travelhub_project
+   python -m venv .venv
+   .venv\Scripts\activate  # Windows PowerShell: .venv\Scripts\Activate.ps1
+   ```
+2. Instalar dependencias:
+   ```bash
+   pip install -r requirements/base.txt -r requirements/dev.txt
+   ```
+3. Configurar archivo de variables de entorno:
+   ```bash
+   cp .env.example .env.local
+   # Modificar .env.local con las claves correspondientes
+   ```
+4. Ejecutar migraciones e inicializar base de datos:
+   ```bash
+   python manage.py migrate
+   python manage.py createsuperuser
+   ```
+5. Iniciar servidor de desarrollo y workers:
+   ```bash
+   python manage.py runserver
+   # En terminales separadas:
+   celery -A travelhub worker -l info
+   celery -A travelhub beat -l info
+   ```
 
 ---
 
-## 5. MAPA DE ARCHIVOS CRITICOS
+## 5. MAPA DE ARCHIVOS CRÍTICOS
 
 ```
 travelhub_project/
-|
-+-- travelhub/                     <- Config del proyecto Django
-|   +-- settings/
-|   |   +-- base.py                <- MIDDLEWARE, APPS, SAAS_PLAN_LIMITS, JWT, DATABASES
-|   |   +-- production.py          <- HSTS, SSL, Sentry, validaciones estrictas de secrets
-|   |   +-- development.py         <- Debug tools, email console
-|   |   +-- testing.py             <- Overrides para pytest
-|   +-- urls.py                    <- Router maestro (todas las rutas)
-|   +-- urls_api.py                <- Router DRF (merge bookings + crm + finance routers)
-|   +-- celery.py                  <- Configuracion Celery app
-|   +-- celery_beat_schedule.py    <- Tareas programadas (crontab)
-|
-+-- core/                          <- App nucleo (SaaS, multi-tenancy, seguridad)
-|   +-- middleware.py              <- ThreadLocalContextMiddleware (L137),
-|   |                                 MultiTenantDomainMiddleware (L500),
-|   |                                 SecurityHeadersMiddleware + CSP dinamico (L354)
-|   +-- middleware_saas.py         <- SaaSLimitMiddleware (throttling por plan)
-|   +-- middleware_ai_ratelimit.py <- Rate limiting endpoints IA
-|   +-- middleware_onboarding.py   <- Redirect al onboarding si agencia incompleta
-|   +-- middleware_plan_limits.py  <- Enforcement limites de plan por accion
-|   +-- security.py                <- get_agencia_or_403, get_object_tenant_or_404,
-|   |                                 filter_queryset_by_tenant, agency_role_required (L122)
-|   +-- mixins.py                  <- SaaSMixin (CBV queryset filter + RBAC),
-|   |                                 AgencyRoleRequiredMixin, HtmxResponseMixin
-|   +-- fields.py                  <- EncryptedCharField, EncryptedTextField (Fernet, L24-142)
-|   +-- signals.py                 <- Signals de negocio (parseo automatico boletos)
-|   +-- signals_audit.py           <- Signals de auditoria (AuditLog automatico)
-|   +-- db_router.py               <- PrimaryReplicaRouter (reads->replica, writes->default)
-|   +-- tasks.py                   <- Tareas Celery de core (sync_bcv, process_emails, etc.)
-|   +-- models/
-|       +-- __init__.py            <- Exports publicos de core.models
-|       +-- base.py                <- AgenciaMixin (L197), AgenciaManager (L48),
-|       |                             SaasQuerySet, SoftDeleteModel,
-|       |                             GlobalAwareAgenciaManager, SoftDeleteQuerySet
-|       +-- agencia.py             <- Agencia (L15), UsuarioAgencia (L374),
-|       |                             AgenciaBranding (L410), AgenciaConfiguracion (L472)
-|       +-- audit.py               <- AuditLog (L16) -- hash-chained, forense
-|       +-- ai.py                  <- AIUsageLog (L6) -- tracking de costos IA
-|       +-- api_keys.py            <- Modelo de API keys externas
-|       +-- webhooks.py            <- Webhook, WebhookDelivery, WebhookEvent
-|
-+-- apps/                          <- Modulos de negocio (Django apps)
-|   +-- bookings/                  <- Core de ventas y boletos
-|   |   +-- models/
-|   |   |   +-- venta.py           <- Venta, ItemVenta, PagoVenta, FeeVenta
-|   |   |   +-- importacion.py     <- BoletoImportado (estado_parseo, archivo_pdf_generado)
-|   |   |   +-- servicios.py       <- Reservas de hotel, auto, seguros
-|   |   |   +-- componentes.py     <- Componentes adicionales de venta
-|   |   +-- tasks.py               <- retry_queued_boletos_task
-|   |   +-- serializers.py         <- DRF serializers (39KB -- el mas grande del proyecto)
-|   |   +-- signals.py             <- Signals de bookings (PDF, venta, etc.)
-|   |
-|   +-- automation/                <- Motor IA y parseo de documentos
-|   |   +-- parsers/
-|   |   |   +-- ticket_parser.py   <- FastDeterministicParsers (regex), extract_data_from_text (L306)
-|   |   |   +-- gemini_parser.py   <- GeminiParser (NLP + Vision para PDFs corruptos)
-|   |   |   +-- kiu_parser.py      <- Parser especifico KIU (GDS venezolano) [28799 bytes]
-|   |   |   +-- base_parser.py     <- BaseTicketParser, ParsedTicketData [31060 bytes]
-|   |   |   +-- adapter.py         <- parse_ticket_with_new_parsers (router de parsers)
-|   |   |   +-- normalization.py   <- CatalogNormalizationService (aeropuertos, aerolineas)
-|   |   |   +-- pdf_generation.py  <- PdfGenerationService (Gotenberg/WeasyPrint)
-|   |   +-- services/
-|   |   |   +-- ai_engine.py       <- AIEngine.call_gemini() (L86), get_gemini_api_key() (L44)
-|   |   |   +-- ai_router.py       <- ProviderChain (Gemini -> OpenAI -> DeepSeek fallback)
-|   |   |   +-- ticket_parser_service.py <- TicketParserService [44700 bytes -- orquestador]
-|   |   |   +-- ai_agent.py        <- Agente conversacional con Function Calling
-|   |   |   +-- ai_copywriter.py   <- Generador de contenido marketing con IA
-|   |   |   +-- ai_tools.py        <- Herramientas/Functions para el AI Agent [37637 bytes]
-|   |   +-- tasks.py               <- process_web_uploaded_ticket, ejecutar_cobranza_ia_task
-|   |
-|   +-- finance/                   <- Contabilidad y facturacion
-|   +-- crm/                       <- Clientes, pasaportes, pipeline Kanban
-|   +-- contabilidad/              <- Plan de cuentas, asientos contables
-|   +-- communications/            <- WhatsApp (Evolution), Telegram, Push
-|   +-- common/                    <- Utilidades compartidas, SaaSQuotaService
-|   +-- marketing/                 <- Campanias, leads, funnel
-|   +-- reports/                   <- Reportes programados, exportacion
-|   +-- cms/                       <- Contenido generado por IA
-|   +-- cotizaciones/              <- Modulo de presupuestos/cotizaciones
-|   +-- gamification/              <- [VERIFICAR alcance actual]
-|   +-- tasks/                     <- Gestion de tareas internas de agencia
-|
-+-- templates/                     <- Templates globales
-+-- static/                        <- Assets estaticos
-+-- fixtures/                      <- Datos iniciales
-+-- docker-compose.yml             <- Produccion (Traefik + PgBouncer + Evolution)
-+-- docker-compose.dev.yml         <- Desarrollo local
-+-- Dockerfile                     <- Imagen Django + Gunicorn
-+-- .env.example                   <- Template de variables de entorno (137 vars)
-+-- TECH_DEBT_REMEDIATION.md       <- Inventario de deudas tecnicas con prioridades P0-P4
-+-- CONTEXT_MAP.md                 <- Este archivo
+├── travelhub/                             <- Configuración raíz de Django
+│   ├── settings/
+│   │   ├── base.py                        <- Configuración global, APPS, SAAS_PLAN_LIMITS (L540)
+│   │   ├── production.py                  <- Security headers, SSL, Sentry, PgBouncer settings
+│   │   ├── development.py                 <- Consola de email, Debug Toolbar
+│   │   └── testing.py                     <- Overrides para pytest
+│   ├── urls.py                            <- Router maestro de URLs (L58)
+│   ├── urls_api.py                        <- Router DRF v1 (Bookings, CRM, Finance) (L11)
+│   ├── celery.py                          <- Instanciación de app Celery
+│   └── celery_beat_schedule.py            <- Programación periódica Crontab
+│
+├── core/                                  <- Núcleo del sistema SaaS, seguridad y multi-tenancy
+│   ├── middleware/
+│   │   ├── tenant.py                      <- ThreadLocalContextMiddleware (L165), ContextVars, agency_context
+│   │   ├── domain.py                      <- MultiTenantDomainMiddleware (L10), resolución por subdominio
+│   │   ├── rls.py                         <- rls_session_context (L10), SET LOCAL app.current_agencia_id
+│   │   └── security_headers.py            <- SecurityHeadersMiddleware (L12), CSP dinámico con nonce
+│   ├── middleware_saas.py                 <- SaaSLimitMiddleware, throttling por cuota de plan
+│   ├── middleware_ai_ratelimit.py         <- Rate limiting específico para endpoints de IA
+│   ├── security.py                        <- get_agencia_or_403, get_object_tenant_or_404 (L15), RBAC
+│   ├── fields.py                          <- EncryptedCharField (L108), EncryptedTextField (Fernet)
+│   ├── signals.py                         <- Listener post_save de boletos e ingesta
+│   ├── db_router.py                       <- PrimaryReplicaRouter (separación lectura/escritura)
+│   ├── tasks.py                           <- sync_bcv_rates, tareas periódicas del núcleo
+│   └── models/
+│       ├── base.py                        <- AgenciaManager (L48), AgenciaMixin (L197), SaasQuerySet (L15)
+│       ├── agencia.py                     <- Agencia (L15), UsuarioAgencia (L374), AgenciaConfiguracion (L472)
+│       ├── audit.py                       <- AuditLog (L16) con encadenamiento de hashes SHA-256
+│       └── ai.py                          <- AIUsageLog (L6) para registro de costos de IA
+│
+└── apps/                                  <- Módulos de dominio de negocio
+    ├── bookings/                          <- Emisión de boletos y gestión de ventas
+    │   ├── models/
+    │   │   ├── venta.py                   <- Venta, ItemVenta, PagoVenta, FeeVenta
+    │   │   ├── importacion.py             <- BoletoImportado (estado_parseo, datos_parseados)
+    │   │   └── servicios.py               <- Reservas de Hotel, Autos y Seguros
+    │   ├── serializers.py                 <- Serializadores DRF
+    │   ├── tasks.py                       <- retry_queued_boletos_task, procesar_boleto_async
+    │   └── urls.py                        <- Router endpoints `/api/boletos/` y `/api/ventas/`
+    │
+    ├── automation/                        <- Parsers de GDS e Inteligencia Artificial
+    │   ├── parsers/
+    │   │   ├── ai_universal_parser.py     <- UniversalAIParser (L53), fallback heurístico + Gemini
+    │   │   ├── kiu_parser.py              <- KiuParser (L15), parseo determinístico KIU
+    │   │   ├── console_parser.py          <- ConsoleParser (L12), comandos de consola GDS
+    │   │   ├── ticket_parser.py           <- FastDeterministicParsers (L18), extract_data_from_text (L306)
+    │   │   ├── gemini_parser.py           <- GeminiParser (L14), parsing multimodal con imágenes/PDF
+    │   │   └── adapter.py                 <- parse_ticket_with_new_parsers (L15), router de parsers GDS
+    │   ├── services/
+    │   │   ├── ai_engine.py               <- AIEngine (L90), llamada unificada a IA con resolución de keys
+    │   │   ├── ai_router.py               <- GeminiRouter (L55), estructuración de PNR e itinerarios
+    │   │   ├── ticket_parser_service.py   <- TicketParserService (L35), orquestador principal
+    │   │   ├── ai_agent.py                <- Agente conversacional interactivo (Function Calling)
+    │   │   └── ai_tools.py                <- Declaración de herramientas ejecutables por el AI Agent
+    │   └── tasks.py                       <- process_web_uploaded_ticket, tareas Celery de automatización
+    │
+    ├── communications/                    <- Mensajería multicanal (WhatsApp y Telegram)
+    │   ├── services/
+    │   │   ├── telegram_unified.py        <- TelegramNotificationService, TelegramStorageService
+    │   │   ├── notification_router.py     <- NotificationRouter (L73), enrutador WhatsApp/Telegram/Email
+    │   │   └── file_storage_service.py    <- Almacenamiento de vouchers en Telegram/R2
+    │   └── views/
+    │       └── telegram_views.py          <- TelegramWebhookView, integración bidireccional Brain Assistant
+    │
+    ├── finance/                           <- Facturación SENIAT, cobranzas y Stripe
+    │   ├── services/
+    │   │   └── stripe_service.py          <- StripeService (L15), Checkout, Portal y Webhooks
+    │   ├── views/
+    │   │   └── views_webhooks.py          <- StripeWebhookView (L180), verificación de firma HMAC
+    │   └── models/                        <- Factura, LiquidacionProveedor, Cobranza
+    │
+    ├── crm/                               <- Gestión de clientes, pasaportes y pipelines
+    ├── contabilidad/                      <- Plan de cuentas y asientos contables automáticos
+    ├── cms/                               <- Generación de contenido marketing e integración KB/RAG
+    ├── cotizaciones/                      <- Presupuestos itinerantes para clientes
+    └── reports/                           <- Generación de reportes PDF/Excel
 ```
 
 ---
 
-## 6. LOGICA DE MULTI-TENANCY
+## 6. LÓGICA DE MULTI-TENANCY
 
-### Arquitectura de 4 capas (defense-in-depth)
+El aislamiento de datos en TravelHub se implementa mediante un esquema de **Defensa en Profundidad de 4 Capas**:
 
-**CAPA 1: MultiTenantDomainMiddleware (core/middleware.py:500)**
-- Resuelve la agencia por dominio personalizado o subdominio
-- Inyecta request.agencia / request.agency
-- Lanza Http404 si el dominio no corresponde a ninguna agencia
-
-**CAPA 2: ThreadLocalContextMiddleware (core/middleware.py:137)**
-- Lee request.user -> busca UsuarioAgencia -> extrae Agencia
-- Resuelve impersonacion God Mode (superuser, timeout 30 min)
-- Inyecta en Python ContextVars: agency_var, user_var, etc.
-- Ejecuta `SET LOCAL app.current_agencia_id = %s` en PostgreSQL
-- Ejecuta `SET LOCAL app.bypass_rls = 'true'` para /admin/
-- Limpieza garantizada en bloque finally
-
-**CAPA 3: AgenciaManager.get_queryset() (core/models/base.py:63)**
-- `Model.objects.all()` auto-filtra por agency_var
-- Si `is_system_context()` -> bypass (Celery, tareas de fondo)
-- Si superuser -> queryset completo (God Mode)
-- Si no hay agencia + no superuser -> `queryset.none()`
-- Aplica tambien soft-delete (is_deleted=False)
-
-**CAPA 4: SaaSMixin / get_object_tenant_or_404 (CBV + Func Views)**
-- get_queryset() con filtro agencia explicito (redundancia)
-- RBAC por rol (vendedor ve solo sus propias ventas)
-- Previene modificar en rol "consulta" o "contador"
-
-### Codigo real -- AgenciaMixin (core/models/base.py:197)
-```python
-class AgenciaMixin(models.Model):
-    agencia = models.ForeignKey("core.Agencia", ...)
-    objects = AgenciaManager()       # filtra automaticamente por tenant
-    all_objects = models.Manager()   # sin filtro (admin/sistema)
-    class Meta:
-        abstract = True
-
-    def save(self, *args, **kwargs):
-        # Auto-asigna agencia desde ContextVar si no esta presente
-        # Levanta PermissionDenied si hay cruce de datos cross-tenant
-        ...
+```
+[ HTTP Request ]
+       │
+       ▼
+ ┌──────────────────────────────────────────────────────────┐
+ │ CAPA 1: MultiTenantDomainMiddleware (core/middleware/domain.py) │  -> Resuelve Agencia por subdominio/host
+ └────────────────────────────┬─────────────────────────────┘
+                              │
+                              ▼
+ ┌──────────────────────────────────────────────────────────┐
+ │ CAPA 2: ThreadLocalContextMiddleware (core/middleware/tenant.py)│  -> Setea ContextVars & RLS en DB
+ └────────────────────────────┬─────────────────────────────┘
+                              │
+                              ▼
+ ┌──────────────────────────────────────────────────────────┐
+ │ CAPA 3: AgenciaManager (core/models/base.py:48)          │  -> Auto-filtra Model.objects.all()
+ └────────────────────────────┬─────────────────────────────┘
+                              │
+                              ▼
+ ┌──────────────────────────────────────────────────────────┐
+ │ CAPA 4: RLS PostgreSQL Policy (core/middleware/rls.py)    │  -> Restricción a nivel de motor DB
+ └──────────────────────────────────────────────────────────┘
 ```
 
-### Codigo real -- AgenciaManager (core/models/base.py:48)
+### Detalle de las 4 Capas de Aislamiento
+
+#### Capa 1: Identificación del Tenant (`core/middleware/domain.py:10`)
+`MultiTenantDomainMiddleware` examina el encabezado `Host` de la petición HTTP. Si coincide con un dominio personalizado o subdominio registrado en `Agencia`, inyecta la instancia en `request.agencia`. Si el dominio no existe, retorna error HTTP 404.
+
+#### Capa 2: Contexto Thread/Task Safe & Seteo RLS (`core/middleware/tenant.py:165`)
+`ThreadLocalContextMiddleware` vincula el usuario autenticado con su `UsuarioAgencia` y establece las variables contextuales asíncronas (`ContextVars`):
+- `agency_var.set(agencia)`
+- `user_var.set(user)`
+- Ejecuta `rls_session_context(agencia.id)` (`core/middleware/rls.py:10`), el cual lanza en la sesión de base de datos PostgreSQL:
+  ```sql
+  SET LOCAL app.current_agencia_id = '<agencia_id>';
+  SET LOCAL app.bypass_rls = 'false';
+  ```
+- Al finalizar el ciclo de la petición (bloque `finally`), resetea las variables a `'0'` para evitar contaminación entre peticiones en el pool de conexiones.
+
+#### Capa 3: Filtro Automático en ORM (`core/models/base.py:48` y `L197`)
+Todo modelo de negocio hereda de `AgenciaMixin`. Este mixin asigna como manager predeterminado `AgenciaManager`:
+
 ```python
-def get_queryset(self):
-    if is_system_context(): return queryset   # Celery bypass
-    agency = get_current_agency()             # Lee ContextVar
-    if agency: return queryset.filter(agencia=agency)  # CLAVE
-    if user and user.is_superuser: return queryset
-    return queryset.none()  # Seguridad por defecto
+# core/models/base.py
+class AgenciaManager(models.Manager):
+    def get_queryset(self):
+        queryset = SaasQuerySet(self.model, using=self._db)
+        if is_system_context():
+            return queryset  # Bypass explícito para Celery
+        agency = get_current_agency()
+        if agency:
+            return queryset.filter(agencia=agency)  # Filtro obligatorio por tenant
+        user = get_current_user()
+        if user and user.is_superuser:
+            return queryset  # God Mode para superusuarios en /admin/
+        return queryset.none()  # Fail-safe: si no hay contexto, no retorna registros
 ```
 
-### Contexto de sistema para Celery tasks
-```python
-from core.middleware import system_context, agency_context
-
-# Tarea cross-tenant:
-with system_context(reason="retry_queued_boletos", max_seconds=60.0):
-    BoletoImportado.all_objects.filter(...).update(...)
-
-# Tarea por agencia especifica:
-with agency_context(agencia):
-    BoletoImportado.objects.filter(estado_parseo="EN_PROCESO")
+#### Capa 4: Row-Level Security en PostgreSQL (`core/middleware/rls.py:10`)
+Las tablas con datos de agencias poseen políticas RLS aplicadas a nivel de PostgreSQL:
+```sql
+CREATE POLICY agencia_isolation_policy ON bookings_venta
+    USING (agencia_id = NULLIF(current_setting('app.current_agencia_id', true), '')::integer
+           OR current_setting('app.bypass_rls', true) = 'true');
 ```
 
-### Roles de usuario (UsuarioAgencia.rol)
+### Ejecución de Tareas en Background (Celery)
+Para tareas en segundo plano donde no existe petición HTTP activa, se utilizan los siguientes context managers:
 
-| Rol        | Permisos |
-|------------|----------|
-| admin      | Todo |
-| gerente    | Todo excepto configuracion SaaS |
-| vendedor   | Solo sus propias ventas |
-| contador   | Solo modelos financieros (Factura, PagoVenta, etc.) |
-| operador   | Operacional sin finanzas |
-| consulta   | Solo lectura, sin crear/modificar |
+1. **Contexto de Agencia Específica:**
+   ```python
+   from core.middleware import agency_context
+   with agency_context(agencia_instance, reason="procesar_correo_ingresado"):
+       # Model.objects.all() se filtra automáticamente para esa agencia
+       Venta.objects.filter(...)
+   ```
 
-### Impersonacion God Mode
-Un superuser puede impersonar cualquier agencia desde el admin.
-Token guardado en `request.session["impersonated_agencia_id"]` con timestamp.
-**Timeout automatico: 30 minutos** (timedelta(seconds=1800) en middleware.py:202).
+2. **Contexto de Sistema (Bypass de Multi-Tenancy):**
+   ```python
+   from core.middleware import system_context
+   # Requiere ALLOW_SYSTEM_CONTEXT=1 en entorno
+   with system_context(reason="sync_bcv_rates_cron", max_seconds=60.0):
+       # Permite consultar y actualizar registros cross-tenant
+       AgenciaConfiguracion.all_objects.filter(...)
+   ```
 
 ---
 
 ## 7. ARQUITECTURA DE LA IA INTERNA
 
-### 7.1 Ticket Parser Pro (parseo de boletos)
-
-Flujo de procesamiento:
-```
-ARCHIVO SUBIDO (PDF/TXT/EML)
-         |
-         v
-TicketParserService.procesar_boleto()
-         |
-         +-- Extraccion de texto
-         |    +-- PyMuPDF (fitz) para PDF
-         |    +-- Decodificacion EML para correos
-         |
-         +-- MOTOR 1: GDS Especifico (Deterministico / Gratis)
-         |    +-- adapter.parse_ticket_with_new_parsers()
-         |         +-- KiuParser      (kiu_parser.py -- boletos KIU)
-         |         +-- ConsoleParser  (console_parser.py -- formato consola GDS)
-         |         +-- [otros parsers registrados en registry.py]
-         |
-         +-- MOTOR 2: Regex Generico (FastDeterministicParsers)
-         |    +-- extract_data_from_text() en ticket_parser.py
-         |         +-- SHA-256 fingerprint -> cache Redis (TTL 86400s)
-         |         +-- Patrones regex para PNR, boleto, nombre, vuelos
-         |
-         +-- MOTOR 3: IA (GeminiParser) [mas costoso]
-              +-- GeminiParser.parse(text, html_text, pdf_path)
-                   +-- Modelo: gemini-2.5-flash
-                   +-- Timeout: 20 segundos (ThreadPoolExecutor)
-                   +-- Vision: activa si texto corrupto "(cid:" o < 100 chars
-                   +-- Fallback: devuelve {} en error
-```
-
-Orden de prioridad en extract_data_from_text() (ticket_parser.py:306-375):
-1. Cache Redis (fingerprint SHA-256, TTL 24h)
-2. parse_ticket_with_new_parsers() -- parsers GDS especificos
-3. FastDeterministicParsers.parse_general_regex() -- regex generico
-4. Si todo falla -> retorna dict vacio (no lanza excepcion)
-
-Tarea Celery del parseo (apps/automation/tasks.py:8):
-```python
-@shared_task(bind=True, max_retries=3, soft_time_limit=20, time_limit=30)
-def process_web_uploaded_ticket(self, boleto_id, agencia_id=None):
-    # Estados: EN_PROCESO -> COMPLETADO | REVISION_REQUERIDA
-    # SoftTimeLimitExceeded -> marca REVISION_REQUERIDA (no crashea)
-```
-
-### 7.2 AI Engine (motor unificado)
-
-```python
-# apps/automation/services/ai_engine.py
-class AIEngine:
-    DEFAULT_MODEL = "gemini-2.5-flash"
-    PRO_MODEL     = "gemini-1.5-pro"
-
-    def call_gemini(self, prompt, content_list=None, response_schema=None, ...):
-        # Delega a ProviderChain con fallback automatico:
-        # Gemini -> OpenAI -> DeepSeek
-```
-
-Resolucion de API key (prioridad):
-1. `AgenciaConfiguracion.gemini_api_key` -- clave privada de la agencia (cifrada con Fernet)
-2. `os.environ["GEMINI_API_KEY"]` -- clave global del sistema
-
-Esto permite que cada agencia PRO/ENTERPRISE use su propia cuota de Gemini.
-
-### 7.3 AI Agent con Function Calling
+TravelHub integra inteligencia artificial mediante una arquitectura multicapa de parsers, motores conversacionales y herramientas con fallback automático:
 
 ```
-apps/automation/services/ai_agent.py       (6497 bytes)
-apps/automation/services/ai_tools.py       (37637 bytes -- herramientas Function Calling)
+                      [ Documento / Texto / PDF / EML ]
+                                     │
+                                     ▼
+                      TicketParserService.procesar_boleto()
+                                     │
+         ┌───────────────────────────┴───────────────────────────┐
+         │                                                       │
+         ▼                                                       ▼
+ ┌───────────────────────────────┐               ┌───────────────────────────────┐
+ │ MOTOR 1: Parsers GDS          │               │ MOTOR 2: FastDeterministic    │
+ │ (KiuParser, ConsoleParser)   │               │ (Regex Genericos)             │
+ └──────────────┬────────────────┘               └───────────────┬───────────────┘
+                │ (Si falla o falta confianza)                   │ (Si falla)
+                └───────────────────────────┬────────────────────┘
+                                            │
+                                            ▼
+                             ┌───────────────────────────────┐
+                             │ MOTOR 3: UniversalAIParser    │
+                             │ (Gemini 2.5 Flash / Vision)   │
+                             └──────────────┬────────────────┘
+                                            │
+                                            ▼
+                             ┌───────────────────────────────┐
+                             │ ProviderChain (ai_engine.py)  │
+                             │ Gemini -> OpenAI -> DeepSeek  │
+                             └───────────────────────────────┘
 ```
 
-Agente conversacional. Las herramientas en ai_tools.py permiten al agente ejecutar acciones reales
-del ERP (consultar ventas, crear boletos, etc.).
-[VERIFICAR] integracion con WhatsApp chatbot.
+### 7.1 Ticket Parser Pro & Service (`apps/automation/services/ticket_parser_service.py:35`)
+Orquesta la extracción de datos desde boletos PDF, texto o correo electrónico:
+1. **Detección y Caching:** Calcula un fingerprint SHA-256 del contenido. Si existe en Redis cache (TTL 24 horas), retorna el resultado parseado sin consumir CPU ni cuota de API.
+2. **Parsers Deterministícos GDS:** Intenta extraer la información usando `parse_ticket_with_new_parsers()` (`apps/automation/parsers/adapter.py:15`), invocando `KiuParser` o `ConsoleParser`.
+3. **Regex Generico (`FastDeterministicParsers`):** Si el GDS no es detectado, aplica expresiones regulares para capturar PNR, número de boleto (13 dígitos), pasajero e itinerarios.
+4. **Parsing IA Fallback (`UniversalAIParser`):** Si el resultado determinístico es incompleto o de baja confianza, delega el texto o documento a `UniversalAIParser` (`apps/automation/parsers/ai_universal_parser.py:53`), usando `AIEngine`.
 
-### 7.4 Control de costos IA
+### 7.2 AI Engine & ProviderChain (`apps/automation/services/ai_engine.py:90`)
+`AIEngine.call_gemini()` actúa como el cliente unificado para todas las solicitudes de IA del sistema:
+- **Priorización de API Keys:**
+  1. Clave privada de la agencia (`AgenciaConfiguracion.gemini_api_key`, desencriptada de `EncryptedCharField`).
+  2. Clave global del sistema (`os.environ["GEMINI_API_KEY"]`).
+- **Cadena de Fallback (ProviderChain):** Si Gemini falla por rate-limit (HTTP 429) o timeout, la solicitud conmuta automáticamente a OpenAI (`openai==2.48.0`) y posteriormente a DeepSeek via la interfaz compatible.
+- **Modelos predeterminados:** `gemini-2.5-flash` para velocidad/eficiencia y `gemini-1.5-pro` para tareas complejas de razonamiento o parsing multimodal de alta densidad.
 
-```python
-# core/models/ai.py
-class AIUsageLog(models.Model):
-    agencia        = ForeignKey(Agencia)
-    model_name     = CharField  # 'gemini-2.5-flash', 'gemini-1.5-pro'
-    feature        = CharField  # 'ticket_parsing', 'reconciliation', 'marketing_copy'
-    input_tokens   = IntegerField
-    output_tokens  = IntegerField
-    estimated_cost = DecimalField(max_digits=10, decimal_places=6)
-    status         = CharField  # 'SUCCESS', 'FAILED', '429_LIMIT'
-```
+### 7.3 Agente Conversacional e Integración Brain Assistant (`apps/automation/services/ai_agent.py`)
+El módulo de agente conversacional permite interactuar con el ERP en lenguaje natural mediante **Function Calling**:
+- **Herramientas Ejecutables (`apps/automation/services/ai_tools.py`):** Define funciones que la IA puede invocar de forma segura, tales como buscar clientes, consultar estado de boletos, calcular totales de ventas o revisar la tasa BCV del día.
+- **Canal Telegram Webhook (`apps/communications/views/telegram_views.py`):** Los mensajes entrantes al bot de Telegram son procesados por el webhook, resolviendo el contexto multi-tenant de la agencia correspondiente y respondiendo interactivamente mediante el agente de IA.
 
-Rate limiting via core/middleware_ai_ratelimit.py:
-- ai_parser_quota: 20/minute
-- ai_parser_daily: 200/day
+### 7.4 Registro de Uso y Rate Limiting
+- **Auditoría de Costos (`core/models/ai.py:AIUsageLog`):** Registra cada llamada a la IA capturando agencia, modelo utilizado, tokens de entrada/salida, costo estimado en USD y funcionalidad ejecutada (`ticket_parsing`, `brain_assistant`, `marketing_copy`).
+- **Control de Frecuencia (`core/middleware_ai_ratelimit.py`):** Limita el consumo de endpoints de IA (máximo 20 peticiones por minuto por IP/agencia y 200 peticiones diarias en planes básicos).
 
 ---
 
 ## 8. CONTRATO DE API / ENDPOINTS PRINCIPALES
 
-### Autenticacion
+### Autenticación y Sesión
 
-| Metodo | Ruta | Proposito | Auth |
-|--------|------|-----------|------|
-| POST | /api/auth/jwt/obtain/ | Obtener JWT access + refresh tokens | No |
-| POST | /api/auth/jwt/logout/ | Invalidar refresh token | Token |
-| GET | /auth/magic-request/ | Solicitar magic link por email | No |
-| GET | /auth/magic/<token>/ | Verificar y autenticar con magic link | No |
-| POST | /login/ | Login clasico Django (session) | No |
-| POST | /sso/login/<provider_id>/ | Inicio SSO/OIDC | No |
+| Método | Ruta | Propósito | Autenticación |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/api/auth/jwt/obtain/` | Obtener par de tokens JWT (`access` y `refresh`). | Ninguna |
+| **POST** | `/api/auth/jwt/logout/` | Invalidar token de refresco JWT. | JWT Token |
+| **POST** | `/login/` | Iniciar sesión basada en cookies de sesión Django. | Ninguna |
+| **GET** | `/auth/magic-request/` | Solicitar enlace mágico de inicio de sesión por email. | Ninguna |
+| **GET** | `/auth/magic/<token>/` | Validar enlace mágico y autenticar usuario. | Ninguna |
 
-### API REST (todas requieren Token o JWT)
+### Core & ERP (Endpoints REST DRF `/api/`)
 
-| Metodo | Ruta | Proposito |
-|--------|------|-----------|
-| GET/POST | /api/boletos/ | Listar / crear BoletoImportado |
-| POST | /api/boletos/upload/ | Subir PDF/TXT para parseo automatico |
-| POST | /api/boletos/<pk>/retry-parse/ | Re-parsear boleto existente |
-| GET/POST | /api/ventas/ | CRUD de Ventas |
-| GET/POST | /api/facturas/ | CRUD de Facturas |
-| GET/POST | /api/clientes/ | CRUD CRM -- Clientes |
-| GET | /api/dashboard/stats/ | KPIs del dashboard (throttle: 100/hour) |
-| GET | /api/tasas-bcv/ | Tasas de cambio BCV actuales |
-| GET | /api/audit-logs/ | Logs de auditoria (solo staff) |
-| POST | /api/parse-demo/ | Demo publico de parseo de boleto |
-| GET | /api/schema/ | OpenAPI schema (solo staff en prod) |
-| GET | /api/docs/ | Swagger UI (solo staff en prod) |
+| Método | Ruta | Propósito | Roles / Permisos |
+| :--- | :--- | :--- | :--- |
+| **GET / POST** | `/api/boletos/` | Listar y registrar boletos importados. | Autenticado (Tenant) |
+| **POST** | `/api/boletos/upload/` | Subir archivo PDF/TXT para parseo automático de boleto. | Autenticado (Tenant) |
+| **POST** | `/api/boletos/<id>/retry-parse/` | Solicitar re-parseo de un boleto previamente fallido. | Autenticado (Tenant) |
+| **GET / POST** | `/api/ventas/` | Listar y crear ventas consolidadas. | Autenticado (Tenant) |
+| **GET / PUT** | `/api/ventas/<id>/` | Consultar o actualizar detalle de una venta. | Autenticado (Tenant) |
+| **GET / POST** | `/api/facturas/` | Generar y listar facturas fiscales SENIAT. | Autenticado (Rol: Admin, Contador) |
+| **GET / POST** | `/api/clientes/` | Gestión de clientes CRM y pasaportes. | Autenticado (Tenant) |
+| **GET** | `/api/dashboard/stats/` | Obtener métricas y KPIs consolidados del dashboard. | Autenticado (Tenant) |
+| **GET** | `/api/tasas-bcv/` | Consultar la tasa de cambio oficial BCV vigente. | Autenticado (Tenant) |
+| **GET** | `/api/audit-logs/` | Consultar logs de auditoría forense del sistema. | Superusuario / Staff |
 
-### Sistema y monitoreo
+### Monitoreo & Sistema
 
-| Metodo | Ruta | Auth |
-|--------|------|------|
-| GET | /health/ | No |
-| GET | /health/metrics/ | No |
-| GET | /prometheus/ | No |
-| POST | /csp-report/ | No (CSRF exempt) |
-| GET | /status/ | Staff only |
+| Método | Ruta | Propósito | Autenticación |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/health/` | Healthcheck básico del servicio web y base de datos. | Ninguna |
+| **GET** | `/health/metrics/` | Estado extendido de componentes (DB, Redis, Celery). | Ninguna |
+| **GET** | `/prometheus/` | Exportador de métricas en formato Prometheus. | IP restringida / Staff |
+| **POST** | `/csp-report/` | Endpoint receptor de violaciones de CSP. | Ninguna (Exento CSRF) |
 
-### Webhooks externos (CSRF exempt, verificacion de firma requerida)
+### Webhooks Externos (Exentos de CSRF - Verificación de Firma Obligatoria)
 
-| Metodo | Ruta | Proposito |
-|--------|------|-----------|
-| POST | /system/webhooks/stripe/ | Eventos Stripe (billing) |
-| POST | /system/webhooks/whatsapp/ | Mensajes WhatsApp Meta Cloud API |
-| GET/POST | /system/webhooks/telegram/ | Updates bot Telegram |
-| POST | /system/webhooks/binance/ | Confirmaciones pago Binance Pay |
+| Método | Ruta | Propósito | Mecanismo de Seguridad |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/system/webhooks/stripe/` | Procesar eventos de facturación y planes SaaS. | Firma HMAC en header `Stripe-Signature` (`views_webhooks.py:180`) |
+| **POST** | `/system/webhooks/telegram/` | Recepción de mensajes del bot de Telegram. | Verificación de secreto en URL / Token del bot (`telegram_views.py`) |
+| **POST** | `/system/webhooks/binance/` | Confirmaciones de pago Binance Pay. | Firma HMAC-SHA256 en header `X-Binance-Signature` |
+| **POST** | `/system/webhooks/whatsapp/` | Notificaciones de recepción/entrega WhatsApp. | Token de verificación global de Evolution API |
 
 ---
 
 ## 9. SEGURIDAD Y REGLAS DE ORO
 
-### Medidas implementadas (verificadas en codigo)
+### Medidas de Seguridad Implementadas
 
-#### Cifrado en campo (core/fields.py)
-- EncryptedCharField y EncryptedTextField usan Fernet (AES-128-CBC + HMAC-SHA256)
-- Campos cifrados en AgenciaConfiguracion: password_app_correo, telegram_bot_token,
-  evolution_api_key, email_monitor_password, gemini_api_key
-- Deteccion de doble cifrado: si valor empieza con 'gAAAAA', no se vuelve a cifrar
-- Fallo en descifrado -> retorna "" + loguea a Sentry (no crashea la app)
+#### 1. Cifrado en Reposo de Datos Sensibles (`core/fields.py:108`)
+- `EncryptedCharField` y `EncryptedTextField` utilizan cifrado simétrico **Fernet** (AES-128-CBC + HMAC-SHA256).
+- Los siguientes campos en `AgenciaConfiguracion` se almacenan siempre cifrados: `password_app_correo`, `telegram_bot_token`, `evolution_api_key`, `email_monitor_password`, `gemini_api_key`.
+- Prevención de doble cifrado: si la cadena inicia con el prefijo Fernet `gAAAAA`, no se re-encripta.
 
-#### Proteccion brute-force (django-axes, verificado en settings/base.py)
-```python
-AXES_ENABLED = True
-AXES_FAILURE_LIMIT = 5       # Bloqueo tras 5 intentos fallidos
-AXES_COOLOFF_TIME = 1        # Hora de cooldown
-AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
-AXES_RESET_ON_SUCCESS = True
-```
+#### 2. Protección Contra Ataques de Fuerza Bruta (`django-axes`)
+Configurado en `travelhub/settings/base.py`:
+- Bloqueo automático al superar 5 intentos fallidos de autenticación (`AXES_FAILURE_LIMIT = 5`).
+- Cooldown de 1 hora (`AXES_COOLOFF_TIME = 1`).
+- Seguimiento por combinación de nombre de usuario e dirección IP (`AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]`).
 
-#### JWT (verificado en settings/base.py)
-```python
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
-    "ALGORITHM": "HS256",
-}
-```
+#### 3. Política de Tokens JWT Estricta
+- Tokens de acceso con vida útil corta de 30 minutos (`ACCESS_TOKEN_LIFETIME = timedelta(minutes=30)`).
+- Tokens de refresco con rotación y lista negra activa tras su uso (`ROTATE_REFRESH_TOKENS = True`, `BLACKLIST_AFTER_ROTATION = True`).
 
-#### Sesiones (verificado en settings/base.py)
-```python
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_AGE = 14400      # 4 horas
-SESSION_COOKIE_NAME = "th_sessionid"
-CSRF_COOKIE_NAME = "th_csrftoken"
-SESSION_COOKIE_SAMESITE = "Lax"
-```
+#### 4. Content Security Policy (CSP) Dinámico (`core/middleware/security_headers.py:12`)
+- Inyección de un **nonce criptográfico aleatorio** de 16 bytes (`secrets.token_hex(16)`) generado por cada petición HTTP.
+- Headers adicionales de seguridad forzados en cada respuesta: `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options: DENY`.
 
-#### Content Security Policy dinamico (verificado en core/middleware.py:354)
-- Generado por SecurityHeadersMiddleware en cada request
-- Nonce criptografico unico por request (secrets.token_hex(16))
-- Cada agencia puede extender CSP via AgenciaConfiguracion.csp_directives (JSONField)
-- Headers adicionales: X-Content-Type-Options: nosniff,
-  Referrer-Policy: strict-origin-when-cross-origin, X-Frame-Options: DENY
+#### 5. Auditoría Forense Criptográfica (`core/models/audit.py:16`)
+- Cada registro en `AuditLog` incluye una **cadena de hashes encadenados** (`previous_hash` y `record_hash` en SHA-256) al estilo de un libro contable inmutable.
+- Permite detectar manipulaciones directas en la tabla de auditoría si la cadena de hashes se rompe.
 
-#### RLS a nivel de base de datos (verificado en core/middleware.py)
-```sql
--- Ejecutado por ThreadLocalContextMiddleware en cada request:
-SET LOCAL app.current_agencia_id = '<id>';
-SET LOCAL app.bypass_rls = 'false';
--- Al finalizar el request (bloque finally garantizado):
-SET LOCAL app.current_agencia_id = '0';
-SET LOCAL app.bypass_rls = 'false';
-```
-Con ATOMIC_REQUESTS = True, estas variables tienen el mismo ciclo de vida que la transaccion.
+---
 
-#### Audit Log forense (core/models/audit.py:16)
-- Cadena de hashes (blockchain-style): previous_hash y record_hash (SHA-256) en cada registro
-- Inmutable: no se borra, solo SET_NULL en FK si la Venta es eliminada
-- Registra: CREATE, UPDATE, DELETE, STATE, LOGIN, LOGOUT
+### Reglas del Repositorio (Reglas de ORO)
 
-#### DB Router (core/db_router.py)
-- PrimaryReplicaRouter: reads -> replica, writes -> default
-- apps criticas (axes, sessions, admin) siempre al primary
-- En tests: usa 'default' como espejo de 'replica'
-
-### Reglas de ORO (nunca violar)
+> ⚠️ **IMPERATIVOS ARQUITECTÓNICOS ABSOLUTOS** — Ninguna IA ni desarrollador debe violar estas reglas bajo ninguna circunstancia.
 
 ```
-[CRITICO] REGLA 1: NUNCA hacer Model.objects.get(pk=pk) sin filtro de agencia en vistas de usuario.
-  Correcto: get_object_tenant_or_404(Model, agencia, pk=pk)
-  Correcto: Model.objects.get(pk=pk, agencia=agencia)
+[CRÍTICO] REGLA 1: NUNCA ejecutar Model.objects.get(pk=pk) sin filtrar por la agencia en vistas o APIs de usuario.
+  - INCORRECTO: BoletoImportado.objects.get(pk=pk)
+  - CORRECTO:   get_object_tenant_or_404(BoletoImportado, agencia, pk=pk)
+  - CORRECTO:   BoletoImportado.objects.get(pk=pk, agencia=agencia)
 
-[CRITICO] REGLA 2: NUNCA usar SQL crudo (cursor.execute) para manipular entidades de negocio.
-  Solo Django ORM: objects.create(), objects.filter(), transaction.atomic()
+[CRÍTICO] REGLA 2: NUNCA usar SQL dinámico o consultas crudas en texto (cursor.execute) para manipular datos de negocio.
+  - Usar EXCLUSIVAMENTE Django ORM (objects.create(), objects.filter(), transaction.atomic()).
 
-[CRITICO] REGLA 3: NUNCA inventar librerias. Si no esta en requirements/base.txt, no usarla.
+[CRÍTICO] REGLA 3: NUNCA importar librerías externas que no estén declaradas en requirements/base.txt.
 
-[CRITICO] REGLA 4: NUNCA guardar secretos en codigo fuente.
-  Solo en variables de entorno o EncryptedCharField en la base de datos.
+[CRÍTICO] REGLA 4: NUNCA hardcodear API keys, tokens o contraseñas en código fuente.
+  - Usar os.getenv() o campos EncryptedCharField en la base de datos.
 
-[ALTO] REGLA 5: Todo modelo de negocio DEBE heredar AgenciaMixin.
-  Esto garantiza el filtro automatico del AgenciaManager.
+[ALTO]    REGLA 5: Todo nuevo modelo de dominio de agencia DEBE heredar de AgenciaMixin (core.models.base).
+  - Esto garantiza la auto-asignación de la agencia y el aislamiento automático por AgenciaManager.
 
-[ALTO] REGLA 6: Para tareas Celery cross-tenant, usar SIEMPRE system_context(reason="...").
-  El parametro reason es obligatorio para auditoria.
+[ALTO]    REGLA 6: En tareas Celery cross-tenant, envolver el bloque obligatoriamente en system_context(reason="...").
+  - El parámetro 'reason' es obligatorio para trazabilidad en logs de auditoría.
 
-[ALTO] REGLA 7: No activar USE_PGBOUNCER=True sin tambien configurar CONN_MAX_AGE=0.
-  Con PgBouncer en transaction mode + CONN_MAX_AGE>0, el RLS se fuga entre requests.
+[ALTO]    REGLA 7: Al activar USE_PGBOUNCER=True en entorno, se DEBE forzar CONN_MAX_AGE=0.
+  - Mantener conexiones abiertas con PgBouncer en modo transacción provoca fugas de variables RLS entre requests.
 
-[MEDIO] REGLA 8: Validar entidades en modelos (validators.py), no en vistas.
-  Las vistas solo convierten request -> model -> response.
+[MEDIO]   REGLA 8: Las validaciones de negocio deben residir en los Modelos o Serializadores, NUNCA en los templates.
 
-[MEDIO] REGLA 9: Ciudades/origenes en parseo Sabre: usar [\t ] (horizontal) no \s en regex.
-  \s incluye saltos de linea y desplaza el match. (Ver .agents/AGENTS.md)
+[MEDIO]   REGLA 9: Al extraer orígenes/destinos en regex para Sabre, usar clases de caracteres horizontales [\t ] y NO \s.
+  - \s incluye saltos de línea (\n) y desplaza el offset de captura en patrones no codiciosos.
 
-[MEDIO] REGLA 10: core/ NO puede importar de apps/*. Solo apps/* importan de core/.
-  Si necesitas logica de apps/ en core/, usa referencias lazy ('app.ModelName').
+[MEDIO]   REGLA 10: El paquete core/ NUNCA debe importar módulos desde apps/*. La dependencia es unidireccional (apps/ -> core/).
 ```
 
 ---
 
 ## 10. BUGS Y LIMITACIONES CONOCIDAS
 
-> Deuda técnica reconocida. No estan en trabajo activo.
-> Ver TECH_DEBT_REMEDIATION.md para inventario completo.
+Deuda técnica registrada y gestionada (detalles completos en `TECH_DEBT_REMEDIATION.md`):
 
-### P0 — Seguridad (critico) — ✅ TODOS RESUELTOS
+1. **Formatos No Estándar en Boletos Imprimibles Avior / Estelar:**
+   - Ciertos boletos web generados como imagen dentro del PDF no contienen capa de texto ejecutable. Requieren procesamiento por Gemini Vision, lo que incrementa el tiempo de respuesta a 8-12 segundos.
 
-| ID | Descripcion | Estado |
-|----|------------|--------|
-| P0-002 | IDOR en BoletoRetryParseAPIView | ✅ RESUELTO — `get_object_tenant_or_404()` en boleto_views.py:165 |
-| P0-003 | IDOR en VentaDoubleInvoiceAPIView | ✅ RESUELTO — `get_object_tenant_or_404()` en boleto_views.py:365 |
-| P0-005 | Webhook Stripe sin firma | ✅ RESUELTO — `stripe.Webhook.construct_event()` en views_webhooks.py:159 |
-| P0-006 | Information Disclosure str(e) | ✅ RESUELTO — todos reemplazados con error_id + logger.exception |
+2. **Parser GDS Amadeus:**
+   - ✅ **RESUELTO:** Implementado `AmadeusParser` nativo (`apps/automation/parsers/amadeus_parser.py`) heredando de `BaseTicketParser` con soporte para boletos GDS Amadeus y recibos CheckMyTrip.
 
-### P1 — Estabilidad — ✅ TODOS RESUELTOS
-
-| ID | Descripcion | Estado |
-|----|------------|--------|
-| P1-001 | Doble signal post_save | ✅ RESUELTO — un solo receiver verificado |
-| P1-002 | django.setup() en celery.py | ✅ RESUELTO — no existe llamada explicita |
-
-### Limitaciones de parseo de boletos
-
-- PDFs con texto codificado como imagen (boletos Avior Web): requiere Gemini Vision, con costo y latencia
-- Boletos Amadeus: parser generico regex; sin parser especifico (stub sin implementar)
-- Variabilidad de formatos KIU: funciona para aerolineas venezolanas principales, puede fallar en otras
-- Timeout de Gemini: 20 segundos. Boletos complejos o red lenta -> REVISION_REQUERIDA
+3. **Timeout en Extracción por Red Lenta:**
+   - La tarea asíncrona de parseo tiene un `soft_time_limit` de 20 segundos. Si la API de Gemini responde con alta latencia, el estado del boleto pasa a `REVISION_REQUERIDA` para que un operador verifique manualmente.
 
 ---
 
-## 11. BRECHAS EN REPARACION
+## 11. BRECHAS EN REPARACIÓN (TRABAJO ACTIVO)
 
-> Estado al 2026-07-26 en rama `hardening/operational-risks`
+Estado actualizado de los ítems de remediación técnica y hardening en el repositorio:
 
-| ID | Descripcion | Estado |
-|----|------------|--------|
-| P0-004 | system_context() sin limite de tiempo | OK -- max_seconds=60.0 en middleware.py:69 |
-| P1-003 | CONN_MAX_AGE incompatible con PgBouncer | OK -- USE_PGBOUNCER env var en base.py |
-| P2-006 | Re-evaluacion de sys.argv en cada query | OK -- constantes _IS_PYTEST, _IS_MANAGEMENT_COMMAND |
-| P0-002 | IDOR BoletoRetryParseAPIView | OK -- get_object_tenant_or_404() |
-| P0-003 | IDOR VentaDoubleInvoiceAPIView | OK -- get_object_tenant_or_404() |
-| P0-005 | Stripe webhook firma | OK -- construct_event() validado |
-| P0-006 | Traceback en 500 | OK -- error_id pattern |
-| P1-001 | Doble signal BoletoImportado | OK -- un solo receiver |
-| P1-002 | django.setup() en celery.py | OK -- no existe |
-| P1-004 | Cache TTL agencia | OK -- 30s + signal invalidacion |
-| P1-005 | locale.setlocale global | OK -- safe_setlocale en core/locale_patch.py |
-| P1-006 | Truncacion silenciosa | OK -- log + flag |
-| P1-007 | WhatsApp sync en signals | OK -- .delay() |
-| P2-001 | Comentario placeholder | OK -- no existe |
-| P2-003 | flights SDK sin uso | OK -- eliminado de requirements |
-| P2-005 | GDS months duplicado | OK -- centralizado |
-| P2-007 | @property id | OK -- eliminado |
-| P2-008 | Tests en raiz | OK -- movidos a scratch_scripts/ |
-| P2-009 | _build_redis_url en settings | OK -- movido a core/utils/redis_utils.py |
-| P2-011 | Nested atomic en Venta.save() | OK -- select_for_update() |
-| P3-001 | Boletos QUE nunca reintentados | OK -- retry_queued_boletos_task existe |
-| P3-004 | log_parseo sin limite | OK -- truncado a 4000 chars en save() |
-| Contabilidad IA | AsientoContableSchema refactorizado | OK -- Resuelto |
-| Parser Amadeus | Implementacion real del parser Amadeus | PENDIENTE |
-| P3-002 | Endpoint polling estado parseo | PENDIENTE |
-| P3-003 | Alerta cuota Gemini por agencia | PENDIENTE |
-| P4-001 | Metricas precision parser | PENDIENTE |
-| P4-002 | God Object urls.py | PENDIENTE |
-| P4-003 | Versionado datos_parseados | PENDIENTE |
-| P4-004 | NotificationRouter unificado | PENDIENTE |
-| P4-005 | CI/CD check documentacion | PENDIENTE |
+| ID / Área | Descripción del Trabajo | Estado | Referencia de Verificación |
+| :--- | :--- | :--- | :--- |
+| **P0-002** | Vulnerabilidad IDOR en `BoletoRetryParseAPIView` | ✅ **Resuelto** | `get_object_tenant_or_404()` implementado en `apps/bookings/views/boleto_views.py:165` |
+| **P0-003** | Vulnerabilidad IDOR en `VentaDoubleInvoiceAPIView` | ✅ **Resuelto** | `get_object_tenant_or_404()` implementado en `apps/bookings/views/boleto_views.py:365` |
+| **P0-004** | Prevención de ejecución indefinida en `system_context()` | ✅ **Resuelto** | Control `max_seconds=60.0` y env var `ALLOW_SYSTEM_CONTEXT` en `core/middleware/tenant.py:67` |
+| **P0-005** | Validación de firma HMAC en Webhook Stripe | ✅ **Resuelto** | `stripe.Webhook.construct_event()` en `apps/finance/views/views_webhooks.py:180` |
+| **P0-006** | Prevención de fuga de información en tracebacks HTTP 500 | ✅ **Resuelto** | Patrón `error_id` opaco retornado al cliente y log estructurado en Sentry |
+| **P1-001** | Eliminación de ejecuciones duplicadas por señales Django | ✅ **Resuelto** | Desduplicación de receivers `post_save` en `apps/bookings/signals.py` |
+| **P1-003** | Incompatibilidad de `CONN_MAX_AGE` con PgBouncer | ✅ **Resuelto** | Sincronización automática de flag `USE_PGBOUNCER` en `travelhub/settings/base.py` |
+| **P1-004** | Invalidación de cache de configuración de agencia | ✅ **Resuelto** | Inserción de signal de limpieza al actualizar `AgenciaConfiguracion` |
+| **P1-007** | Sincronización asíncrona en notificaciones de WhatsApp | ✅ **Resuelto** | Despacho de notificaciones migrado a Celery `.delay()` |
+| **P3-001** | Reintento automático de boletos encolados en error | ✅ **Resuelto** | Tarea programada `retry_queued_boletos_task` en `apps/bookings/tasks.py` |
+| **Telegram** | Integración Brain Assistant bidireccional en Telegram | ✅ **Resuelto** | Webhook y enrutador activo en `apps/communications/views/telegram_views.py` |
+| **Parser Amadeus** | Implementación de parser determinístico nativo Amadeus | ✅ **Resuelto** | `AmadeusParser` en `apps/automation/parsers/amadeus_parser.py` (100% tests pasados) |
+| **P3-002** | Endpoint de polling para estado de parseo en tiempo real | ✅ **Resuelto** | `BoletoStatusAPIView` en `apps/bookings/views/boleto_status_api.py` (`/api/boletos/<pk>/status/`) |
+| **P3-003** | Alerta cuota Gemini por agencia | ✅ **Resuelto** | `_check_daily_quota_alert()` en `apps/automation/services/ai_engine.py:428` |
+| **P4-001** | Métricas de precisión del parser | ✅ **Resuelto** | `ParserMetricsCollector` en `apps/automation/metrics/parser_metrics.py` |
+| **P4-003** | Versionado de datos_parseados | ✅ **Resuelto** | `_parser_version: "2.5.0"` y `_parsed_at` en `apps/automation/parsers/base_parser.py:186` |
+| **P4-004** | Unificación definitiva de NotificationRouter multicanal | ✅ **Resuelto** | `NotificationRouter` en `apps/communications/services/notification_router.py` |
 
 ---
 
-## APENDICE: Patrones de codigo rapidos para nueva IA
+## APÉNDICE: PATRONES DE CÓDIGO RÁPIDOS PARA OTRA IA
 
-### Nuevo endpoint REST seguro
+### 1. Crear un Nuevo Endpoint REST Multi-tenant Seguro
 
 ```python
-from core.api.mixins.tenant import TenantViewSetMixin  # [VERIFICAR path exacto]
+from rest_framework import viewsets
 from core.security import get_agencia_from_request, get_object_tenant_or_404
+from apps.bookings.models import Venta
+from apps.bookings.serializers import VentaSerializer
 
-class MiModeloViewSet(TenantViewSetMixin, viewsets.ModelViewSet):
-    serializer_class = MiModeloSerializer
-    # get_queryset() ya filtra por agencia (via TenantViewSetMixin -> AgenciaManager)
+class VentaViewSet(viewsets.ModelViewSet):
+    serializer_class = VentaSerializer
+
+    def get_queryset(self):
+        # AgenciaManager auto-filtra por la agencia actual del usuario
+        return Venta.objects.all()
 
     def get_object(self):
         agencia = get_agencia_from_request(self.request)
-        return get_object_tenant_or_404(MiModelo, agencia, pk=self.kwargs["pk"])
+        return get_object_tenant_or_404(Venta, agencia, pk=self.kwargs["pk"])
 ```
 
-### Nuevo modelo de negocio
+### 2. Definir un Nuevo Modelo de Dominio de Agencia
 
 ```python
+from django.db import models
 from core.models.base import AgenciaMixin, SoftDeleteModel
 
-class MiModelo(AgenciaMixin, SoftDeleteModel):
+class ServicioTuristico(AgenciaMixin, SoftDeleteModel):
     nombre = models.CharField(max_length=200)
-    # agencia ForeignKey INCLUIDO automaticamente por AgenciaMixin
-    # is_deleted, deleted_at INCLUIDO por SoftDeleteModel
-    # objects (AgenciaManager) filtra por tenant automaticamente
-    # all_objects (Manager) sin filtro para admin/sistema
-    # with_deleted (SoftDeleteManager) incluye eliminados
+    precio_usd = models.DecimalField(max_digits=12, decimal_places=2)
+
+    # AgenciaMixin incluye automáticamente:
+    # - ForeignKey('core.Agencia', on_delete=models.CASCADE)
+    # - manager 'objects' (AgenciaManager) con filtrado multi-tenant
+    # - manager 'all_objects' (Manager estándar para admin/sistema)
+
     class Meta:
-        app_label = "mi_app"
+        verbose_name = "Servicio Turístico"
+        ordering = ["-id"]
 ```
 
-### Tarea Celery con contexto de agencia
-
-```python
-from celery import shared_task
-from core.middleware import agency_context
-
-@shared_task(bind=True, max_retries=3)
-def mi_tarea(self, agencia_id):
-    from core.models import Agencia
-    agencia = Agencia.objects.get(pk=agencia_id)
-    with agency_context(agencia, reason="mi_tarea_descripcion"):
-        # Model.objects.all() filtra por agencia automaticamente aqui
-        pass
-```
-
-### Acceder a IA con fallback automatico
+### 3. Invocar la IA Interna con Fallback y Seguimiento de Costos
 
 ```python
 from apps.automation.services.ai_engine import AIEngine
 
 engine = AIEngine()
-result = engine.call_gemini(
-    prompt="Tu prompt aqui",
-    feature="mi_feature",       # Para AIUsageLog (tracking de costos)
-    temperature=0.1,
-    agency=request.agencia,     # Para resolver la API key correcta
+respuesta = engine.call_gemini(
+    prompt="Resume el siguiente itinerario de vuelo...",
+    feature="resumen_itinerario",  # Identificador para AIUsageLog
+    temperature=0.2,
+    agency=request.agencia,        # Resuelve API key de agencia o global
 )
-if "error" in result:
-    # El engine ya intento todos los proveedores del chain (Gemini -> OpenAI -> DeepSeek)
-    pass
+
+if "error" not in respuesta:
+    contenido = respuesta.get("content")
 ```

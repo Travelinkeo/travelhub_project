@@ -1,0 +1,183 @@
+>hefarereq
+                        REQUEST TYPES         SP   2MAY13 1042Z
+
+ ESTA PAGINA ENUMERA LOS CODIGOS DE TIPO DE SOLICITUD QUE SE
+ PUEDEN UTILIZAR CON LA ENTRADA FQD. LOS CODIGOS DE TIPO DE
+ SOLICITUD TAMBIEN PUEDEN HACER REFERENCIA A CODIGOS DE
+ DESCUENTO A PASAJERO.
+
+ TAREA                         FORMATO                REFERENCIA
+ -----                         -------                ----------
+ FQD CON TIPOS DE SOLICITUD    FQD LONPAR/R,-SD-ZZ        HE FQD
+                               FQD BKKNYC/S/R,-PXA
+
+ TIPO DE SOLICITUD                                    CODIGO
+ -----------------                                    ------
+ ACOMPANANTE                                          YC
+ ACOMPANANTE, NORMAL Y EXCURSION                      CNX
+ ADMINISTRATIVO                                       ADM
+ ADULTO CON TOUR DE GRUPO INCLUIDO Y TOUR INDIVIDUAL  GTI
+ ADULTO DE GRUPO                                      GR
+ ADULTO EN STANDBY                                    AB
+ ADULTO EN STANDBY Y PASAJERO FRECUENTE               NXF
+                                                             >MD
+>md
+                        REQUEST TYPES         SP   2MAY13 1042Z
+
+ TIPO DE SOLICITUD                                    CODIGO
+ -----------------                                    ------
+ ADULTO MILITAR CONFIRMADO                            MIL
+ ADULTO MILITAR CONFIRMADO Y DEPENDIENTE              YMD
+ ADULTO MILITAR CONFIRMADO Y NINO                     YMC
+ ADULTO NORMAL                                        NL
+ ADULTO Y NINO CON TOUR DE GRUPO INCLUIDO             GTC
+ ADULTO Y NINO CON TOUR INDIVIDUAL INCLUIDO           ITC
+ ADULTO Y NINO DE EXCURSION                           EXN
+ ADULTO Y NINO DE GRUPO                               GRC
+ ADULTO Y NINO EN CHARTER                             TA
+ ADULTO Y NINO NORMALES                               NLC
+ AIRE-MAR                                             AS
+ APEX                                                 APX
+ BEBE                                                 IN
+ CATEGORIA Z                                          CZ
+ CERTIFICADO DE INCENTIVOS                            ICP
+ DEPT. DE DEFENSA Y MILITAR JUBILADO Y DEPENDIENTE    DM
+ DISCRIMINATORIO (TRABAJADOR, ETC.)                   DIS
+                                                             >MD
+>md
+                        REQUEST TYPES         SP   2MAY13 1042Z
+
+ TIPO DE SOLICITUD                                    CODIGO
+ -----------------                                    ------
+ EMIGRANTE                                            EMI
+ EQUIPAJE                                             BAG
+ EQUIPAJE                                             BG
+ ESPOSA (CABEZA DE FAMILIA)                           SH
+ ESPOSA (DEPENDIENTE)                                 ST
+ ESTUDIANTE CONFIRMADO                                SD
+ ESTUDIANTE CONFIRMADO Y STANDBY                      SSB
+ ESTUDIANTE Y JOVEN CONFIRMADO                        SDZ
+ ESTUDIANTE/JOVEN                                     ZS
+ EXCURSION, ADULTO                                    EX
+ EXCURSION, ADULTO Y NINO, APEX Y PEX                 EXC
+ GOBIERNO DE VARIOS ESTADOS                           MSG
+ GRUPO                                                GRP
+ HELICOPTERO                                          HEL
+ INTERCAMBIO GUBERNAMENTAL/ GOBIERNO ESTATAL/
+ GOBIERNO DE LA CIUDAD O REGION/ VIAJE
+ GUBERNAMENTAL/ NINO/ CONTRATO GUBERNAMENTAL          YG
+                                                             >MD
+>md
+                        REQUEST TYPES         SP   2MAY13 1042Z
+
+ TIPO DE SOLICITUD                                    CODIGO
+ -----------------                                    ------
+ JOVEN                                                ZZ
+ JOVEN CONFIRMADO                                     YZ
+ JOVEN CONFIRMADO Y STANDBY                           YZB
+ JOVEN EN CHARTER                                     TZ
+ JUBILADO                                             CD
+ JUBILADO                                             YS
+ JUBILADO EN STANDBY                                  CB
+ JUBILADO Y STANDBY                                   SCB
+ MENOR NO ACOMPANADO                                  UM
+ MIEMBRO DEL CLERO                                    CL
+ MIEMBRO DEL GOBIERNO Y CAT. Z                        GVZ
+ MIEMBRO DEL GOBIERNO Y MILITAR                       GVM
+ MIEMBRO DEL GOBIERNO, MILITAR Y CAT. Z               GMZ
+ MILITAR CONFIRMADO Y EN STANDBY                      YMB
+ MILITAR DE PERMISO Y RECLUTA MILITAR                 YM
+ MILITAR DEPENDIENTE                                  MD
+ MILITAR EN CHARTER                                   TM
+                                                             >MD
+>md
+                        REQUEST TYPES         SP   2MAY13 1042Z
+
+ TIPO DE SOLICITUD                                    CODIGO
+ -----------------                                    ------
+ MILITAR EN STANDBY                                   MB
+ MILITAR Y CAT. Z                                     MLZ
+ NINO CON TOUR INDIVIDUAL INCLUIDO                    IC
+ NINO DE EXCURSION/NINO DEPENDIENTE DE EXCURSION      CX
+ NINO DE GRUPO                                        GC
+ NINO DEPENDIENTE DEL GOBIERNO                        YGC
+ NINO MILITAR CONFIRMADO                              MC
+ NINO NORMAL Y DE EXCURSION                           CHX
+ NINO NORMAL/NINO DEPENDIENTE NORMAL                  CH
+ NORMAL Y DE EXCURSION                                NLX
+ NORMAL Y DE EXCURSION PARA ADULTO, MILITAR ADULTO,
+ GOBIERNO                                             NXM
+ OBRERO/TRABAJADOR                                    LBR
+ PASAJERO FRECUENTE                                   FT
+ PASAJERO FRECUENTE ADULTO Y NINO                     FTC
+ PLAN FAMILIAR                                        YP/FP
+ PLAN FAMILIAR ADULTO/NINO/ACOMPANANTE                FP/YP
+                                                             >MD
+>md
+                        REQUEST TYPES         SP   2MAY13 1042Z
+
+ TIPO DE SOLICITUD                                    CODIGO
+ -----------------                                    ------
+ POR TIERRA                                           GRD
+ PROMOCION*: PERSONA EN DESPLAZAMIENTO A SU
+ TRABAJO/CONVENCION/CUPON/DESCUENTO/EMIGRANTE/
+ MISIONERO/REFUGIADO/MARINERO/GUIA TURISTICO/
+ EMPLEADO DE UNIVERSIDAD/AGENTE/PEREGRINO             PR*
+ RESIDENTE DEL ESTADO                                 STR
+ SOLO CLASES FULL COACH Y PRIMERA (SOLO CO)           YF
+ STANDBY DE ESTUDIANTE                                SB
+ STANDBY DE ESTUDIANTE Y JOVEN                        SYB
+ STANDBY DE JOVEN                                     YB
+ TARIFA DE TOUR INCLUIDO                              GIT
+ TARIFAS DE EXCURSION Y DE PROPIETARIO                EXP
+ TARIFAS DE EXTENSION DE ASEAN                        EXT
+ TARIFAS DE PERSONAL                                  STF
+ TARIFAS DE PROPIETARIO/NEGOCIADAS/PRIVADAS           PF
+ TARIFAS DE PROPIETARIO/NEGOCIADAS/PRIVADAS           PFA-PFZ
+
+ *ESTE CODIGO SE UTILIZA CON UN CODIGO DE MONEDA.            >MD
+>md
+                        REQUEST TYPES         SP   2MAY13 1042Z
+
+ TIPO DE SOLICITUD                                    CODIGO
+ -----------------                                    ------
+ TARIFAS ESPECIALES                                   SPL
+ TARIFAS NORMALES                                     NML
+ TARIFAS NORMALES Y DE PROPIETARIO                    NLP
+ TARIFAS NORMALES Y ESPECIALES                        NSP
+ TARIFAS NORMALES, DE EXCURSION Y DE PROPIETARIO      NXP
+ TARIFAS PEX                                          PEX
+ TARIFAS PEX Y APEX                                   PXA
+ TARIFAS PROMOCIONALES PARA ADULTOS                   NXS
+ TOUR DE GRUPO INCLUIDO                               GT
+ TOUR INCLUIDO Y EXCURSION PARA ADULTO                ITX
+ TOUR INDIVIDUAL INCLUIDO PARA ADULTO                 IT
+ TOUR INDIVIDUAL INCLUIDO, NORMAL Y AIRE-MAR          NLI
+ TRABAJADOR                                           DL
+ VIAJE DE MIEMBRO DEL GOBIERNO DE LA CIUDAD/REGION    GCT
+ VISITA A OTRO PAIS PARA ADULTO O ADULTO DE GRUPO     PR
+ VISITA A OTRO PAIS PARA ADULTO Y NINO                VSC
+ VISITA A OTRO PAIS PARA NINO                         VC
+                    *** FIN DE PANTALLA ***
+>md
+                        REQUEST TYPES         SP   2MAY13 1042Z
+
+ TIPO DE SOLICITUD                                    CODIGO
+ -----------------                                    ------
+ TARIFAS ESPECIALES                                   SPL
+ TARIFAS NORMALES                                     NML
+ TARIFAS NORMALES Y DE PROPIETARIO                    NLP
+ TARIFAS NORMALES Y ESPECIALES                        NSP
+ TARIFAS NORMALES, DE EXCURSION Y DE PROPIETARIO      NXP
+ TARIFAS PEX                                          PEX
+ TARIFAS PEX Y APEX                                   PXA
+ TARIFAS PROMOCIONALES PARA ADULTOS                   NXS
+ TOUR DE GRUPO INCLUIDO                               GT
+ TOUR INCLUIDO Y EXCURSION PARA ADULTO                ITX
+ TOUR INDIVIDUAL INCLUIDO PARA ADULTO                 IT
+ TOUR INDIVIDUAL INCLUIDO, NORMAL Y AIRE-MAR          NLI
+ TRABAJADOR                                           DL
+ VIAJE DE MIEMBRO DEL GOBIERNO DE LA CIUDAD/REGION    GCT
+ VISITA A OTRO PAIS PARA ADULTO O ADULTO DE GRUPO     PR
+ VISITA A OTRO PAIS PARA ADULTO Y NINO                VSC
+ VISITA A OTRO PAIS PARA NINO                         VC

@@ -107,6 +107,20 @@ import logging  # noqa: E402
 logging.disable(logging.CRITICAL)
 
 # ---------------------------------------------------------------------------
+# Base de datos en memoria (sqlite3 fallback para tests cuando Postgres no está disponible)
+# ---------------------------------------------------------------------------
+
+import os  # noqa: E402
+
+if os.environ.get("USE_SQLITE_TEST_DB", "true").lower() in ("true", "1"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        }
+    }
+
+# ---------------------------------------------------------------------------
 # Criptografía: Clave estática Fernet válida para tests unitarios
 # ---------------------------------------------------------------------------
 ENCRYPTION_KEY = "ujK9r7o7B-B-jH87L2K0XvB4oK9zB_M3_z6vG1T_P5U="

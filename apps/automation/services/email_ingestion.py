@@ -101,6 +101,19 @@ class EmailIngestionService:
                             }
                         )
 
+                        # Auto-indexar en la Base de Conocimiento RAG (Correos informativos y circulares)
+                        try:
+                            from apps.automation.services.rag_service import RAGKnowledgeService
+
+                            RAGKnowledgeService.index_email_content(
+                                subject=subject,
+                                body=body,
+                                source_email=from_,
+                                agencia=getattr(self, "agency", None),
+                            )
+                        except Exception as e_rag:
+                            logger.warning(f"Error indexando correo en RAG: {e_rag}")
+
                         # Marcar como leído
                         self.imap.store(e_id, "+FLAGS", "\\Seen")
 

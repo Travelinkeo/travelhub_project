@@ -2,7 +2,16 @@ from django.contrib import admin
 
 from core.api import SaaSAdminMixin
 
-from .models import Articulo, GuiaDestino, KBArticle, KBCategory, PostRedesSociales
+from .models import (
+    Articulo,
+    GuiaDestino,
+    KBArticle,
+    KBCategory,
+    KBDocument,
+    KBHistoricalEmailLog,
+    KnowledgeChunk,
+    PostRedesSociales,
+)
 
 
 @admin.register(Articulo)
@@ -50,7 +59,14 @@ class KBCategoryAdmin(SaaSAdminMixin, admin.ModelAdmin):
 class KBArticleAdmin(SaaSAdminMixin, admin.ModelAdmin):
     """KBArticleAdmin."""
 
-    list_display = ("title", "category", "is_public", "is_published", "view_count", "created_at")
+    list_display = (
+        "title",
+        "category",
+        "is_public",
+        "is_published",
+        "view_count",
+        "created_at",
+    )
     list_filter = ("is_public", "is_published", "category")
     search_fields = ("title", "content", "tags")
     prepopulated_fields = {"slug": ("title",)}
@@ -61,3 +77,32 @@ class KBArticleAdmin(SaaSAdminMixin, admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
+
+
+@admin.register(KBDocument)
+class KBDocumentAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    list_display = ("title", "gds_type", "is_indexed", "created_at")
+    list_filter = ("gds_type", "is_indexed")
+    search_fields = ("title", "descripcion")
+
+
+@admin.register(KnowledgeChunk)
+class KnowledgeChunkAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    list_display = ("source_title", "source_type", "source_reference_id", "created_at")
+    list_filter = ("source_type",)
+    search_fields = ("source_title", "content_chunk", "source_reference_id")
+
+
+@admin.register(KBHistoricalEmailLog)
+class KBHistoricalEmailLogAdmin(SaaSAdminMixin, admin.ModelAdmin):
+    list_display = (
+        "subject",
+        "sender",
+        "source_email",
+        "date_sent",
+        "status",
+        "chunks_created",
+        "created_at",
+    )
+    list_filter = ("status", "source_email")
+    search_fields = ("subject", "sender", "message_id", "error_message")

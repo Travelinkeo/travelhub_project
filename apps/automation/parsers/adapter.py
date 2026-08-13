@@ -9,14 +9,10 @@ from typing import Any
 
 from apps.automation.metrics.parser_metrics import ParserMetrics, ParserMetricsCollector
 
+from .amadeus_parser import AmadeusParser
+from .console_parser import ConsoleParser
+from .gemini_parser import GeminiParser
 from .kiu_parser import KIUParser
-from .legacy.amadeus_parser import AmadeusParser
-from .legacy.copa_parser import CopaParser
-from .legacy.sabre_parser import SabreParser
-from .legacy.tk_connect_parser import TKConnectParser
-from .legacy.travelport_parser import TravelportParser
-from .legacy.web_receipt_parser import WebReceiptParser
-from .legacy.wingo_parser import WingoParser
 from .registry import registry
 
 logger = logging.getLogger(__name__)
@@ -32,12 +28,8 @@ def _register_parsers():
     parsers = [
         KIUParser(),
         AmadeusParser(),
-        CopaParser(),
-        SabreParser(),
-        TKConnectParser(),
-        TravelportParser(),
-        WebReceiptParser(),
-        WingoParser(),
+        ConsoleParser(),
+        GeminiParser(),
     ]
     for parser in parsers:
         registry.register(parser)

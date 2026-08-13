@@ -1,0 +1,20 @@
+
+ 1.1MONTES/MIGUEL MR*P-10387741
+ 1 LH 535B 20MAY 2 CCSFRA HK1  1650  0925   21MAY 3
+                                               /DCLH*5CEJLR /E
+ 2 LH 728B 21MAY 3 FRAPVG HK1  1710  0955   22MAY 4
+                                               /DCLH*5CEJLR /E
+ 3 LH 733U 08JUN 7 PVGFRA HK1  2335  0520   09JUN 1
+                                               /DCLH*5CEJLR /E
+ 4 LH 534U 09JUN 1 FRACCS HK1  1025  1430  /DCLH*5CEJLR /E
+
+FTKZSS
+ 1.1DUQUE/JUAN MR*E-82235395
+ 2.1RANIREZ/JOSE FABIAN MR*P-70698217
+ 1 LH 535B 20MAY 2 CCSFRA HK2  1650  0925   21MAY 3
+                                               /DCLH*5CRRTD /E
+ 2 LH 728B 21MAY 3 FRAPVG HK2  1710  0955   22MAY 4
+                                               /DCLH*5CRRTD /E
+ 3 LH 733U 08JUN 7 PVGFRA HK2  2335  0520   09JUN 1
+                                               /DCLH*5CRRTD /E
+ 4 LH 534U 09JUN 1 FRACCS HK2  1025  1430  /DCLH*5CRRTD /E

@@ -893,3 +893,17 @@ class AgentTools:
             "fuente": "TravelHub Backup Local Rules",
         }
         return json.dumps(result, indent=2)
+
+    @staticmethod
+    def search_knowledge_base(query: str) -> str:
+        """
+        Busca en la base de conocimientos RAG (Manuales PDF de GDS Sabre, Amadeus, KIU, Wikis de la agencia y Correos de Mailbot)
+        para responder preguntas sobre procedimientos, comandos GDS, políticas o normativas.
+        """
+        try:
+            from apps.automation.services.rag_service import RAGKnowledgeService
+
+            return RAGKnowledgeService.search_relevant_chunks(query)
+        except Exception as e:
+            logger.error(f"Error consultando RAG Base de Conocimiento: {e}")
+            return f"Error en la búsqueda de base de conocimiento: {str(e)}"

@@ -12,6 +12,11 @@ from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from apps.bookings.views.billing_api import (
+    CheckoutPlanAPIView,
+    CurrentBillingPlanAPIView,
+    RegisterTenantAPIView,
+)
 from apps.communications.views.push_views import push_subscribe, push_unsubscribe
 from core.metrics import health_metrics_view
 from core.middleware import csp_report_view
@@ -71,6 +76,13 @@ urlpatterns = [
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("api/auth/jwt/obtain/", TokenObtainPairView.as_view(), name="jwt_obtain_pair"),
     path("api/auth/jwt/logout/", TokenLogoutView.as_view(), name="jwt_logout"),
+    path("api/auth/register-tenant/", RegisterTenantAPIView.as_view(), name="register_tenant"),
+    path(
+        "api/billing/current-plan/",
+        CurrentBillingPlanAPIView.as_view(),
+        name="billing_current_plan",
+    ),
+    path("api/billing/checkout/", CheckoutPlanAPIView.as_view(), name="billing_checkout"),
     # Magic Links
     path("auth/magic-request/", MagicLinkRequestView.as_view(), name="magic_link_request"),
     path("auth/magic/<str:token>/", MagicLinkVerifyView.as_view(), name="magic_link_verify"),

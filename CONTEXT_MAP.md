@@ -457,6 +457,9 @@ El módulo de agente conversacional permite interactuar con el ERP en lenguaje n
 | :--- | :--- | :--- | :--- |
 | **POST** | `/api/auth/jwt/obtain/` | Obtener par de tokens JWT (`access` y `refresh`). | Ninguna |
 | **POST** | `/api/auth/jwt/logout/` | Invalidar token de refresco JWT. | JWT Token |
+| **POST** | `/api/auth/register-tenant/` | Autoregistro (Self-Service Onboarding) público de nuevas agencias y administradores. | Ninguna |
+| **GET** | `/api/billing/current-plan/` | Consulta de plan SaaS, consumo mensual de boletos y cuotas. | Autenticado (Tenant) |
+| **POST** | `/api/billing/checkout/` | Realizar upgrade de plan SaaS (Stripe / PagoMóvil / Zelle). | Autenticado (Tenant) |
 | **POST** | `/login/` | Iniciar sesión basada en cookies de sesión Django. | Ninguna |
 | **GET** | `/auth/magic-request/` | Solicitar enlace mágico de inicio de sesión por email. | Ninguna |
 | **GET** | `/auth/magic/<token>/` | Validar enlace mágico y autenticar usuario. | Ninguna |

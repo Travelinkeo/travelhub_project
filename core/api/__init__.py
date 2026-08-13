@@ -13,7 +13,7 @@ from core.cache import (
     cache_api_response,
     cache_queryset,
     invalidate_cache,
-    invalidate_cache_pattern,
+    invalidate_cache_pattern,  # noqa: F401
 )
 from core.dashboard_stats import get_dashboard_stats
 
@@ -77,6 +77,7 @@ from core.security import (
 )
 from core.services.api_secrets import get_api_secret
 from core.services.api_testers import test_api_secret
+from core.services.suscripcion_service import SuscripcionService  # noqa: F401
 
 # --- Signal Bypass ---
 from core.signals_bypass import (

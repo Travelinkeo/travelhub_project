@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
+from apps.automation.parsers.amadeus_parser import AmadeusParser as TravelportParser
 from apps.automation.parsers.base_parser import ParsedTicketData
-from apps.automation.parsers.legacy.travelport_parser import TravelportParser
 
 # Ticket Travelport completo que puede parsear por Regex
 SAMPLE_TRAVELPORT_TICKET_REGEX = """

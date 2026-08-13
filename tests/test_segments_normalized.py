@@ -1,5 +1,5 @@
+from apps.automation.parsers.amadeus_parser import AmadeusParser as SabreParser
 from apps.automation.parsers.kiu_parser import KIUParser
-from apps.automation.parsers.legacy.sabre_parser import SabreParser
 
 REQUIRED_KEYS = {"aerolinea", "numero_vuelo", "origen", "destino", "fecha_salida", "hora_salida"}
 

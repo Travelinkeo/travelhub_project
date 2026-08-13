@@ -1,7 +1,7 @@
 import pytest
 
+from apps.automation.parsers.amadeus_parser import AmadeusParser as SabreParser
 from apps.automation.parsers.kiu_parser import KIUParser
-from apps.automation.parsers.legacy.sabre_parser import SabreParser
 
 
 @pytest.fixture

@@ -66,8 +66,8 @@ class ItineraryCryptoService:
         payload = f"{venta.pk}:{venta.agencia_id}"
         token = signer.sign(payload)
 
-        # Construimos la ruta relativa
-        path = reverse("bookings:public_itinerary_live", kwargs={"token": token})
+        # Construimos la ruta relativa limpia en la raíz
+        path = reverse("public_itinerary_root", kwargs={"token": token})
 
         # Retornamos la URL absoluta del inquilino si está definida (SaaS Ready), de lo contrario relativa
         domain = getattr(settings, "SITE_DOMAIN", "")

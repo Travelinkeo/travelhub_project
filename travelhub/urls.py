@@ -12,11 +12,13 @@ from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from apps.bookings.passenger_portal_views import public_itinerary_view
 from apps.bookings.views.billing_api import (
     CheckoutPlanAPIView,
     CurrentBillingPlanAPIView,
     RegisterTenantAPIView,
 )
+from apps.bookings.views.comunicacion_views import generate_ical_calendar
 from apps.communications.views.push_views import push_subscribe, push_unsubscribe
 from core.metrics import health_metrics_view
 from core.middleware import csp_report_view
@@ -128,6 +130,13 @@ urlpatterns = [
     ),
     # Developer Portal
     path("developers/", developer_portal, name="developer_portal"),
+    # Public Passenger Itinerary Live Portal & Calendar (RFC 5545 iCal)
+    path("itinerary/v1/live/<str:token>/", public_itinerary_view, name="public_itinerary_root"),
+    path(
+        "itinerary/v1/live/<str:token>/calendar.ics",
+        generate_ical_calendar,
+        name="public_itinerary_calendar_ics_root",
+    ),
     # --- DASHBOARD PRINCIPAL ---
     path("", public_landing, name="home"),
     path(

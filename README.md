@@ -9,7 +9,7 @@ Plataforma de gestión SaaS multi-tenencia para agencias de viajes con automatiz
 - **Backend:** Django 5.x + Django REST Framework (DRF) + Python 3.12+
 - **Capa Async & Tareas:** Celery + Redis 7
 - **Base de Datos:** PostgreSQL 15 (con aislamiento multi-tenant por `Agencia`)
-- **Frontend / Portal:** Next.js + React + Material-UI (MUI) / Admin Unfold
+- **Frontend / Portal:** Django SSR + HTMX + Alpine.js + TailwindCSS / Admin Unfold
 - **Seguridad:** Cifrado simétrico Fernet (API keys, credenciales), JWT, auditoría forense (`AuditLog`)
 - **Motor Neuronal (IA):** Gemini 1.5 Pro/Flash (`google.genai`), OpenAI, DeepSeek (Provider Chain con fallback automático)
 - **Base de Conocimientos RAG:** Vectorial de 768 dimensiones (`text-embedding-004`)

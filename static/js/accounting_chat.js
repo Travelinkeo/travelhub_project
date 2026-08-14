@@ -10,10 +10,10 @@ document.addEventListener('alpine:init', () => {
         userInput: '',
         loading: false,
         suggestions: [
-            "¿Requisitos de viaje?",
-            "¿Saldo de Bancos?",
-            "¿Mis últimas ventas?",
-            "Generar post de marketing"
+            { icon: 'travel_explore', text: '¿Requisitos de viaje y SAIME?' },
+            { icon: 'account_balance', text: '¿Saldo consolidado de Bancos?' },
+            { icon: 'receipt_long', text: '¿Mis últimas ventas del mes?' },
+            { icon: 'campaign', text: 'Generar post de marketing' }
         ],
 
         init() {
@@ -85,10 +85,22 @@ document.addEventListener('alpine:init', () => {
         },
 
         formatMessage(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             let escaped = div.innerHTML;
-            escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<b class="text-indigo-200">$1</b>');
+
+            // Negritas con alto contraste en tema claro y oscuro
+            escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-[var(--text-main)]">$1</strong>');
+
+            // Cursivas
+            escaped = escaped.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
+
+            // Código en línea
+            escaped = escaped.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-[var(--surface-3)] font-mono text-xs text-[var(--text-main)] border border-[var(--border-color)]">$1</code>');
+
+            // Listas y viñetas
+            escaped = escaped.replace(/^\* (.*?)$/gm, '<div class="flex items-start gap-2 my-1"><span class="text-[var(--primary)] font-bold select-none">•</span><span>$1</span></div>');
             escaped = escaped.replace(/\n/g, '<br>');
             return escaped;
         },

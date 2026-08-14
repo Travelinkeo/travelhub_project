@@ -1,91 +1,108 @@
-# TravelHub
+# TravelHub 🚀
 
-Plataforma de gestión de agencias de viajes multi-tenencia con automatización, CRM, facturación electrónica y más.
+Plataforma de gestión SaaS multi-tenencia para agencias de viajes con automatización de boletos por IA, CRM, RAG vectorial, facturación multi-moneda, pasarela de pagos y notificaciones multicanal.
 
-## Arquitectura
+---
 
-- Django + PostgreSQL + Redis + Celery
-- Multi-tenencia (por agencia)
-- Panel admin con Unfold
-- API REST con DRF
+## 🏗️ Arquitectura General
 
-## Estructura del proyecto
+- **Backend:** Django 5.x + Django REST Framework (DRF) + Python 3.12+
+- **Capa Async & Tareas:** Celery + Redis 7
+- **Base de Datos:** PostgreSQL 15 (con aislamiento multi-tenant por `Agencia`)
+- **Frontend / Portal:** Next.js + React + Material-UI (MUI) / Admin Unfold
+- **Seguridad:** Cifrado simétrico Fernet (API keys, credenciales), JWT, auditoría forense (`AuditLog`)
+- **Motor Neuronal (IA):** Gemini 1.5 Pro/Flash (`google.genai`), OpenAI, DeepSeek (Provider Chain con fallback automático)
+- **Base de Conocimientos RAG:** Vectorial de 768 dimensiones (`text-embedding-004`)
 
-| Directorio | Descripción |
+---
+
+## 📦 Estructura de Aplicaciones
+
+| Módulo / App | Descripción |
 |---|---|
-| `travelhub/` | Configuración Django (settings, urls, wsgi, celery) |
-| `core/` | Módulo central (modelos, servicios, admin, seguridad, cifrado) |
-| `apps/bookings/` | Gestión de reservas, boletos aéreos, hoteles, autos |
-| `apps/crm/` | Gestión de clientes, historial, relaciones |
-| `apps/finance/` | Facturación electrónica, conciliación, comisiones |
-| `apps/automation/` | Automatización con IA, proveedores Gemini/OpenAI/DeepSeek |
-| `apps/communications/` | Notificaciones email (Resend), WhatsApp, Telegram |
-| `apps/contabilidad/` | Contabilidad venezolana (BCV, IVA, fiscal) |
-| `apps/cotizaciones/` | Cotizaciones y presupuestos |
-| `apps/cms/` | Gestión de contenido (artículos) |
-| `apps/gamification/` | Gamificación, logros, puntajes |
-| `apps/marketing/` | Campañas de marketing |
-| `apps/reports/` | Reportes programados y KPIs |
-| `apps/tasks/` | Tareas internas |
-| `tests/` | Tests unitarios, de servicios, E2E Playwright |
+| `travelhub/` | Configuración central Django (settings local/prod, urls, wsgi, celery) |
+| `core/` | Kernel público del dominio (`core.api`), modelos core, seguridad, cifrado, cuotas |
+| `apps/bookings/` | Reservas, boletos aéreos (GDS Sabre, KIU, Amadeus), billing/suscripciones |
+| `apps/crm/` | Gestión de clientes, pasajeros, historial de compras |
+| `apps/finance/` | Facturación electrónica multi-moneda, comprobantes, pagos, comisiones |
+| `apps/automation/` | Ingesta neuronal de boletos, Mailbot, RAG (`RAGKnowledgeService`) |
+| `apps/communications/` | WhatsApp (Evolution API / Meta), Telegram Bot, Email (Resend) |
+| `apps/contabilidad/` | Normativa tributaria venezolana (tasas BCV, retenciones IVA/ISLR) |
+| `apps/cotizaciones/` | Presupuestos dinámicos e itinerarios |
+| `apps/cms/` | Base de conocimiento (`KBDocument`, `KnowledgeChunk`) y contenido |
+| `apps/gamification/` | Recompensas, metas de ventas y puntajes |
+| `apps/reports/` | KPIs financieros, reportes programados en PDF |
+| `tests/` | Suite con 65+ tests unitarios, de integración y E2E (pytest) |
 
-## Requisitos
+---
 
-- Docker y Docker Compose
-- Python 3.12+
-- PostgreSQL 15, Redis 7
+## ⚡ Nuevas Funcionalidades SaaS B2B
 
-## Inicio rápido
+### 1. Autoservicio & Suscripciones (`SuscripcionService`)
+- **Self-Service Onboarding (`POST /api/auth/register-tenant/`):** Alta atómica de agencias, usuarios propietarios y configuración inicial.
+- **Planes Escalonados:** `FREE` (50 boletos/mes), `BASIC` (300 boletos/mes), `PRO` (1500 boletos/mes), `ENTERPRISE` (Ilimitado).
+- **Consulta de Consumos (`GET /api/billing/current-plan/`):** Métrica en tiempo real del % de cuota consumida.
+- **Pasarela Checkout (`POST /api/billing/checkout/`):** Upgrades instantáneos por Stripe Sandbox, Zelle o PagoMóvil.
+
+### 2. Motor RAG & Base de Conocimiento (`RAGKnowledgeService`)
+- Indexación vectorial avanzada (`text-embedding-004`).
+- **Compendio de Turismo & Manuales GDS:** Incluye manuales de Sabre, Amadeus, KIU, regulaciones migratorias SAIME/INAC, guías de Los Roques, Nueva Esparta y directorio aéreo.
+- **Comando de Ingesta:**
+  ```bash
+  python manage.py ingest_folder_manuals --dir docs/manuales_notebooklm
+  ```
+
+### 3. Notificación Automática Multicanal
+Al generar o procesar un boleto PDF, el sistema despacha automáticamente:
+- **Telegram Bot:** PDF y ficha técnica al canal de la agencia (`send_telegram_document_task`).
+- **WhatsApp:** Envío automático del boleto PDF al cliente (`WhatsAppService.send_document`).
+
+---
+
+## 🛠️ Inicio Rápido
 
 ```bash
-# Clonar
-git clone <repo>
-cd travelhub
+# 1. Clonar el repositorio
+git clone <repo-url>
+cd travelhub_project
 
-# Variables de entorno
+# 2. Configurar entorno virtual e instalar dependencias
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+pip install -r requirements.txt
+
+# 3. Configurar variables de entorno
 cp .env.example .env
-# Editar .env con tus claves
 
-# Iniciar con Docker
-docker compose up -d
+# 4. Ejecutar migraciones de base de datos
+python manage.py migrate
 
-# Migraciones
-docker compose exec web python manage.py migrate
-
-# Tests
-docker compose -f docker-compose.test.yml run --rm web
+# 5. Iniciar servidor de desarrollo
+python manage.py runserver
 ```
 
-## Tests
+---
 
-- Framework: pytest
-- Cobertura mínima: 75% (`--cov-fail-under=75`)
-- Tests unitarios: `pytest tests/unit/`
-- Tests servicios: `pytest tests/services/`
-- Tests E2E: `pytest tests/e2e/` (requiere `E2E_TESTS=1`)
-- Ver cobertura: `pytest --cov=. --cov-report=term-missing`
+## 🧪 Pruebas & Calidad de Código
 
-### CI/CD
+Ejecución de la suite completa de pruebas unitarias e integración con `pytest`:
 
-GitHub Actions ejecuta:
-1. Pre-check rápido en `tests/unit/`
-2. Suite completa con PostgreSQL service
-3. Verificación de cobertura >= 75%
+```bash
+# En entorno con SQLite de prueba
+$env:USE_SQLITE_TEST_DB="true"; python -m pytest tests/
 
-## Características principales
+# En entorno Docker con PostgreSQL
+docker compose -f docker-compose.test.yml run --rm web pytest tests/
+```
 
-- **Multi-tenencia**: Agencias aisladas con cifrado de datos sensibles
-- **IA integrada**: Gemini, OpenAI, DeepSeek con fallback automático
-- **GDS**: Parsers para Sabre, KIU, Amadeus
-- **Facturación**: Factura electrónica venezolana (SENIAT/IVSS)
-- **BCV**: Tasas de cambio del Banco Central de Venezuela
-- **Notificaciones**: Email (Resend), WhatsApp (Evolution API), Telegram
-- **Seguridad**: Cifrado Fernet, API keys rotables, auditoría, SSO
-- **Dashboard admin**: Panel unificado con monitoreo de salud del sistema
+- **Pre-commit Hooks:** Linters `ruff`, `ruff-format` e inspección de importaciones cruzadas prohibidas (`check-domain-imports`) activos al 100%.
 
-## Despliegue
+---
 
-- Producción: Docker Compose con Nginx, Gunicorn, Uvicorn
-- Base de datos: PostgreSQL 15 (RDS en AWS)
-- Cache: Redis 7 (ElastiCache)
-- Archivos: R2 (Cloudflare) o S3
+## 📊 Monitoreo & Telemetría
+
+- **Dashboard de Estado:** `http://localhost:8000/system/status/`
+- **Healthcheck JSON:** `http://localhost:8000/health/`
+- **Métricas Avanzadas:** `http://localhost:8000/health/metrics/`
+- **Prometheus Metrics:** `http://localhost:8000/prometheus/`
+- **Alertas en Vivo:** Integración con Sentry (`SENTRY_DSN`) y Telegram Bot.

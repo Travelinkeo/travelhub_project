@@ -231,7 +231,7 @@ jobs:
             type=raw,value=staging,enable=${{ github.ref == 'refs/heads/staging' }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: Dockerfile

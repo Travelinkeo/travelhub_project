@@ -1,43 +1,43 @@
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
     <!-- Card: Ingresos -->
-    <div class="bg-[#1e293b] border border-blue-500/30 p-5 rounded-xl shadow-lg relative overflow-hidden">
+    <div class="bg-surface-1 border border-blue-500/30 p-5 rounded-xl shadow-lg relative overflow-hidden">
         <div class="absolute top-0 right-0 p-4 opacity-10 text-blue-500">
             <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path></svg>
         </div>
-        <h3 class="text-xs uppercase tracking-wider text-blue-400 font-bold mb-1">Ingresos Brutos</h3>
-        <p class="text-3xl font-black text-white">${{ ingresos_brutos|floatformat:2 }}</p>
+        <h3 class="text-xs uppercase tracking-wider text-blue-500 dark:text-blue-400 font-bold mb-1">Ingresos Brutos</h3>
+        <p class="text-3xl font-black text-text-main tabular-nums">${{ ingresos_brutos|floatformat:2 }}</p>
     </div>
 
     <!-- Card: Ganancia -->
-    <div class="bg-[#1e293b] border border-green-500/30 p-5 rounded-xl shadow-lg relative overflow-hidden">
-        <div class="absolute top-0 right-0 p-4 opacity-10 text-green-500">
+    <div class="bg-surface-1 border border-emerald-500/30 p-5 rounded-xl shadow-lg relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-4 opacity-10 text-emerald-500">
             <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path></svg>
         </div>
-        <h3 class="text-xs uppercase tracking-wider text-green-400 font-bold mb-1">Ganancia Neta</h3>
-        <p class="text-3xl font-black text-white">${{ ganancia_neta|floatformat:2 }}</p>
+        <h3 class="text-xs uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-bold mb-1">Ganancia Neta</h3>
+        <p class="text-3xl font-black text-text-main tabular-nums">${{ ganancia_neta|floatformat:2 }}</p>
     </div>
 
     <!-- Card: Liquidez -->
-    <div class="bg-[#1e293b] border border-yellow-500/30 p-5 rounded-xl shadow-lg relative overflow-hidden">
-        <div class="absolute top-0 right-0 p-4 opacity-10 text-yellow-500">
+    <div class="bg-surface-1 border border-amber-500/30 p-5 rounded-xl shadow-lg relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-4 opacity-10 text-amber-500">
             <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
         </div>
-        <h3 class="text-xs uppercase tracking-wider text-yellow-400 font-bold mb-1">Liquidez (En Banco)</h3>
-        <p class="text-3xl font-black text-white">${{ liquidez_real|floatformat:2 }}</p>
+        <h3 class="text-xs uppercase tracking-wider text-amber-600 dark:text-amber-400 font-bold mb-1">Liquidez (En Banco)</h3>
+        <p class="text-3xl font-black text-text-main tabular-nums">${{ liquidez_real|floatformat:2 }}</p>
     </div>
 
     <!-- Card: Deuda -->
-    <div class="bg-[#1e293b] border-l-4 border-red-500 p-5 rounded-xl shadow-lg relative overflow-hidden">
-        <h3 class="text-xs uppercase tracking-wider text-red-400 font-bold mb-1">Deuda Proveedores</h3>
-        <p class="text-3xl font-black text-white">${{ deuda_proveedores|floatformat:2 }}</p>
+    <div class="bg-surface-1 border-l-4 border-l-red-500 border border-border-color p-5 rounded-xl shadow-lg relative overflow-hidden">
+        <h3 class="text-xs uppercase tracking-wider text-red-500 dark:text-red-400 font-bold mb-1">Deuda Proveedores</h3>
+        <p class="text-3xl font-black text-text-main tabular-nums">${{ deuda_proveedores|floatformat:2 }}</p>
     </div>
 </div>
 
 <!-- Sección de Gráfica -->
-<div class="bg-[#1e293b] border border-gray-700 p-6 rounded-xl shadow-lg mt-6">
+<div class="bg-surface-1 border border-border-color p-6 rounded-xl shadow-lg mt-6">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-lg font-bold text-gray-100">Evolución de Ingresos</h2>
-        <span class="text-sm text-gray-400">Monto total por día</span>
+        <h2 class="text-lg font-bold text-text-main">Evolución de Ingresos</h2>
+        <span class="text-sm text-text-muted">Monto total por día</span>
     </div>
 
     <div class="h-[300px] w-full relative">

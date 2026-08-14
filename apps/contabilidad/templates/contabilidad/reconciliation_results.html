@@ -4,97 +4,97 @@
 {% block title %}Resultados de Conciliación - TravelHub IA{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-12">
+<div class="max-w-6xl mx-auto px-4 py-8">
     <!-- Header de Resultados -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
         <div>
             <div class="flex items-center gap-3 mb-2">
-                <a href="{% url 'contabilidad:reconciliation' %}" class="p-2 bg-gray-800 hover:bg-gray-700 rounded-xl text-gray-400 hover:text-white transition-all">
-                    <span class="material-symbols-outlined w-5 h-5">chevron_left</span>
+                <a href="{% url 'contabilidad:reconciliation' %}" class="p-2 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] border border-[var(--border-color)] rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-main)] transition-all shadow-sm">
+                    <span class="material-symbols-outlined text-lg">chevron_left</span>
                 </a>
-                <h1 class="text-3xl font-bold text-white tracking-tight">Reporte de Conciliación</h1>
+                <h1 class="text-2xl sm:text-3xl font-black text-[var(--text-main)] tracking-tight">Reporte de Conciliación</h1>
             </div>
-            <p class="text-gray-400">Analizado desde: <span class="text-indigo-400 font-mono">{{ filename }}</span></p>
+            <p class="text-[var(--text-muted)] text-sm">Analizado desde: <span class="text-[var(--primary)] font-mono font-bold">{{ filename }}</span></p>
         </div>
 
         <div class="flex items-center gap-3">
-            <button data-action="print" class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-xl border border-white/5 transition-all flex items-center gap-2 text-sm font-medium">
-                <span class="material-symbols-outlined w-4 h-4">print</span>
-                Imprimir
+            <button data-action="print" class="px-4 py-2.5 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text-secondary)] hover:text-[var(--text-main)] rounded-xl border border-[var(--border-color)] transition-all flex items-center gap-2 text-sm font-medium shadow-sm">
+                <span class="material-symbols-outlined text-lg">print</span>
+                <span>Imprimir</span>
             </button>
 
             <form action="{% url 'contabilidad:export_reconciliation' %}" method="POST" id="export-form">
                 {% csrf_token %}
                 <input type="hidden" name="results_json" value="{{ results_json }}">
-                <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2 text-sm font-bold">
-                    <span class="material-symbols-outlined w-4 h-4">file_download</span>
-                    Exportar Excel
+                <button type="submit" class="px-5 py-2.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-xl shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center gap-2 text-sm font-bold active:scale-95">
+                    <span class="material-symbols-outlined text-lg">file_download</span>
+                    <span>Exportar Excel</span>
                 </button>
             </form>
         </div>
     </div>
 
     <!-- Grid de Resumen -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-        <div class="bg-gray-800/40 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl">
-            <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Total Procesados</p>
-            <h2 class="text-3xl font-bold text-white">{{ results|length }}</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-[var(--surface-1)] p-5 rounded-2xl border border-[var(--border-color)] shadow-md">
+            <p class="text-[var(--text-muted)] text-xs font-bold uppercase tracking-widest mb-1">Total Procesados</p>
+            <h2 class="text-2xl font-black text-[var(--text-main)] tabular-nums">{{ results|length }}</h2>
         </div>
-        <div class="bg-gray-800/40 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl border-l-4 border-l-green-500">
-            <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Sin Diferencias</p>
-            <h2 class="text-3xl font-bold text-green-400" id="count-ok">0</h2>
+        <div class="bg-[var(--surface-1)] p-5 rounded-2xl border border-[var(--border-color)] border-l-4 border-l-emerald-500 shadow-md">
+            <p class="text-[var(--text-muted)] text-xs font-bold uppercase tracking-widest mb-1">Sin Diferencias</p>
+            <h2 class="text-2xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums" id="count-ok">0</h2>
         </div>
-        <div class="bg-gray-800/40 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl border-l-4 border-l-red-500">
-            <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Discrepancias</p>
-            <h2 class="text-3xl font-bold text-red-400" id="count-diff">0</h2>
+        <div class="bg-[var(--surface-1)] p-5 rounded-2xl border border-[var(--border-color)] border-l-4 border-l-red-500 shadow-md">
+            <p class="text-[var(--text-muted)] text-xs font-bold uppercase tracking-widest mb-1">Discrepancias</p>
+            <h2 class="text-2xl font-black text-red-600 dark:text-red-400 tabular-nums" id="count-diff">0</h2>
         </div>
-        <div class="bg-gray-800/40 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl border-l-4 border-l-yellow-500">
-            <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">No Encontrados</p>
-            <h2 class="text-3xl font-bold text-yellow-400" id="count-missing">0</h2>
+        <div class="bg-[var(--surface-1)] p-5 rounded-2xl border border-[var(--border-color)] border-l-4 border-l-amber-500 shadow-md">
+            <p class="text-[var(--text-muted)] text-xs font-bold uppercase tracking-widest mb-1">No Encontrados</p>
+            <h2 class="text-2xl font-black text-amber-600 dark:text-amber-400 tabular-nums" id="count-missing">0</h2>
         </div>
     </div>
 
     <!-- Tabla de Detalles -->
-    <div class="bg-gray-800/40 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden animate-in fade-in duration-700">
+    <div class="bg-[var(--surface-1)] rounded-2xl border border-[var(--border-color)] shadow-xl overflow-hidden animate-in fade-in duration-700">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-gray-900/50 border-b border-white/5">
-                        <th class="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-widest">Localizador / PNR</th>
-                        <th class="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-widest">Pasajero</th>
-                        <th class="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-widest text-right">Costo Proveedor</th>
-                        <th class="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-widest text-right">Costo Interno</th>
-                        <th class="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-widest text-right">Diferencia</th>
-                        <th class="px-6 py-5 text-xs font-bold text-gray-500 uppercase tracking-widest">Estado</th>
+                    <tr class="bg-[var(--surface-2)] border-b border-[var(--border-color)]">
+                        <th class="px-6 py-4 text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Localizador / PNR</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Pasajero</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest text-right">Costo Proveedor</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest text-right">Costo Interno</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest text-right">Diferencia</th>
+                        <th class="px-6 py-4 text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Estado</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/5">
+                <tbody class="divide-y divide-[var(--border-color)]">
                     {% for item in results %}
-                    <tr class="hover:bg-white/5 transition-colors group">
+                    <tr class="hover:bg-[var(--surface-2)]/60 transition-colors group">
                         <td class="px-6 py-4">
-                            <span class="text-white font-mono font-bold">{{ item.locator }}</span>
+                            <span class="text-[var(--text-main)] font-mono font-bold">{{ item.locator }}</span>
                         </td>
                         <td class="px-6 py-4">
-                            <span class="text-gray-300 text-sm">{{ item.passenger|default:"-" }}</span>
+                            <span class="text-[var(--text-secondary)] text-sm">{{ item.passenger|default:"-" }}</span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <span class="text-white font-medium">${{ item.provider_cost|floatformat:2 }}</span>
+                            <span class="text-[var(--text-main)] font-medium tabular-nums font-mono">${{ item.provider_cost|floatformat:2 }}</span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <span class="text-gray-400 text-sm">${{ item.internal_cost|floatformat:2 }}</span>
+                            <span class="text-[var(--text-muted)] text-sm tabular-nums font-mono">${{ item.internal_cost|floatformat:2 }}</span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <span class="font-bold {% if item.difference == 0 %}text-gray-500{% elif item.difference > 0 %}text-red-400{% else %}text-green-400{% endif %}">
+                            <span class="font-bold tabular-nums font-mono {% if item.difference == 0 %}text-[var(--text-muted)]{% elif item.difference > 0 %}text-red-500{% else %}text-emerald-500{% endif %}">
                                 {% if item.difference > 0 %}+{% endif %}${{ item.difference|floatformat:2 }}
                             </span>
                         </td>
                         <td class="px-6 py-4">
                             {% if item.status == 'OK' %}
-                            <span class="px-2.5 py-1 bg-green-500/10 text-green-400 text-[10px] font-black uppercase rounded-lg border border-green-500/20">Coincide</span>
+                            <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase rounded-lg border border-emerald-500/20">Coincide</span>
                             {% elif item.status == 'DISCREPANCY' %}
-                            <span class="px-2.5 py-1 bg-red-500/10 text-red-400 text-[10px] font-black uppercase rounded-lg border border-red-500/20">Diferencia</span>
+                            <span class="px-2.5 py-1 bg-red-500/10 text-red-600 dark:text-red-400 text-[10px] font-black uppercase rounded-lg border border-red-500/20">Diferencia</span>
                             {% else %}
-                            <span class="px-2.5 py-1 bg-yellow-500/10 text-yellow-400 text-[10px] font-black uppercase rounded-lg border border-yellow-500/20">No Registrado</span>
+                            <span class="px-2.5 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase rounded-lg border border-amber-500/20">No Registrado</span>
                             {% endif %}
                         </td>
                     </tr>

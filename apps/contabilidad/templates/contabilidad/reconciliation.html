@@ -4,33 +4,33 @@
 {% block title %}Conciliación de Proveedores - TravelHub IA{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-12">
-    <div class="text-center mb-10">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 mb-4 border border-indigo-500/20 shadow-xl">
-            <span class="material-symbols-outlined w-8 h-8">verified_user</span>
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[var(--primary)]/10 text-[var(--primary)] mb-3 border border-[var(--primary)]/20 shadow-md">
+            <span class="material-symbols-outlined text-3xl">verified_user</span>
         </div>
-        <h1 class="text-3xl font-bold text-white tracking-tight">Conciliación de Proveedores</h1>
-        <p class="text-gray-400 mt-2 max-w-lg mx-auto">
+        <h1 class="text-2xl sm:text-3xl font-black text-[var(--text-main)] tracking-tight">Conciliación de Proveedores</h1>
+        <p class="text-[var(--text-muted)] text-sm mt-1.5 max-w-lg mx-auto">
             Sube el reporte de tu proveedor (Excel o PDF) y nuestro motor de IA lo cruzará automáticamente con tus ventas registradas.
         </p>
     </div>
 
     {% if error %}
-    <div class="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400 animate-in fade-in zoom-in duration-300">
-        <span class="material-symbols-outlined w-5 h-5">error</span>
+    <div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-500 animate-in fade-in zoom-in duration-300">
+        <span class="material-symbols-outlined text-xl">error</span>
         <p class="text-sm font-medium">{{ error }}</p>
     </div>
     {% endif %}
 
-    <div class="bg-gray-800/40 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8 duration-700">
-        <div class="p-8 md:p-12">
-            <form method="post" enctype="multipart/form-data" class="space-y-8">
+    <div class="bg-[var(--surface-1)] rounded-3xl border border-[var(--border-color)] shadow-xl overflow-hidden animate-in slide-in-from-bottom-8 duration-700">
+        <div class="p-6 sm:p-10">
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
                 {% csrf_token %}
 
                 <!-- Selector de Proveedor -->
-                <div class="space-y-3">
-                    <label class="text-sm font-semibold text-gray-300 ml-1">Seleccionar Proveedor (Opcional)</label>
-                    <select name="proveedor" class="w-full bg-gray-900/50 border border-white/10 rounded-2xl px-5 py-4 text-white focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500/50 transition-all outline-none appearance-none cursor-pointer">
+                <div class="space-y-2">
+                    <label class="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] ml-1">Seleccionar Proveedor (Opcional)</label>
+                    <select name="proveedor" class="w-full bg-[var(--surface-2)] border border-[var(--border-color)] text-[var(--text-main)] rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-[var(--primary)]/30 focus:border-[var(--primary)] transition-all outline-none cursor-pointer">
                         <option value="">Todos los proveedores</option>
                         {% for p in proveedores %}
                         <option value="{{ p.id_proveedor }}">{{ p.nombre_proveedor }}</option>
@@ -41,32 +41,32 @@
                 <!-- Dropzone -->
                 <div class="relative group">
                     <input type="file" name="reporte" id="reporte" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required accept=".pdf,.xlsx,.xls">
-                    <div class="border-2 border-dashed border-white/10 group-hover:border-indigo-500/50 rounded-3xl p-12 text-center transition-all bg-gray-900/30 group-hover:bg-indigo-500/5">
-                        <div class="w-20 h-20 bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl group-hover:scale-110 transition-transform duration-500">
-                            <span class="material-symbols-outlined w-10 h-10 text-gray-500 group-hover:text-indigo-400 transition-colors">cloud_upload</span>
+                    <div class="border-2 border-dashed border-[var(--border-color)] group-hover:border-[var(--primary)] rounded-3xl p-10 text-center transition-all bg-[var(--surface-2)]/50 group-hover:bg-[var(--surface-2)]">
+                        <div class="w-16 h-16 bg-[var(--surface-2)] border border-[var(--border-color)] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md group-hover:scale-110 transition-transform duration-300">
+                            <span class="material-symbols-outlined text-3xl text-[var(--primary)]">cloud_upload</span>
                         </div>
-                        <h3 class="text-xl font-bold text-white mb-2">Suelte su archivo aquí</h3>
-                        <p class="text-gray-500 text-sm">Soportamos reportes en formato PDF (vía IA) y Excel.</p>
-                        <div id="file-name" class="mt-4 text-indigo-400 font-medium hidden"></div>
+                        <h3 class="text-lg font-bold text-[var(--text-main)] mb-1">Suelte su archivo aquí o haga clic</h3>
+                        <p class="text-[var(--text-muted)] text-xs">Soportamos reportes en formato PDF (vía IA) y hojas de cálculo Excel (.xlsx, .xls).</p>
+                        <div id="file-name" class="mt-4 text-[var(--primary)] font-medium text-xs hidden"></div>
                     </div>
                 </div>
 
                 <!-- Submit -->
-                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-5 rounded-2xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all transform active:scale-[0.98] flex items-center justify-center gap-3">
-                    <span class="material-symbols-outlined w-5 h-5">bolt</span>
-                    Iniciar Conciliación Inteligente
+                <button type="submit" class="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold py-4 rounded-2xl shadow-lg shadow-[var(--primary)]/25 transition-all transform active:scale-[0.99] flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-xl">bolt</span>
+                    <span>Iniciar Conciliación Inteligente</span>
                 </button>
             </form>
         </div>
 
-        <div class="bg-indigo-500/5 p-6 border-t border-white/5 flex items-center justify-center gap-8">
+        <div class="bg-[var(--surface-2)]/50 p-4 border-t border-[var(--border-color)] flex items-center justify-center gap-6">
             <div class="flex items-center gap-2">
-                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span class="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Matching por Localizador</span>
+                <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <span class="text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold">Matching por Localizador</span>
             </div>
             <div class="flex items-center gap-2">
                 <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span class="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Extracción Gemini 1.5</span>
+                <span class="text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold">Extracción Neuronal Gemini Pro</span>
             </div>
         </div>
     </div>

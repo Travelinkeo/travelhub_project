@@ -86,17 +86,19 @@ class Command(BaseCommand):
         dry_run = options["dry_run"]
 
         self.stdout.write(
-            self.style.SUCCESS(f"🚀 Escaneando manuales y documentos en: {target_dir}...")
+            self.style.SUCCESS(f"[RAG] Escaneando manuales y documentos en: {target_dir}...")
         )
 
         try:
             agencia = Agencia.objects.get(id=agencia_id)
         except Agencia.DoesNotExist:
-            self.stdout.write(self.style.ERROR(f"❌ La agencia con ID {agencia_id} no existe."))
+            self.stdout.write(
+                self.style.ERROR(f"[ERROR] La agencia con ID {agencia_id} no existe.")
+            )
             return
 
         if not os.path.exists(target_dir):
-            self.stdout.write(self.style.ERROR(f"❌ La carpeta {target_dir} no existe."))
+            self.stdout.write(self.style.ERROR(f"[ERROR] La carpeta {target_dir} no existe."))
             return
 
         stats = {"scanned": 0, "processed": 0, "skipped": 0, "chunks": 0, "errors": 0}
@@ -131,7 +133,7 @@ class Command(BaseCommand):
                     stats["skipped"] += 1
                     continue
 
-                self.stdout.write(f"📄 Procesando: [{gds_type}] {title}...")
+                self.stdout.write(f"[DOC] Procesando: [{gds_type}] {title}...")
 
                 text_content = ""
                 if ext == ".pdf":
@@ -147,7 +149,7 @@ class Command(BaseCommand):
 
                 if not text_content or len(text_content.strip()) < 50:
                     self.stdout.write(
-                        self.style.WARNING(f" ⚠️ Texto insuficiente en {file} (Omitido)")
+                        self.style.WARNING(f" [WARN] Texto insuficiente en {file} (Omitido)")
                     )
                     stats["skipped"] += 1
                     continue
@@ -198,14 +200,16 @@ class Command(BaseCommand):
                     stats["processed"] += 1
                     stats["chunks"] += chunks_count
                     self.stdout.write(
-                        self.style.SUCCESS(f" ✅ Indexado: '{title}' ({chunks_count} chunks)")
+                        self.style.SUCCESS(f" [OK] Indexado: '{title}' ({chunks_count} chunks)")
                     )
 
                 except Exception as e_proc:
-                    self.stdout.write(self.style.ERROR(f" ❌ Error en '{title}': {e_proc}"))
+                    self.stdout.write(self.style.ERROR(f" [ERROR] En '{title}': {e_proc}"))
                     stats["errors"] += 1
 
-        self.stdout.write(self.style.SUCCESS("\n📊 RESUMEN DE INDEXACIÓN DE MANUALES LOCALES:"))
+        self.stdout.write(
+            self.style.SUCCESS("\n[STATS] RESUMEN DE INDEXACIÓN DE MANUALES LOCALES:")
+        )
         self.stdout.write(f" - Archivos escaneados: {stats['scanned']}")
         self.stdout.write(f" - Manuales procesados e indexados: {stats['processed']}")
         self.stdout.write(f" - Chunks vectoriales creados: {stats['chunks']}")

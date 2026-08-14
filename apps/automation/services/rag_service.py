@@ -6,7 +6,7 @@ from typing import Any
 from django.apps import apps
 from django.utils import timezone
 
-from apps.automation.services.ai_engine import _get_genai
+from apps.automation.services.ai_engine import _get_genai, get_gemini_api_key
 from core.api import get_current_agency
 
 logger = logging.getLogger(__name__)
@@ -33,17 +33,20 @@ class RAGKnowledgeService:
             return []
 
         try:
-            client = _get_genai(agency=agency)
-            response = client.models.embed_content(
-                model="text-embedding-004",
-                contents=text[:2048],  # Límite seguro de caracteres por chunk
-            )
-            if hasattr(response, "embedding") and hasattr(response.embedding, "values"):
-                return list(response.embedding.values)
-            elif isinstance(response, dict) and "embedding" in response:
-                return response["embedding"].get("values", [])
-            elif hasattr(response, "embeddings") and response.embeddings:
-                return list(response.embeddings[0].values)
+            api_key = get_gemini_api_key(agency=agency)
+            if api_key:
+                genai_mod = _get_genai()
+                client = genai_mod.Client(api_key=api_key)
+                response = client.models.embed_content(
+                    model="text-embedding-004",
+                    contents=text[:2048],  # Límite seguro de caracteres por chunk
+                )
+                if hasattr(response, "embedding") and hasattr(response.embedding, "values"):
+                    return list(response.embedding.values)
+                elif isinstance(response, dict) and "embedding" in response:
+                    return response["embedding"].get("values", [])
+                elif hasattr(response, "embeddings") and response.embeddings:
+                    return list(response.embeddings[0].values)
         except Exception as e:
             logger.warning(f"RAG: Error generando embedding Gemini para chunk: {e}")
 

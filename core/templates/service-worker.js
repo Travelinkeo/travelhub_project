@@ -40,7 +40,7 @@ self.addEventListener('fetch', (event) => {
 
   if (url.origin !== self.location.origin) return;
   if (request.method !== 'GET') return;
-  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/admin/') || url.pathname.startsWith('/system/') || url.pathname.startsWith('/erp/')) return;
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/admin/') || url.pathname.startsWith('/system/') || url.pathname.startsWith('/erp/') || url.pathname.startsWith('/itinerary/')) return;
 
   // Navegación: Network First con fallback offline seguro (NUNCA devuelve undefined)
   if (request.mode === 'navigate') {

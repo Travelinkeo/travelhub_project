@@ -13,7 +13,7 @@ def agency_context(request):
     rol = None
     user_agencies = []
 
-    if request.user.is_authenticated:
+    if hasattr(request, "user") and request.user.is_authenticated:
         agencia = getattr(request, "agencia", None)
 
         from core.models.agencia import UsuarioAgencia

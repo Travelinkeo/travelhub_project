@@ -4,22 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enlace Expirado - TravelHub Secure</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com" nonce="{{ request.csp_nonce }}"></script>
+    <!-- Tailwind CSS Compilado Local -->
+    <link rel="stylesheet" href="/static/core/css/tailwind-built.css">
     <!-- Premium Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <script nonce="{{ request.csp_nonce }}">
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                        mono: ['"JetBrains Mono"', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -64,7 +52,7 @@
             <h1 class="text-2xl font-extrabold tracking-tight text-white mb-3">
                 Acceso Expirado o Inválido
             </h1>
-            
+
             <!-- Description -->
             <p class="text-sm text-slate-300 leading-relaxed mb-8">
                 Para proteger la confidencialidad de tus datos, este enlace de viaje tiene una validez temporal y ha expirado automáticamente, o bien el token de seguridad ha sido modificado.
@@ -84,12 +72,12 @@
 
             <!-- Action Button -->
             <div class="mt-8">
-                <a href="javascript:window.location.reload();" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-semibold rounded-xl shadow-lg transition-all duration-200 hover:-translate-y-0.5 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900">
+                <button type="button" onclick="window.location.reload()" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-semibold rounded-xl shadow-lg transition-all duration-200 hover:-translate-y-0.5 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18v3.5m0 0h3v-3.5"></path>
                     </svg>
                     Reintentar Conexión
-                </a>
+                </button>
             </div>
         </div>
 

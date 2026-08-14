@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 
 from django.conf import settings
+from django.core import signing
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.urls import reverse
 
@@ -59,12 +60,9 @@ class ItineraryCryptoService:
     def generar_enlace_itinerario(cls, venta) -> str:
         """
         Empaqueta la tupla (id_venta, agencia_id) en un token seguro con marca de tiempo
-        y construye la URL absoluta para el cliente.
+        y construye la URL absoluta para el cliente usando signing.dumps (URL-Safe).
         """
-        signer = TimestampSigner(salt=cls.SALT)
-        # Serializamos los datos críticos en una cadena simple
-        payload = f"{venta.pk}:{venta.agencia_id}"
-        token = signer.sign(payload)
+        token = signing.dumps({"v": venta.pk, "a": venta.agencia_id}, salt=cls.SALT, compress=True)
 
         # Construimos la ruta relativa limpia en la raíz
         path = reverse("public_itinerary_root", kwargs={"token": token})
@@ -83,20 +81,21 @@ class ItineraryCryptoService:
         Valida la firma criptográfica y la vigencia del token.
         Retorna una tupla (venta_id, agencia_id) o levanta excepciones de seguridad.
         """
-        signer = TimestampSigner(salt=cls.SALT)
-
         # Convertimos los días de vigencia a segundos (Defensa por expiración)
         max_age_seconds = max_age_days * 24 * 60 * 60
 
         try:
-            # Desfirmamos validando la marca de tiempo del servidor
-            payload = signer.unsign(token, max_age=max_age_seconds)
-            venta_id, agencia_id = payload.split(":")
-            return int(venta_id), int(agencia_id)
-
+            data = signing.loads(token, salt=cls.SALT, max_age=max_age_seconds)
+            return int(data["v"]), int(data["a"])
         except (SignatureExpired, BadSignature) as e:
-            # Propagamos el fallo controlado para manejo en la capa de control (View)
-            raise e
+            # Fallback de compatibilidad con TimestampSigner legado
+            try:
+                signer = TimestampSigner(salt=cls.SALT)
+                payload = signer.unsign(token, max_age=max_age_seconds)
+                venta_id, agencia_id = payload.split(":")
+                return int(venta_id), int(agencia_id)
+            except Exception:
+                raise e from None
 
 
 class ItineraryService:

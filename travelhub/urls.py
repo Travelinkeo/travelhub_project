@@ -12,13 +12,13 @@ from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from apps.bookings.passenger_portal_views import public_itinerary_view
 from apps.bookings.views.billing_api import (
     CheckoutPlanAPIView,
     CurrentBillingPlanAPIView,
     RegisterTenantAPIView,
 )
 from apps.bookings.views.comunicacion_views import generate_ical_calendar
+from apps.bookings.views.itinerary_views import public_itinerary_view
 from apps.communications.views.push_views import push_subscribe, push_unsubscribe
 from core.metrics import health_metrics_view
 from core.middleware import csp_report_view

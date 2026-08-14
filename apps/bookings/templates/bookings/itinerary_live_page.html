@@ -26,35 +26,14 @@
             updateFavicon();
         })();
     </script>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com" nonce="{{ request.csp_nonce }}"></script>
+    <!-- Tailwind CSS Compilado Local -->
+    <link rel="stylesheet" href="{% static 'core/css/tailwind-built.css' %}">
     <!-- Alpine.js Local -->
     <script defer src="{% static 'vendor/alpine_v2.js' %}" nonce="{{ request.csp_nonce }}"></script>
     <!-- HTMX Local -->
     <script src="{% static 'vendor/htmx_v2.js' %}" nonce="{{ request.csp_nonce }}"></script>
     <!-- Premium Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <script nonce="{{ request.csp_nonce }}">
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            DEFAULT: 'var(--brand-primary)',
-                            hover: 'var(--brand-primary-hover)',
-                            light: 'var(--brand-light)',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                        mono: ['"JetBrains Mono"', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
 
     <style>
         :root {

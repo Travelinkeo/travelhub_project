@@ -35,8 +35,8 @@ def public_itinerary_view(request, token):
                 Venta.all_objects.select_related("agencia")
                 .prefetch_related(
                     "pasajeros",
-                    "pagos_finanzas_recaudacion",  # Relación del motor de recaudación
-                    "pagos_finanzas_recaudacion__moneda",  # Prefetch moneda para listado de pagos
+                    "pagos_venta",  # Relación del motor de recaudación
+                    "pagos_venta__moneda",  # Prefetch moneda para listado de pagos
                     "segmentos_vuelo",  # Prefetch segmentos de vuelo
                     "segmentos_vuelo__origen",  # Prefetch origen
                     "segmentos_vuelo__destino",  # Prefetch destino

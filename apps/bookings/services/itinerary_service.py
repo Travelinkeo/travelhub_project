@@ -86,16 +86,25 @@ class ItineraryCryptoService:
 
         try:
             data = signing.loads(token, salt=cls.SALT, max_age=max_age_seconds)
-            return int(data["v"]), int(data["a"])
+            if isinstance(data, dict):
+                return int(data["v"]), int(data["a"]) if data.get("a") is not None else None
+            elif isinstance(data, list | tuple):
+                return int(data[0]), int(data[1]) if len(data) > 1 and data[1] is not None else None
+        except Exception as err:
+            logger.debug("Fallo parsing signing.loads, intentando TimestampSigner: %s", err)
+
+        # Fallback de compatibilidad con TimestampSigner legado (formato id:agencia:timestamp:signature)
+        try:
+            signer = TimestampSigner(salt=cls.SALT)
+            payload = signer.unsign(token, max_age=max_age_seconds)
+            parts = payload.split(":")
+            venta_id = int(parts[0])
+            agencia_id = int(parts[1]) if len(parts) > 1 and parts[1] != "None" else None
+            return venta_id, agencia_id
         except (SignatureExpired, BadSignature) as e:
-            # Fallback de compatibilidad con TimestampSigner legado
-            try:
-                signer = TimestampSigner(salt=cls.SALT)
-                payload = signer.unsign(token, max_age=max_age_seconds)
-                venta_id, agencia_id = payload.split(":")
-                return int(venta_id), int(agencia_id)
-            except Exception:
-                raise e from None
+            raise e from None
+        except Exception as e:
+            raise BadSignature(f"Token inválido: {e}") from None
 
 
 class ItineraryService:

@@ -115,11 +115,14 @@ class VentaDetailView(BookingBaseMixin, DetailView):
     def get_context_data(self, **kwargs):
         """get_context_data."""
         context = super().get_context_data(**kwargs)
+        from apps.bookings.services.itinerary_service import ItineraryCryptoService
+
         context["items"] = self.object.items_venta.all().select_related(
             "producto_servicio", "proveedor_servicio"
         )
         context["fees"] = self.object.fees_venta.all().select_related("moneda")
         context["pagos"] = self.object.pagos_venta.all().select_related("moneda")
+        context["itinerary_url"] = ItineraryCryptoService.generar_enlace_itinerario(self.object)
         return context
 
 

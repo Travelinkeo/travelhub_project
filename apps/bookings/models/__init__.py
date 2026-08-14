@@ -13,6 +13,7 @@ from .componentes import (
     ServicioAdicionalDetalle,
     TrasladoServicio,
 )
+from .comunicacion import MensajeAdjunto, VentaMensaje
 from .importacion import BoletoImportado, BoletoImportadoTransito, SolicitudAnulacion
 from .pagos import FeeVenta, PagoVenta
 from .secuencia import SecuenciaVentaDiaria
@@ -33,6 +34,8 @@ __all__ = [
     "ItemVenta",
     "VentaParseMetadata",
     "VentaAuditFinding",
+    "VentaMensaje",
+    "MensajeAdjunto",
     "SecuenciaVentaDiaria",
     "AuditLog",
     "AlojamientoReserva",

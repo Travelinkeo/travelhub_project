@@ -1,0 +1,96 @@
+{% load i18n humanize static %}
+
+<div class="glass-panel rounded-3xl overflow-hidden border border-[var(--border-color)] shadow-xl flex flex-col h-[650px] bg-[var(--surface-1)]">
+    <!-- Header del Panel Conversacional -->
+    <div class="px-5 py-4 border-b border-[var(--border-color)] bg-[var(--surface-2)]/70 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="relative flex h-2.5 w-2.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </div>
+            <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--text-main)] flex items-center gap-1.5">
+                    <span>Canal de Comunicación</span>
+                </h3>
+                <p class="text-[11px] text-[var(--text-muted)] truncate max-w-[200px] sm:max-w-[280px]">
+                    {{ venta.cliente.nombres|default:"Pasajero" }} •
+                    {% if venta.cliente.email %}{{ venta.cliente.email }}{% else %}{{ venta.cliente.telefono_principal|default:"Sin contacto" }}{% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Indicador de Canal y Refresco Manual -->
+        <div class="flex items-center gap-2">
+            <button hx-get="{% url 'bookings:venta_messages_stream' venta.pk %}"
+                    hx-target="#messages-stream"
+                    hx-swap="innerHTML"
+                    class="p-1.5 rounded-lg bg-[var(--surface-1)] hover:bg-[var(--surface-3)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all"
+                    title="Actualizar mensajes">
+                <span class="material-symbols-outlined text-sm">refresh</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Feed de Mensajes con Auto-Polling HTMX (cada 15s) -->
+    <div id="messages-stream"
+         class="flex-1 p-4 overflow-y-auto space-y-4 bg-[var(--surface-base)]/40 scroll-smooth"
+         hx-get="{% url 'bookings:venta_messages_stream' venta.pk %}"
+         hx-trigger="every 15s"
+         hx-swap="innerHTML">
+        {% include "bookings/partials/_message_list.html" with messages=venta.mensajes_comunicacion.all %}
+    </div>
+
+    <!-- Formulario de Redacción y Envío Rápido -->
+    <form hx-post="{% url 'bookings:venta_message_send' venta.pk %}"
+          hx-target="#messages-stream"
+          hx-swap="beforeend"
+          hx-on::after-request="this.reset(); document.getElementById('messages-stream').scrollTop = document.getElementById('messages-stream').scrollHeight;"
+          class="p-4 border-t border-[var(--border-color)] bg-[var(--surface-2)]/80 space-y-3">
+        {% csrf_token %}
+
+        <!-- Opciones Rápidas de Adjuntos y Canal -->
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--text-muted)]">
+            <div class="flex items-center gap-3">
+                <label class="inline-flex items-center gap-1.5 cursor-pointer text-[var(--text-secondary)] hover:text-[var(--text-main)] select-none">
+                    <input type="checkbox" name="attach_ticket" checked class="rounded border-[var(--border-color)] text-[var(--primary)] focus:ring-0">
+                    <span class="text-[11px] font-medium">Adjuntar Boleto PDF</span>
+                </label>
+                <label class="inline-flex items-center gap-1.5 cursor-pointer text-[var(--text-secondary)] hover:text-[var(--text-main)] select-none">
+                    <input type="checkbox" name="include_itinerary" checked class="rounded border-[var(--border-color)] text-[var(--primary)] focus:ring-0">
+                    <span class="text-[11px] font-medium">Incluir Ficha Digital</span>
+                </label>
+            </div>
+
+            <!-- Selector de Canal (Email / WhatsApp) -->
+            <div class="flex items-center gap-1 bg-[var(--surface-1)] p-0.5 rounded-lg border border-[var(--border-color)]">
+                <label class="px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-all has-[:checked]:bg-[var(--primary)] has-[:checked]:text-white text-[var(--text-muted)]">
+                    <input type="radio" name="canal" value="EMAIL" checked class="sr-only">
+                    <span>Email</span>
+                </label>
+                <label class="px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-all has-[:checked]:bg-emerald-600 has-[:checked]:text-white text-[var(--text-muted)]">
+                    <input type="radio" name="canal" value="WHATSAPP" class="sr-only">
+                    <span>WhatsApp</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Área de Texto y Botón de Envío -->
+        <div class="flex items-center gap-2">
+            <textarea name="body"
+                      rows="2"
+                      placeholder="Escribe un mensaje o actualización para el pasajero..."
+                      class="flex-1 bg-[var(--surface-1)] border border-[var(--border-color)] text-[var(--text-main)] placeholder-[var(--text-muted)] rounded-2xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-[var(--primary)]/30 focus:border-[var(--primary)] outline-none resize-none transition-all"
+                      required
+                      onkeydown="if(event.ctrlKey && event.keyCode == 13){ event.preventDefault(); this.form.dispatchEvent(new Event('submit', {cancelable: true})); }"></textarea>
+
+            <button type="submit"
+                    class="h-12 px-4 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-2xl font-bold shadow-md shadow-[var(--primary)]/20 transition-all flex items-center justify-center gap-1.5 active:scale-95 text-xs">
+                <span>Enviar</span>
+                <span class="material-symbols-outlined text-sm">send</span>
+            </button>
+        </div>
+        <div class="flex justify-between items-center text-[10px] text-[var(--text-muted)] px-1">
+            <span>Presiona <kbd class="px-1 py-0.5 rounded bg-[var(--surface-1)] border border-[var(--border-color)] font-mono text-[9px]">Ctrl + Enter</kbd> para enviar</span>
+        </div>
+    </form>
+</div>

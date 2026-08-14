@@ -1,0 +1,83 @@
+{% load i18n humanize %}
+
+<div class="flex flex-col {% if msg.direccion == 'OUT' %}items-end{% else %}items-start{% endif %} space-y-1 group animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <div class="max-w-[88%] sm:max-w-[80%] rounded-2xl px-4 py-3 text-xs space-y-2 shadow-sm
+        {% if msg.direccion == 'OUT' %}
+            bg-[var(--primary)] text-white rounded-tr-none
+        {% else %}
+            bg-[var(--surface-2)] text-[var(--text-main)] border border-[var(--border-color)] rounded-tl-none
+        {% endif %}">
+
+        <p class="whitespace-pre-line leading-relaxed selection:bg-white/20">{{ msg.cuerpo }}</p>
+
+        <!-- Enlace a Ficha Digital Interactivo -->
+        {% if msg.enlace_ficha_digital %}
+        <div class="p-2.5 rounded-xl border flex items-center justify-between gap-3 text-[11px]
+            {% if msg.direccion == 'OUT' %}
+                bg-black/15 border-white/20 text-white
+            {% else %}
+                bg-[var(--surface-1)] border-[var(--border-color)] text-[var(--text-main)]
+            {% endif %}">
+            <div class="flex items-center gap-2 truncate">
+                <span class="material-symbols-outlined text-base">flight_takeoff</span>
+                <div class="truncate">
+                    <p class="font-bold truncate">Ficha Digital del Viajero</p>
+                    <p class="text-[9px] opacity-75 truncate">Itinerario interactivo en vivo</p>
+                </div>
+            </div>
+            <a href="{{ msg.enlace_ficha_digital }}" target="_blank"
+                class="px-2 py-1 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1
+                {% if msg.direccion == 'OUT' %}
+                    bg-white text-[var(--primary)] hover:bg-slate-100 shadow-sm
+                {% else %}
+                    bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)]
+                {% endif %}">
+                <span>Abrir</span>
+                <span class="material-symbols-outlined text-xs">open_in_new</span>
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Adjunto pendiente mientras Celery procesa -->
+        {% if pending_attachment %}
+        <div class="p-2 rounded-xl bg-black/10 border border-white/10 flex items-center gap-2 text-[10px] text-white/90">
+            <span class="animate-spin material-symbols-outlined text-sm">progress_activity</span>
+            <span>Generando y anexando PDF del boleto...</span>
+        </div>
+        {% endif %}
+
+        <!-- Adjuntos persistidos -->
+        {% if msg.adjuntos.exists %}
+        <div class="space-y-1.5 pt-1">
+            {% for att in msg.adjuntos.all %}
+            <div class="p-2 rounded-xl border flex items-center justify-between gap-2 text-[11px]
+                {% if msg.direccion == 'OUT' %}
+                    bg-black/15 border-white/20 text-white
+                {% else %}
+                    bg-[var(--surface-1)] border-[var(--border-color)] text-[var(--text-main)]
+                {% endif %}">
+                <div class="flex items-center gap-1.5 truncate">
+                    <span class="material-symbols-outlined text-sm text-red-400">picture_as_pdf</span>
+                    <span class="font-mono text-[10px] truncate">{{ att.nombre_archivo }}</span>
+                </div>
+                <a href="{{ att.archivo.url }}" target="_blank"
+                    class="font-bold underline text-[10px] hover:opacity-80 transition-opacity">
+                    Descargar
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Metadata de Pie (Remitente, Hora y Canal) -->
+    <div class="flex items-center gap-1.5 text-[10px] text-[var(--text-muted)] px-1">
+        <span class="font-medium">{{ msg.remitente|slice:":25" }}</span>
+        <span>•</span>
+        <span>{{ msg.created_at|date:"d M H:i" }}</span>
+        <span>•</span>
+        <span class="font-mono uppercase font-bold text-[9px]">
+            {% if msg.canal == 'WHATSAPP' %}💬 WhatsApp{% else %}✉️ Email{% endif %}
+        </span>
+    </div>
+</div>

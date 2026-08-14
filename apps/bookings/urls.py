@@ -312,6 +312,22 @@ urlpatterns = [
         dynamic_view("apps.bookings.views.boleto_status_api.BoletoStatusAPIView"),
         name="boleto_status",
     ),
+    # --- BANDEJA CONVERSACIONAL Y MENSAJERÍA ---
+    path(
+        "ventas/<int:pk>/messages/",
+        dynamic_fb_view("apps.bookings.views.comunicacion_views.venta_messages_stream"),
+        name="venta_messages_stream",
+    ),
+    path(
+        "ventas/<int:pk>/messages/send/",
+        dynamic_fb_view("apps.bookings.views.comunicacion_views.venta_message_send"),
+        name="venta_message_send",
+    ),
+    path(
+        "itinerary/v1/live/<str:token>/calendar.ics",
+        dynamic_fb_view("apps.bookings.views.comunicacion_views.generate_ical_calendar"),
+        name="public_itinerary_calendar_ics",
+    ),
     # API
     path("api/", include(router.urls)),
     path("api/v1/gds/ingest-pnr/", api_ingest_pnr_view, name="api_gds_ingest_pnr"),

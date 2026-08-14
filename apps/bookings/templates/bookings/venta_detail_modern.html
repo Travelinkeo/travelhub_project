@@ -27,39 +27,54 @@
                 <p class="text-text-muted text-sm mt-1">Registrado el {{ venta.fecha_venta|date:"d M Y, H:i" }}</p>
             </div>
         </div>
-        <div class="flex items-center gap-3">
-            <a href="{% url 'bookings:venta_timeline' venta.pk %}"
-                class="px-6 py-2.5 bg-status-info/10 hover:bg-status-info/20 text-status-info border border-status-info/30 rounded-xl font-bold transition-all flex items-center gap-2">
-                <span class="material-symbols-outlined text-[20px]">history</span>
-                Línea de Vida
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <!-- Botón Ficha Digital Web -->
+            {% if itinerary_url %}
+            <a href="{{ itinerary_url }}" target="_blank"
+               class="px-4 py-2.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-xl font-bold shadow-md shadow-[var(--primary)]/25 transition-all flex items-center gap-1.5 text-xs active:scale-95"
+               title="Ver Ficha Digital Interactiva del Pasajero">
+                <span class="material-symbols-outlined text-[18px]">flight_takeoff</span>
+                <span>Ficha Digital Web</span>
             </a>
 
-            <a href="#"
-                class="px-6 py-2.5 bg-surface-2 hover:bg-surface-3 text-text-secondary border border-border-color rounded-xl font-semibold transition-all flex items-center gap-2">
-                <span class="material-symbols-outlined text-[20px] text-primary">credit_card</span>
-                Liquidaciones
+            <button @click="navigator.clipboard.writeText('{{ itinerary_url }}'); window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Enlace a Ficha Digital copiado al portapapeles', type: 'success' } }));"
+                    class="p-2.5 bg-surface-2 hover:bg-surface-3 text-text-secondary hover:text-text-main border border-border-color rounded-xl font-semibold transition-all flex items-center justify-center"
+                    title="Copiar enlace para el cliente">
+                <span class="material-symbols-outlined text-[18px]">content_copy</span>
+            </button>
+            {% endif %}
+
+            {% if venta.cliente and venta.cliente.telefono_principal and itinerary_url %}
+            <a href="https://wa.me/{{ venta.cliente.telefono_principal|cut:'+'|cut:' '|cut:'-' }}?text=Hola%20{{ venta.cliente.nombres|urlencode }}!%20Aqu%C3%AD%20tienes%20tu%20itinerario%20y%20ficha%20digital%20de%20viaje%20confirmado%20(Localizador:%20{{ venta.localizador }}):%20{{ itinerary_url|urlencode }}"
+               target="_blank"
+               class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-md shadow-emerald-600/20 transition-all flex items-center gap-1.5 text-xs active:scale-95"
+               title="Enviar Ficha por WhatsApp">
+                <span class="material-symbols-outlined text-[18px]">chat</span>
+                <span>WhatsApp</span>
+            </a>
+            {% endif %}
+
+            <a href="{% url 'bookings:venta_timeline' venta.pk %}"
+                class="px-4 py-2.5 bg-status-info/10 hover:bg-status-info/20 text-status-info border border-status-info/30 rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs">
+                <span class="material-symbols-outlined text-[18px]">history</span>
+                <span>Línea de Vida</span>
             </a>
 
             {% if not venta.factura %}
             <div class="flex gap-2">
                 <button hx-post="{% url 'core:venta_facturar' venta.pk %}" hx-target="#modal-content"
                     @click="$dispatch('open-modal')"
-                    class="px-6 py-2.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--text-on-primary)] rounded-xl font-bold shadow-lg shadow-[var(--primary)]/20 transition-all flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[20px]">receipt_long</span>
-                    Preparar / Ver Factura
-                </button>
-                <button onclick="generarFacturacionDoble()"
-                    class="px-6 py-2.5 bg-surface-2 hover:bg-surface-3 text-text-main border border-border-color rounded-xl font-bold transition-all flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[20px] text-primary">layers</span>
-                    Doble Facturación
+                    class="px-4 py-2.5 bg-surface-2 hover:bg-surface-3 text-text-main border border-border-color rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs">
+                    <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                    <span>Facturar</span>
                 </button>
             </div>
             {% else %}
             <button hx-get="{% url 'finance:invoice_detail' venta.factura.pk %}" hx-target="#modal-content"
                 @click="$dispatch('open-modal')"
-                class="px-6 py-2.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--text-on-primary)] rounded-xl font-bold shadow-lg transition-all flex items-center gap-2">
-                <span class="material-symbols-outlined text-[20px]">visibility</span>
-                Ver Factura
+                class="px-4 py-2.5 bg-surface-2 hover:bg-surface-3 text-text-main border border-border-color rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs">
+                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                <span>Ver Factura</span>
             </button>
             {% endif %}
         </div>
@@ -224,8 +239,11 @@
             </div>
         </div>
 
-        <!-- Sidebar Column: Summary and Client -->
+        <!-- Sidebar Column: Summary, Communication and Client -->
         <div class="space-y-8">
+            <!-- Bandeja Conversacional y Comunicación con el Pasajero -->
+            {% include "bookings/partials/comunicacion_chat_panel.html" %}
+
             <!-- Financial Summary -->
             <div id="venta-totals-card"
                 class="glass-panel rounded-3xl p-8 bg-gradient-to-br from-[var(--primary)]/20 to-[var(--surface-3)]/20 border-[var(--primary)]/30">

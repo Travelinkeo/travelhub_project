@@ -692,9 +692,7 @@ def generar_pdf_ticket_async_task(boleto_id, **kwargs):
             )
             pnr = boleto.localizador_pnr or "N/A"
             pasajero = (
-                boleto.nombre_pasajero_procesado
-                or boleto.nombre_pasajero_completo
-                or "Pasajero"
+                boleto.nombre_pasajero_procesado or boleto.nombre_pasajero_completo or "Pasajero"
             )
             caption = (
                 f"✈️ <b>Boleto Confirmado</b>\n\n"
@@ -723,13 +721,9 @@ def generar_pdf_ticket_async_task(boleto_id, **kwargs):
 
             # 2. Dispatch WhatsApp Notification
             cliente = (
-                getattr(boleto.venta_asociada, "cliente", None)
-                if boleto.venta_asociada
-                else None
+                getattr(boleto.venta_asociada, "cliente", None) if boleto.venta_asociada else None
             )
-            telefono_cliente = (
-                getattr(cliente, "telefono_principal", None) if cliente else None
-            )
+            telefono_cliente = getattr(cliente, "telefono_principal", None) if cliente else None
             if not telefono_cliente:
                 telefono_cliente = (
                     getattr(cliente, "telefono_secundario", None) if cliente else None
@@ -766,9 +760,7 @@ def generar_pdf_ticket_async_task(boleto_id, **kwargs):
                         f"💬 PDF enviado por WhatsApp a cliente ({telefono_cliente}) para Boleto {boleto.pk}"
                     )
             except Exception as e_ws:
-                logger.error(
-                    f"⚠️ Error enviando PDF por WhatsApp para Boleto {boleto.pk}: {e_ws}"
-                )
+                logger.error(f"⚠️ Error enviando PDF por WhatsApp para Boleto {boleto.pk}: {e_ws}")
         except Exception as e_notif:
             logger.error(
                 f"⚠️ Error enviando notificaciones automáticas de Telegram/WhatsApp: {e_notif}"
@@ -812,3 +804,109 @@ def retry_queued_boletos_task():
             logger.info(" No se encontraron boletos en estado QUE (Cola Llena).")
 
         return count
+
+
+# ==============================================================================
+# 📬 BANDEJA CONVERSACIONAL Y DESPACHO DE MENSAJES RFC 2822 / WHATSAPP
+# ==============================================================================
+
+
+@shared_task(queue="notifications", bind=True, max_retries=3, default_retry_delay=60)
+def dispatch_booking_message_task(
+    self, message_id: int, attach_ticket: bool = False, include_itinerary_link: bool = True
+):
+    """
+    Despacha un mensaje de venta en segundo plano:
+    1. Construye el correo RFC 2822 con Message-ID e In-Reply-To para preservar el hilo.
+    2. Si attach_ticket=True, compila o asocia el PDF del boleto generado.
+    3. Si el canal es WHATSAPP o el cliente tiene teléfono, envía la notificación correspondiente.
+    """
+    from django.conf import settings
+    from django.core.mail import EmailMessage
+
+    from apps.bookings.models import BoletoImportado, MensajeAdjunto, VentaMensaje
+    from apps.communications.services.whatsapp_unified import send_whatsapp_message
+    from core.middleware import system_context
+
+    with system_context(reason="dispatch_booking_message"):
+        try:
+            msg_record = VentaMensaje.objects.select_related(
+                "venta", "venta__agencia", "venta__cliente"
+            ).get(id=message_id)
+            venta = msg_record.venta
+            agencia = venta.agencia
+
+            cuerpo_completo = msg_record.cuerpo
+
+            # Anexar enlace a Ficha Digital si existe
+            if msg_record.enlace_ficha_digital:
+                cuerpo_completo += f"\n\n📱 Ver tu Ficha Digital e Itinerario en Vivo:\n{msg_record.enlace_ficha_digital}"
+
+            # 1. Despacho por Correo Electrónico
+            if msg_record.canal == "EMAIL" or "@" in msg_record.destinatario:
+                remitente_email = getattr(
+                    settings, "DEFAULT_FROM_EMAIL", "operaciones@travelhub.cc"
+                )
+                subject = f"Itinerario de Viaje - Localizador {venta.localizador}"
+
+                headers = {
+                    "Message-ID": msg_record.message_id,
+                }
+                if msg_record.in_reply_to:
+                    headers["In-Reply-To"] = msg_record.in_reply_to
+                    headers["References"] = msg_record.in_reply_to
+
+                email = EmailMessage(
+                    subject=subject,
+                    body=cuerpo_completo,
+                    from_email=remitente_email,
+                    to=[msg_record.destinatario],
+                    headers=headers,
+                )
+
+                # Anexar PDF del boleto si fue solicitado
+                if attach_ticket:
+                    # Buscar boleto PDF existente en la venta o boleto importado
+                    boleto = (
+                        BoletoImportado.objects.filter(venta=venta, archivo_pdf__isnull=False)
+                        .exclude(archivo_pdf="")
+                        .first()
+                    )
+                    if boleto and boleto.archivo_pdf:
+                        try:
+                            pdf_content = boleto.archivo_pdf.read()
+                            filename = f"Boleto_{venta.localizador}.pdf"
+                            email.attach(filename, pdf_content, "application/pdf")
+
+                            # Guardar en adjuntos del mensaje
+                            MensajeAdjunto.objects.get_or_create(
+                                mensaje=msg_record,
+                                nombre_archivo=filename,
+                                tipo_documento="BOLETO",
+                                defaults={"archivo": boleto.archivo_pdf},
+                            )
+                        except Exception as pdf_err:
+                            logger.warning(
+                                f"No se pudo adjuntar PDF para Venta {venta.localizador}: {pdf_err}"
+                            )
+
+                email.send(fail_silently=False)
+                logger.info(
+                    f"✅ Correo despachado exitosamente a {msg_record.destinatario} para Venta {venta.localizador}"
+                )
+
+            # 2. Despacho por WhatsApp si es el canal seleccionado
+            elif msg_record.canal == "WHATSAPP":
+                if msg_record.destinatario:
+                    send_whatsapp_message(
+                        phone=msg_record.destinatario, message=cuerpo_completo, agencia=agencia
+                    )
+                    logger.info(
+                        f"✅ WhatsApp despachado a {msg_record.destinatario} para Venta {venta.localizador}"
+                    )
+
+            return True
+
+        except Exception as exc:
+            logger.error(f"❌ Error despachando mensaje {message_id}: {exc}")
+            raise self.retry(exc=exc) from exc

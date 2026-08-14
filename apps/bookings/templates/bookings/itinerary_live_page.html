@@ -12,12 +12,12 @@
             const favicon = document.getElementById('dynamic-favicon');
             const darkLogo = "/static/images/Logo TravelHub.png";
             const lightLogo = "/static/images/Logo TravelHub Negro.png";
-            
+
             function updateFavicon() {
                 const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                 favicon.href = isDarkMode ? darkLogo : lightLogo;
             }
-            
+
             // Listener para cambios de tema en tiempo real
             if (window.matchMedia) {
                 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateFavicon);
@@ -34,7 +34,7 @@
     <script src="{% static 'vendor/htmx_v2.js' %}" nonce="{{ request.csp_nonce }}"></script>
     <!-- Premium Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    
+
     <script nonce="{{ request.csp_nonce }}">
         tailwind.config = {
             darkMode: 'class',
@@ -55,7 +55,7 @@
             }
         }
     </script>
-    
+
     <style>
         :root {
             --brand-primary: {{ agencia.color_primario|default:"#6366f1" }};
@@ -102,7 +102,7 @@
 
     <!-- Main Container -->
     <div class="relative z-10 max-w-xl mx-auto px-4 py-6 md:py-8 flex flex-col min-h-screen">
-        
+
         <!-- Header -->
         <header class="flex justify-between items-center mb-6">
             <div class="flex items-center gap-3">
@@ -127,7 +127,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Actions Header -->
             <div class="flex items-center gap-2">
                 <!-- Light/Dark Mode Toggle -->
@@ -140,60 +140,108 @@
             </div>
         </header>
 
-        <!-- Ticket Card -->
+        <!-- Ticket Card con Cuenta Regresiva y Acciones -->
         <div class="glass-panel rounded-3xl p-6 shadow-xl mb-6 relative overflow-hidden">
             <!-- Background accent gradient -->
             <div class="absolute top-0 left-0 w-full h-[4px] bg-brand"></div>
 
             <div class="flex justify-between items-start mb-4">
                 <div>
-                    <span class="text-[10px] font-mono tracking-widest uppercase text-slate-400 block mb-0.5">Localizador</span>
+                    <span class="text-[10px] font-mono tracking-widest uppercase text-slate-400 block mb-0.5">Localizador PNR</span>
                     <div class="flex items-center gap-2">
-                        <span class="text-xl font-bold font-mono tracking-wide" :class="darkMode ? 'text-white' : 'text-slate-900'">
+                        <span class="text-2xl font-black font-mono tracking-wide" :class="darkMode ? 'text-white' : 'text-slate-900'">
                             {{ venta.localizador }}
                         </span>
                         <!-- Copy Button -->
                         <button @click="
                             navigator.clipboard.writeText('{{ request.build_absolute_uri }}');
                             toast = true;
-                            toastMessage = 'Enlace de itinerario copiado';
+                            toastMessage = '¡Enlace de tu itinerario copiado!';
                             setTimeout(() => toast = false, 3000)
-                        " class="p-1 rounded-md transition-colors hover:bg-brand/10 text-slate-400 hover:text-brand" title="Copiar enlace público">
+                        " class="p-1.5 rounded-lg transition-colors hover:bg-brand/10 text-slate-400 hover:text-brand" title="Copiar enlace de tu viaje">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                         </button>
                     </div>
                 </div>
-                
+
                 <!-- Status Badge -->
                 <span class="text-xs px-3 py-1 rounded-full font-semibold border {{ venta.get_status_badge }}">
                     {{ venta.get_estado_display }}
                 </span>
             </div>
 
-            <!-- Passengers summary -->
-            <div class="border-t border-slate-200/50 dark:border-slate-800/50 pt-4 mt-2">
-                <span class="text-[10px] font-mono tracking-widest uppercase text-slate-400 block mb-1">Pasajero(s)</span>
-                <div class="space-y-1">
-                    {% for pasajero in venta.pasajeros.all %}
-                        <p class="text-sm font-bold" :class="darkMode ? 'text-white' : 'text-slate-900'">
-                            👤 {{ pasajero.apellidos }}, {{ pasajero.nombres }}
+            <!-- Cuenta Regresiva de Salida (Si hay segmentos de vuelo) -->
+            {% with primer_vuelo=venta.segmentos_vuelo.first %}
+            {% if primer_vuelo and primer_vuelo.fecha_salida %}
+            <div x-data="{
+                    target: new Date('{{ primer_vuelo.fecha_salida|date:'c' }}').getTime(),
+                    days: 0, hours: 0, minutes: 0,
+                    update() {
+                        const now = new Date().getTime();
+                        const diff = this.target - now;
+                        if (diff > 0) {
+                            this.days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                            this.hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            this.minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        }
+                    }
+                 }"
+                 x-init="update(); setInterval(() => update(), 60000)"
+                 class="p-3.5 rounded-2xl bg-brand/5 border border-brand/20 my-3 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">⏳</span>
+                    <div>
+                        <p class="text-[10px] font-mono uppercase tracking-wider text-slate-400">Próxima Salida</p>
+                        <p class="text-xs font-bold" :class="darkMode ? 'text-white' : 'text-slate-900'">
+                            <span x-text="days"></span>d <span x-text="hours"></span>h <span x-text="minutes"></span>m para el despegue
                         </p>
-                    {% empty %}
-                        <p class="text-sm text-slate-400">Sin pasajeros registrados</p>
-                    {% endfor %}
+                    </div>
                 </div>
+                <div class="text-right text-[11px] font-mono text-brand font-bold">
+                    {{ primer_vuelo.fecha_salida|date:"d M, H:i" }}
+                </div>
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <!-- Botones de Acción del Pasajero -->
+            <div class="grid grid-cols-2 gap-2 pt-2">
+                <a href="{% url 'bookings:public_itinerary_calendar_ics' token=token %}"
+                   class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-brand bg-slate-100/50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-center">
+                    <span>📅</span>
+                    <span>Añadir a Calendario</span>
+                </a>
+
+                {% if agencia.telefono_contacto %}
+                <a href="https://wa.me/{{ agencia.telefono_contacto|cut:'+'|cut:' '|cut:'-' }}?text=Hola,%20tengo%20una%20consulta%20sobre%20mi%20reserva%20{{ venta.localizador }}"
+                   target="_blank"
+                   class="p-2.5 rounded-xl border border-emerald-500/30 hover:border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-center">
+                    <span>💬</span>
+                    <span>Asesor WhatsApp</span>
+                </a>
+                {% else %}
+                <button @click="
+                    navigator.clipboard.writeText('{{ request.build_absolute_uri }}');
+                    toast = true;
+                    toastMessage = '¡Enlace copiado al portapapeles!';
+                    setTimeout(() => toast = false, 3000)
+                " class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-brand bg-slate-100/50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-center">
+                    <span>📋</span>
+                    <span>Compartir Viaje</span>
+                </button>
+                {% endif %}
             </div>
 
             <!-- Fast info row -->
             <div class="grid grid-cols-2 gap-4 border-t border-slate-200/50 dark:border-slate-800/50 pt-4 mt-4 text-xs">
                 <div>
-                    <span class="text-[10px] font-mono tracking-widest uppercase text-slate-400 block">Fecha Registro</span>
-                    <span class="font-semibold">{{ venta.fecha_venta|date:"d M Y, H:i" }}</span>
+                    <span class="text-[10px] font-mono tracking-widest uppercase text-slate-400 block">Pasajeros</span>
+                    <span class="font-bold">{{ venta.pasajeros.count }} Registrado{{ venta.pasajeros.count|pluralize:"s" }}</span>
                 </div>
                 <div>
-                    <span class="text-[10px] font-mono tracking-widest uppercase text-slate-400 block">Total Servicios</span>
+                    <span class="text-[10px] font-mono tracking-widest uppercase text-slate-400 block">Servicios</span>
                     <span class="font-semibold">
-                        {{ venta.segmentos_vuelo.count }} Vuelo{{ venta.segmentos_vuelo.count|pluralize:"s" }} / 
+                        {{ venta.segmentos_vuelo.count }} Vuelo{{ venta.segmentos_vuelo.count|pluralize:"s" }} /
                         {{ venta.alojamientos.count }} Hotel{{ venta.alojamientos.count|pluralize:"es" }}
                     </span>
                 </div>
@@ -226,26 +274,26 @@
             <div x-show="activeTab === 'timeline'" class="space-y-4" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                 <div class="flex justify-between items-center mb-2 px-1">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Cronograma del Viaje</h3>
-                    
+
                     <!-- Manual Refresh Trigger -->
-                    <button hx-get="{% url 'bookings:public_itinerary_live' token=token %}" 
-                            hx-target="#timeline-content" 
-                            hx-swap="innerHTML" 
+                    <button hx-get="{% url 'bookings:public_itinerary_live' token=token %}"
+                            hx-target="#timeline-content"
+                            hx-swap="innerHTML"
                             class="flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18v3.5m0 0h3v-3.5"></path></svg>
                         Actualizar
                     </button>
                 </div>
-                
+
                 <!-- Main Timeline Mount Point -->
                 <div id="timeline-content" class="glass-panel rounded-3xl p-6 shadow-lg min-h-[150px]">
                     {% include "bookings/partials/itinerary_live_timeline.html" %}
                 </div>
 
                 <!-- Auto Poller using HTMX (silent refresh) -->
-                <div hx-get="{% url 'bookings:public_itinerary_live' token=token %}" 
-                     hx-trigger="every 120s" 
-                     hx-target="#timeline-content" 
+                <div hx-get="{% url 'bookings:public_itinerary_live' token=token %}"
+                     hx-trigger="every 120s"
+                     hx-target="#timeline-content"
                      hx-swap="innerHTML"
                      style="display:none;"></div>
             </div>
@@ -253,7 +301,7 @@
             <!-- TAB: Passengers -->
             <div x-show="activeTab === 'passengers'" class="space-y-4" style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">Información de Pasajeros</h3>
-                
+
                 <div class="space-y-3">
                     {% for pasajero in venta.pasajeros.all %}
                         {% include "bookings/passenger_portal/partials/passenger_card.html" %}
@@ -268,11 +316,11 @@
             <!-- TAB: Mejorar Viaje / Cross-Selling -->
             <div x-show="activeTab === 'crosssell'" class="space-y-4" style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-data="{ selectedService: '' }">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 px-1">Añadir Servicios a tu Viaje</h3>
-                
+
                 <!-- Services Carousel/Grid -->
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <!-- Seguro / Asistencia -->
-                    <button @click="selectedService = 'SEG'" 
+                    <button @click="selectedService = 'SEG'"
                             :class="selectedService === 'SEG' ? 'border-brand bg-brand/5 ring-1 ring-brand' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60'"
                             class="glass-panel p-4 rounded-2xl border text-center transition-all duration-200 flex flex-col items-center gap-2">
                         <span class="text-2xl">🛡️</span>
@@ -281,7 +329,7 @@
                     </button>
 
                     <!-- Alquiler Auto -->
-                    <button @click="selectedService = 'OTR'" 
+                    <button @click="selectedService = 'OTR'"
                             :class="selectedService === 'OTR' ? 'border-brand bg-brand/5 ring-1 ring-brand' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60'"
                             class="glass-panel p-4 rounded-2xl border text-center transition-all duration-200 flex flex-col items-center gap-2">
                         <span class="text-2xl">🚗</span>
@@ -290,7 +338,7 @@
                     </button>
 
                     <!-- Lounge VIP -->
-                    <button @click="selectedService = 'LNG'" 
+                    <button @click="selectedService = 'LNG'"
                             :class="selectedService === 'LNG' ? 'border-brand bg-brand/5 ring-1 ring-brand' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60'"
                             class="glass-panel p-4 rounded-2xl border text-center transition-all duration-200 flex flex-col items-center gap-2">
                         <span class="text-2xl">✨</span>
@@ -299,7 +347,7 @@
                     </button>
 
                     <!-- SIM de Datos -->
-                    <button @click="selectedService = 'SIM'" 
+                    <button @click="selectedService = 'SIM'"
                             :class="selectedService === 'SIM' ? 'border-brand bg-brand/5 ring-1 ring-brand' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60'"
                             class="glass-panel p-4 rounded-2xl border text-center transition-all duration-200 flex flex-col items-center gap-2">
                         <span class="text-2xl">📱</span>
@@ -315,7 +363,7 @@
                           hx-swap="innerHTML">
                         {% csrf_token %}
                         <input type="hidden" name="tipo_servicio" :value="selectedService">
-                        
+
                         <div id="cross-sell-mount" class="space-y-4">
                             <h4 class="text-sm font-bold text-brand flex items-center gap-2">
                                 <span x-show="selectedService === 'SEG'">🛡️ Seguro de Viaje</span>
@@ -436,7 +484,7 @@
                             </div>
                         </div>
                         {% endif %}
-                        
+
                         {% if agencia.email_principal %}
                         <div class="flex items-center gap-3">
                             <span class="text-lg">✉️</span>
@@ -480,7 +528,7 @@
     </div>
 
     <!-- Toast Notification Component -->
-    <div x-show="toast" 
+    <div x-show="toast"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 translate-y-4"
          x-transition:enter-end="opacity-100 translate-y-0"

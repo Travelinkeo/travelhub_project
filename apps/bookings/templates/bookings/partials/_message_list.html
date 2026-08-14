@@ -1,0 +1,17 @@
+{% load i18n humanize %}
+
+<div class="space-y-4">
+    {% for msg in messages %}
+        {% include "bookings/partials/_single_message.html" with msg=msg %}
+    {% empty %}
+        <div class="h-48 flex flex-col items-center justify-center text-center p-6 text-[var(--text-muted)] space-y-2">
+            <div class="w-12 h-12 rounded-2xl bg-[var(--surface-2)] flex items-center justify-center border border-[var(--border-color)] text-[var(--primary)] shadow-sm">
+                <span class="material-symbols-outlined text-2xl">chat_bubble</span>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-[var(--text-main)]">Sin mensajes en este expediente</p>
+                <p class="text-[11px] mt-0.5">Envía el primer mensaje o comparte la Ficha Digital con el pasajero abajo.</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>

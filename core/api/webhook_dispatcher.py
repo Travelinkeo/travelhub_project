@@ -164,7 +164,7 @@ def notify_pago_confirmado(pago):
     dispatch_webhook_event(
         "pago.confirmado",
         {
-            "pago_id": pago.id,
+            "pago_id": getattr(pago, "pk", getattr(pago, "id_pago_venta", None)),
             "monto": str(getattr(pago, "monto", 0)),
             "moneda": getattr(pago, "moneda", "USD"),
             "metodo": getattr(pago, "metodo_pago", None),

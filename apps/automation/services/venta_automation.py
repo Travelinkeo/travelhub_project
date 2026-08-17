@@ -67,10 +67,6 @@ class VentaAutomationService:
 
         # 3. Guardado Atómico
         with transaction.atomic():
-            # A. Cliente (Refactorizado -> CustomerService)
-            cliente = CustomerService.identify_or_create(data, agencia, forced_cliente_id)
-            nombre_pax = f"{cliente.apellidos}, {cliente.nombres}" if cliente else "PASAJERO"
-
             # B. Datos de Identificación (🛡️ Audit Point 4: Exact Match)
             pnr = str(
                 data.get("pnr")
@@ -94,10 +90,9 @@ class VentaAutomationService:
             if boleto_obj and boleto_obj.venta_asociada:
                 venta = boleto_obj.venta_asociada
 
-            # Prioridad 2: Búsqueda por PNR (🛡️ EXACT MATCH)
+            # Prioridad 2: Búsqueda por PNR (🛡️ Consolidación Multipasajero / Familias)
             if not venta and pnr != "SIN-PNR":
                 manager = getattr(Venta, "all_objects", Venta.objects)
-                # Usamos iexact para evitar falsos positivos de icontains y mejorar performance
                 venta_existente = (
                     manager.filter(agencia=agencia, localizador__iexact=pnr)
                     .order_by("-fecha_venta")
@@ -106,22 +101,22 @@ class VentaAutomationService:
 
                 if venta_existente:
                     seis_meses = datetime.timedelta(days=180)
-                    es_reciclado = False
-
-                    if (timezone.now() - venta_existente.fecha_venta) > seis_meses:
-                        es_reciclado = True
-                    elif (
-                        venta_existente.cliente
-                        and cliente
-                        and venta_existente.cliente_id != cliente.id
-                    ):
-                        es_reciclado = True
-
-                    if not es_reciclado:
+                    if (timezone.now() - venta_existente.fecha_venta) <= seis_meses:
                         venta = venta_existente
                         if hasattr(venta, "deleted_at") and venta.deleted_at:
                             venta.deleted_at = None
                             venta.save(update_fields=["deleted_at"])
+                        logger.info(
+                            f"🔗 Consolidando boleto {ticket_num} en Venta existente #{venta.pk} (PNR: {pnr})"
+                        )
+
+            # A. Cliente Titular
+            if venta and venta.cliente:
+                cliente = venta.cliente
+            else:
+                cliente = CustomerService.identify_or_create(data, agencia, forced_cliente_id)
+
+            nombre_pax = f"{cliente.apellidos}, {cliente.nombres}" if cliente else "PASAJERO"
 
             if not venta:
                 venta = Venta.objects.create(
@@ -138,10 +133,10 @@ class VentaAutomationService:
                     impuestos=monto_impuestos,
                     total_venta=monto_total,
                     saldo_pendiente=monto_total,
-                    descripcion_general=f"Emisión {aerolinea} - Pax: {nombre_pax}",
+                    descripcion_general=f"Emisión {aerolinea} - PNR: {pnr}",
                 )
             else:
-                if not venta.cliente:
+                if not venta.cliente and cliente:
                     venta.cliente = cliente
                 venta.save()
 
@@ -200,10 +195,12 @@ class VentaAutomationService:
                 "tipo_item": "AIR",
                 "descripcion_personalizada": f"Boleto {ticket_num} ({aerolinea})",
                 "cantidad": 1,
-                "precio_unitario_venta": monto_total,
+                "precio_unitario_venta": monto_base
+                if (monto_base and monto_base > 0)
+                else (
+                    monto_total - monto_impuestos if monto_total >= monto_impuestos else monto_total
+                ),
                 "impuestos_item_venta": monto_impuestos,
-                "subtotal_item_venta": monto_base if monto_base else monto_total,
-                "total_item_venta": monto_total,
                 "proveedor_servicio": proveedor_obj,
                 "costo_neto_proveedor": costo_neto_pagar,
                 "comision_agencia_monto": comision_monto,
@@ -219,7 +216,7 @@ class VentaAutomationService:
                 item_venta_obj = ItemVenta.objects.create(**item_data)
 
             # F. Pasajeros (Refactorizado -> CustomerService)
-            CustomerService.sync_pasajero(nombre_pax, agencia, venta)
+            CustomerService.sync_pasajero(data, agencia, venta)
 
             # G. Itinerario (Refactorizado -> ItineraryService)
             ItineraryService.sync_segments(data, agencia, venta, item_venta_obj, aerolinea)
@@ -229,7 +226,8 @@ class VentaAutomationService:
 
             from django.db.models import Sum
 
-            totals = ItemVenta.objects.filter(venta=venta).aggregate(
+            item_mgr = getattr(ItemVenta, "all_objects", ItemVenta.objects)
+            totals = item_mgr.filter(venta=venta).aggregate(
                 total_subtotal=Sum("subtotal_item_venta"),
                 total_impuestos=Sum("impuestos_item_venta"),
                 total_total=Sum("total_item_venta"),
@@ -269,15 +267,14 @@ class VentaAutomationService:
                 data, agencia=agencia
             )
             if ai_report:
-                summary = (
-                    ai_report.get("summary", str(ai_report))
-                    if isinstance(ai_report, dict)
-                    else str(ai_report)
-                )
-                if not venta.notas:
-                    venta.notas = ""
-                venta.notas += f"\n\n[IA SALES REPORT]\n{summary}\n"
-                venta.save(update_fields=["notas"])
+                formatted_report = SalesIntelligenceService.format_report_for_display(ai_report)
+                if formatted_report and formatted_report.strip():
+                    manual_notes = venta.notas_manuales or ""
+                    if manual_notes:
+                        venta.notas = f"{manual_notes}\n\n[IA SALES REPORT]\n{formatted_report}"
+                    else:
+                        venta.notas = f"[IA SALES REPORT]\n{formatted_report}"
+                    venta.save(update_fields=["notas"])
         except Exception as ei:
             logger.error(f"Error generando inteligencia de ventas: {ei}")
 

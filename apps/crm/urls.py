@@ -146,6 +146,11 @@ urlpatterns = [
     ),
     # --- INBOX OMNICANAL (WA + CRM + IA) ---
     path("inbox/", InboxView.as_view(), name="inbox"),
+    path(
+        "mensajes/",
+        RedirectView.as_view(pattern_name="crm:inbox", permanent=False),
+        name="mensajes",
+    ),
     path("inbox/search/", InboxSearchView.as_view(), name="inbox_search"),
     path("inbox/chat/<int:cliente_id>/", ChatThreadView.as_view(), name="chat_thread"),
     path("inbox/send/<int:cliente_id>/", SendMessageView.as_view(), name="send_message"),

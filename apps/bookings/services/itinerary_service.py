@@ -14,11 +14,12 @@ from apps.common.services.catalog_service import CatalogNormalizationService
 logger = logging.getLogger(__name__)
 
 
-def _parse_date_robust(date_str):
+def _parse_datetime_robust(date_str, time_str=None):
     """
-    Intenta parsear fechas en formatos comunes de GDS (25APR, 25 APR 2024, etc)
+    Intenta parsear fechas y horas en formatos comunes de GDS (25APR, 25 APR 2024, 18:30, etc)
+    Retorna un objeto datetime.datetime con la hora correcta si está disponible.
     """
-    if not date_str or str(date_str).strip() == "":
+    if not date_str or str(date_str).strip() in ("", "None", "null", "N/A"):
         return None
 
     date_str = str(date_str).upper().strip()
@@ -31,16 +32,68 @@ def _parse_date_robust(date_str):
         if es in date_str:
             date_str = date_str.replace(es, en)
 
-    formatos = ["%d%b", "%d %b", "%d %b %Y", "%d%b%y", "%d%b%Y", "%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y"]
+    # Limpiar time_str
+    clean_time = None
+    if time_str and str(time_str).strip() not in ("", "None", "null", "N/A", "--:--"):
+        t_raw = str(time_str).strip().replace(".", ":").replace(" ", "")
+        if len(t_raw) == 4 and t_raw.isdigit():
+            t_raw = f"{t_raw[:2]}:{t_raw[2:]}"
+        m_time = re.search(r"(\d{1,2}):(\d{2})", t_raw)
+        if m_time:
+            clean_time = (int(m_time.group(1)), int(m_time.group(2)))
 
-    # Intentar con meses en inglés (estándar GDS)
-    for fmt in formatos:
+    # Formatos combinados (si date_str ya incluye hora)
+    formatos_dt = [
+        "%d%b%y %H:%M",
+        "%d%b%Y %H:%M",
+        "%d %b %Y %H:%M",
+        "%d %b %y %H:%M",
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%d %H:%M",
+        "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%dT%H:%M",
+        "%d/%m/%Y %H:%M",
+        "%d-%m-%Y %H:%M",
+    ]
+
+    from django.utils import timezone
+
+    tz = timezone.get_current_timezone()
+
+    for fmt in formatos_dt:
         try:
             dt = datetime.strptime(date_str, fmt)
             if dt.year == 1900:
-                now = datetime.now()
-                dt = dt.replace(year=now.year)
-            return dt.date()
+                dt = dt.replace(year=datetime.now().year)
+            if timezone.is_naive(dt):
+                dt = timezone.make_aware(dt, tz)
+            return dt
+        except (ValueError, TypeError):
+            continue
+
+    # Formatos solo fecha
+    formatos_d = [
+        "%d%b%y",
+        "%d%b%Y",
+        "%d %b %Y",
+        "%d %b %y",
+        "%d%b",
+        "%d %b",
+        "%Y-%m-%d",
+        "%d/%m/%Y",
+        "%d-%m-%Y",
+    ]
+
+    for fmt in formatos_d:
+        try:
+            dt = datetime.strptime(date_str, fmt)
+            if dt.year == 1900:
+                dt = dt.replace(year=datetime.now().year)
+            if clean_time:
+                dt = dt.replace(hour=clean_time[0], minute=clean_time[1])
+            if timezone.is_naive(dt):
+                dt = timezone.make_aware(dt, tz)
+            return dt
         except (ValueError, TypeError):
             continue
 
@@ -57,7 +110,7 @@ class ItineraryCryptoService:
     SALT = "travelhub.itinerary.v1"
 
     @classmethod
-    def generar_enlace_itinerario(cls, venta) -> str:
+    def generar_enlace_itinerario(cls, venta, request=None) -> str:
         """
         Empaqueta la tupla (id_venta, agencia_id) en un token seguro con marca de tiempo
         y construye la URL absoluta para el cliente usando signing.dumps (URL-Safe).
@@ -67,13 +120,45 @@ class ItineraryCryptoService:
         # Construimos la ruta relativa limpia en la raíz
         path = reverse("public_itinerary_root", kwargs={"token": token})
 
-        # Retornamos la URL absoluta del inquilino si está definida (SaaS Ready), de lo contrario relativa
-        domain = getattr(settings, "SITE_DOMAIN", "")
+        # 1. Si tenemos el objeto request, usamos el host real de la petición
+        if request is not None:
+            try:
+                scheme = "https" if request.is_secure() else "http"
+                host = request.get_host()
+                if host:
+                    return f"{scheme}://{host}{path}"
+            except Exception as e:
+                logger.debug("Host no disponible en request: %s", e)
+
+        # 2. Si la agencia tiene un dominio o subdominio configurado
+        agencia = getattr(venta, "agencia", None)
+        if agencia:
+            dominio_custom = getattr(agencia, "dominio_personalizado", None)
+            if dominio_custom and str(dominio_custom).strip():
+                domain = str(dominio_custom).strip()
+                if not (domain.startswith("http://") or domain.startswith("https://")):
+                    domain = f"https://{domain}"
+                return f"{domain}{path}"
+
+            subdominio = getattr(agencia, "subdominio", None)
+            if subdominio and str(subdominio).strip():
+                main = getattr(settings, "MAIN_DOMAIN", "travelhub.cc")
+                return f"https://{subdominio.strip()}.{main}{path}"
+
+        # 3. Fallback a dominio principal del sistema
+        domain = (
+            getattr(settings, "SITE_DOMAIN", "")
+            or getattr(settings, "MAIN_DOMAIN", "")
+            or getattr(settings, "EMAIL_DOMAIN", "")
+            or "travelhub.cc"
+        ).strip()
+
         if domain:
             if not (domain.startswith("http://") or domain.startswith("https://")):
                 domain = f"https://{domain}"
             return f"{domain}{path}"
-        return path
+
+        return f"https://travelhub.cc{path}"
 
     @classmethod
     def verificar_y_desempaquetar_token(cls, token: str, max_age_days: int = 30) -> tuple:
@@ -145,10 +230,27 @@ class ItineraryService:
                 vuelo_num = str(
                     seg.get("vuelo") or seg.get("flightNumber") or seg.get("flight_number") or "N/A"
                 )
-                f_salida = _parse_date_robust(str(seg.get("fecha_salida") or seg.get("date")))
+                hora_dep = (
+                    seg.get("hora_salida")
+                    or seg.get("departure", {}).get("time")
+                    or seg.get("departure_time")
+                )
+                hora_arr = (
+                    seg.get("hora_llegada")
+                    or seg.get("arrival", {}).get("time")
+                    or seg.get("arrival_time")
+                )
+
+                f_salida = _parse_datetime_robust(
+                    seg.get("fecha_salida") or seg.get("date"), hora_dep
+                )
+                f_llegada = _parse_datetime_robust(
+                    seg.get("fecha_llegada") or seg.get("fecha_salida") or seg.get("date"),
+                    hora_arr,
+                )
 
                 seg_existente = SegmentoVuelo.objects.filter(
-                    venta=venta, numero_vuelo=vuelo_num, fecha_salida=f_salida
+                    venta=venta, numero_vuelo=vuelo_num
                 ).first()
 
                 seg_data = {
@@ -163,7 +265,7 @@ class ItineraryService:
                         seg.get("details", {}).get("cabin") or seg.get("clase") or "Y"
                     )[:5],
                     "fecha_salida": f_salida,
-                    "fecha_llegada": _parse_date_robust(str(seg.get("fecha_llegada"))),
+                    "fecha_llegada": f_llegada,
                 }
 
                 if seg_existente:

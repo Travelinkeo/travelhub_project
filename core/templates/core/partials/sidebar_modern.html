@@ -217,6 +217,14 @@
         <div x-show="!sidebarOpen" class="h-px bg-border-color my-3 mx-2"></div>
 
         <div x-show="(!sidebarOpen && !mobileMenuOpen) || openCategories.crm" x-transition class="space-y-1">
+        <a href="{% url 'crm:inbox' %}"
+            class="nav-item {% if 'inbox' in request.path or 'mensajes' in request.path %}nav-active{% endif %}"
+            :class="!sidebarOpen && 'justify-center'">
+            <span class="material-symbols-outlined text-[20px] shrink-0">chat</span>
+            <span x-show="sidebarOpen" x-transition class="font-bold whitespace-nowrap text-xs">{% trans "Mensajes" %}</span>
+            <span x-show="sidebarOpen" class="ml-auto bg-emerald-500/10 text-emerald-500 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-emerald-500/20">WA</span>
+        </a>
+
         <a href="{% url 'crm:cliente_list' %}"
             class="nav-item {% if 'crm/clientes' in request.path %}nav-active{% endif %}"
             :class="!sidebarOpen && 'justify-center'">

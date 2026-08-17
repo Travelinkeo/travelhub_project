@@ -32,40 +32,41 @@ def generar_asiento_factura(factura):
         AsientoContable: Asiento generado
     """
     from django.apps import apps
+    from django.contrib.contenttypes.models import ContentType
 
     AsientoContable = apps.get_model("contabilidad", "AsientoContable")
     MovimientoContable = apps.get_model("contabilidad", "MovimientoContable")
     CuentaContable = apps.get_model("contabilidad", "CuentaContable")
     try:
         with transaction.atomic():
-            # Reutilizar o crear asiento contable
+            ct = ContentType.objects.get_for_model(factura)
             asiento = AsientoContable.objects.filter(
-                referencia_documento=factura.numero_control, agencia=factura.agencia
+                content_type=ct, object_id=factura.pk, agencia=factura.agencia
             ).first()
 
+            glosa = f"Factura {factura.numero_control} - {factura.cliente.nombres if factura.cliente else ''} {factura.cliente.apellidos if factura.cliente and factura.cliente.apellidos else ''}".strip()
+
             if asiento:
-                asiento.detalles_asiento.all().delete()
+                asiento.movimientos.all().delete()
                 asiento.fecha_contable = factura.fecha_emision
-                asiento.tasa_cambio_aplicada = factura.tasa_bcv_aplicada or Decimal("1.00")
-                asiento.descripcion_general = f"Factura {factura.numero_control} - {factura.cliente.nombres if factura.cliente else ''} {factura.cliente.apellidos if factura.cliente and factura.cliente.apellidos else ''}"
+                asiento.glosa = glosa
                 asiento.save()
             else:
                 asiento = AsientoContable.objects.create(
                     tipo_asiento=AsientoContable.TipoAsiento.VENTAS,
                     fecha_contable=factura.fecha_emision,
-                    descripcion_general=f"Factura {factura.numero_control} - {factura.cliente.nombres if factura.cliente else ''} {factura.cliente.apellidos if factura.cliente and factura.cliente.apellidos else ''}",
-                    tasa_cambio_aplicada=factura.tasa_bcv_aplicada or Decimal("1.00"),
-                    referencia_documento=factura.numero_control,
+                    glosa=glosa,
+                    content_type=ct,
+                    object_id=factura.pk,
                     estado=AsientoContable.EstadoAsiento.BORRADOR,
                     agencia=factura.agencia,
                 )
 
             tasa = factura.tasa_bcv_aplicada or Decimal("1.00")
-            linea_idx = 1
 
             # DEBE: Cuentas por Cobrar
             cuenta_cxc = CuentaContable.objects.filter(
-                codigo_cuenta__startswith="1.1.2",  # Cuentas por Cobrar
+                codigo_cuenta__startswith="1.1.2",
                 acepta_movimientos=True,
                 agencia=factura.agencia,
             ).first()
@@ -82,20 +83,16 @@ def generar_asiento_factura(factura):
                 monto_total_bsd = (monto_total * tasa).quantize(Decimal("0.01"))
                 MovimientoContable.objects.create(
                     asiento=asiento,
-                    linea=linea_idx,
-                    cuenta_contable=cuenta_cxc,
-                    debe=monto_total,
-                    haber=Decimal("0.00"),
-                    debe_bsd=monto_total_bsd,
-                    haber_bsd=Decimal("0.00"),
-                    descripcion_linea=f"CxC Cliente {factura.cliente.nombres if factura.cliente else ''}",
+                    cuenta=cuenta_cxc,
+                    tipo=MovimientoContable.TipoMovimiento.DEBITO,
+                    monto_usd=monto_total,
+                    monto_ves=monto_total_bsd,
                     agencia=factura.agencia,
                 )
-                linea_idx += 1
 
             # HABER: Ingresos por Ventas
             cuenta_ingresos = CuentaContable.objects.filter(
-                codigo_cuenta__startswith="4.1",  # Ingresos
+                codigo_cuenta__startswith="4.1",
                 acepta_movimientos=True,
                 agencia=factura.agencia,
             ).first()
@@ -113,22 +110,18 @@ def generar_asiento_factura(factura):
                     monto_ingresos_bsd = (monto_ingresos * tasa).quantize(Decimal("0.01"))
                     MovimientoContable.objects.create(
                         asiento=asiento,
-                        linea=linea_idx,
-                        cuenta_contable=cuenta_ingresos,
-                        debe=Decimal("0.00"),
-                        haber=monto_ingresos,
-                        debe_bsd=Decimal("0.00"),
-                        haber_bsd=monto_ingresos_bsd,
-                        descripcion_linea=f"Ingresos Factura {factura.numero_control}",
+                        cuenta=cuenta_ingresos,
+                        tipo=MovimientoContable.TipoMovimiento.CREDITO,
+                        monto_usd=monto_ingresos,
+                        monto_ves=monto_ingresos_bsd,
                         agencia=factura.agencia,
                     )
-                    linea_idx += 1
 
             # HABER: IVA por Pagar
             monto_iva_total = factura.total_iva_usd or Decimal("0.00")
             if monto_iva_total > 0:
                 cuenta_iva = CuentaContable.objects.filter(
-                    codigo_cuenta__startswith="2.1.4",  # IVA por Pagar
+                    codigo_cuenta__startswith="2.1.4",
                     acepta_movimientos=True,
                     agencia=factura.agencia,
                 ).first()
@@ -144,22 +137,18 @@ def generar_asiento_factura(factura):
                     monto_iva_bsd = (monto_iva_total * tasa).quantize(Decimal("0.01"))
                     MovimientoContable.objects.create(
                         asiento=asiento,
-                        linea=linea_idx,
-                        cuenta_contable=cuenta_iva,
-                        debe=Decimal("0.00"),
-                        haber=monto_iva_total,
-                        debe_bsd=Decimal("0.00"),
-                        haber_bsd=monto_iva_bsd,
-                        descripcion_linea=f"IVA Factura {factura.numero_control}",
+                        cuenta=cuenta_iva,
+                        tipo=MovimientoContable.TipoMovimiento.CREDITO,
+                        monto_usd=monto_iva_total,
+                        monto_ves=monto_iva_bsd,
                         agencia=factura.agencia,
                     )
-                    linea_idx += 1
 
             # HABER: IGTF por Pagar
             monto_igtf = factura.total_igtf_usd or Decimal("0.00")
             if monto_igtf > 0:
                 cuenta_igtf = CuentaContable.objects.filter(
-                    codigo_cuenta__startswith="2.1.5",  # IGTF por Pagar
+                    codigo_cuenta__startswith="2.1.5",
                     acepta_movimientos=True,
                     agencia=factura.agencia,
                 ).first()
@@ -175,27 +164,21 @@ def generar_asiento_factura(factura):
                     monto_igtf_bsd = (monto_igtf * tasa).quantize(Decimal("0.01"))
                     MovimientoContable.objects.create(
                         asiento=asiento,
-                        linea=linea_idx,
-                        cuenta_contable=cuenta_igtf,
-                        debe=Decimal("0.00"),
-                        haber=monto_igtf,
-                        debe_bsd=Decimal("0.00"),
-                        haber_bsd=monto_igtf_bsd,
-                        descripcion_linea=f"IGTF 3% Factura {factura.numero_control}",
+                        cuenta=cuenta_igtf,
+                        tipo=MovimientoContable.TipoMovimiento.CREDITO,
+                        monto_usd=monto_igtf,
+                        monto_ves=monto_igtf_bsd,
                         agencia=factura.agencia,
                     )
 
-            # Calcular totales y cuadrar el asiento
-            asiento.calcular_totales()
-
             logger.info(
-                f"Asiento contable generado: {asiento.id_asiento} para factura {factura.numero_control}"
+                f"Asiento contable generado: {asiento.pk} para factura {factura.numero_control}"
             )
             return asiento
 
     except Exception as e:
         logger.error(f"Error generando asiento para factura {factura.numero_control}: {str(e)}")
-        raise
+        return None
 
 
 def contabilizar_factura(factura):
@@ -212,16 +195,13 @@ def contabilizar_factura(factura):
 
     AsientoContable = apps.get_model("contabilidad", "AsientoContable")
     try:
-        # Generar asiento siempre (no hay FK para lookup)
         asiento = generar_asiento_factura(factura)
 
         # Aprobar asiento
         if asiento and asiento.estado == AsientoContable.EstadoAsiento.BORRADOR:
             asiento.estado = AsientoContable.EstadoAsiento.CONTABILIZADO
             asiento.save()
-            logger.info(
-                f"Asiento {asiento.id_asiento} aprobado para factura {factura.numero_control}"
-            )
+            logger.info(f"Asiento {asiento.pk} aprobado para factura {factura.numero_control}")
 
         return True
 
@@ -239,14 +219,15 @@ def generar_asiento_pago(pago_venta):
     HABER: Cuentas por Cobrar Clientes
     """
     from django.apps import apps
+    from django.contrib.contenttypes.models import ContentType
 
     AsientoContable = apps.get_model("contabilidad", "AsientoContable")
     MovimientoContable = apps.get_model("contabilidad", "MovimientoContable")
     CuentaContable = apps.get_model("contabilidad", "CuentaContable")
 
-    referencia = f"PAGO-{pago_venta.pk}"
+    ct = ContentType.objects.get_for_model(pago_venta)
     asiento = AsientoContable.objects.filter(
-        referencia_documento=referencia, agencia=pago_venta.agencia
+        content_type=ct, object_id=pago_venta.pk, agencia=pago_venta.agencia
     ).first()
 
     # Si pasa a no confirmado o se anula, cambiar estado del asiento a ANULADO
@@ -254,45 +235,44 @@ def generar_asiento_pago(pago_venta):
         if asiento and asiento.estado != AsientoContable.EstadoAsiento.ANULADO:
             asiento.estado = AsientoContable.EstadoAsiento.ANULADO
             asiento.save(update_fields=["estado"])
-            logger.info(f"Asiento contable {asiento.id_asiento} anulado para pago {pago_venta.pk}")
+            logger.info(f"Asiento contable {asiento.pk} anulado para pago {pago_venta.pk}")
         return asiento
 
     # Si se confirma, crear o reactivar/actualizar asiento
     try:
         with transaction.atomic():
+            fecha_c = (
+                pago_venta.fecha_pago.date()
+                if hasattr(pago_venta.fecha_pago, "date")
+                else pago_venta.fecha_pago
+            )
+            glosa = f"Cobro/Pago Recibido - Ref: {pago_venta.referencia or 'S/R'}"
+
             if asiento:
-                asiento.detalles_asiento.all().delete()
-                asiento.fecha_contable = (
-                    pago_venta.fecha_pago.date()
-                    if hasattr(pago_venta.fecha_pago, "date")
-                    else pago_venta.fecha_pago
-                )
+                asiento.movimientos.all().delete()
+                asiento.fecha_contable = fecha_c
+                asiento.glosa = glosa
                 asiento.estado = AsientoContable.EstadoAsiento.BORRADOR
                 asiento.save()
             else:
                 asiento = AsientoContable.objects.create(
                     tipo_asiento=AsientoContable.TipoAsiento.DIARIO,
-                    fecha_contable=pago_venta.fecha_pago.date()
-                    if hasattr(pago_venta.fecha_pago, "date")
-                    else pago_venta.fecha_pago,
-                    descripcion_general=f"Cobro/Pago Recibido - Ref: {pago_venta.referencia or 'S/R'}",
-                    moneda=pago_venta.moneda,
-                    tasa_cambio_aplicada=Decimal("1.00"),
-                    referencia_documento=referencia,
+                    fecha_contable=fecha_c,
+                    glosa=glosa,
+                    content_type=ct,
+                    object_id=pago_venta.pk,
                     estado=AsientoContable.EstadoAsiento.BORRADOR,
                     agencia=pago_venta.agencia,
                 )
 
             # Buscar cuenta de Disponibilidades (Caja o Banco)
             if pago_venta.metodo == "EFE":
-                # Caja
                 cuenta_debe = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="1.1.1",
                     acepta_movimientos=True,
                     agencia=pago_venta.agencia,
                 ).first()
             else:
-                # Banco
                 cuenta_debe = CuentaContable.objects.filter(
                     codigo_cuenta__startswith="1.1.2",
                     acepta_movimientos=True,
@@ -306,7 +286,6 @@ def generar_asiento_pago(pago_venta):
                     agencia=pago_venta.agencia,
                 ).first()
 
-            # Cuenta por Cobrar Clientes (Haber)
             cuenta_haber = CuentaContable.objects.filter(
                 codigo_cuenta__startswith="1.1.2.01",
                 acepta_movimientos=True,
@@ -320,43 +299,34 @@ def generar_asiento_pago(pago_venta):
                     agencia=pago_venta.agencia,
                 ).first()
 
-            tasa = Decimal("1.00")
             monto_pago = pago_venta.monto + (pago_venta.monto_igtf or Decimal("0.00"))
-            monto_bsd = (monto_pago * tasa).quantize(Decimal("0.01"))
+            monto_ves = Decimal("0.00")
 
-            # Crear movimientos
             if cuenta_debe:
                 MovimientoContable.objects.create(
                     asiento=asiento,
-                    linea=1,
-                    cuenta_contable=cuenta_debe,
-                    debe=monto_pago,
-                    haber=Decimal("0.00"),
-                    debe_bsd=monto_bsd,
-                    haber_bsd=Decimal("0.00"),
-                    descripcion_linea=f"Cobro Método {pago_venta.get_metodo_display()}",
+                    cuenta=cuenta_debe,
+                    tipo=MovimientoContable.TipoMovimiento.DEBITO,
+                    monto_usd=monto_pago,
+                    monto_ves=monto_ves,
                     agencia=pago_venta.agencia,
                 )
 
             if cuenta_haber:
                 MovimientoContable.objects.create(
                     asiento=asiento,
-                    linea=2,
-                    cuenta_contable=cuenta_haber,
-                    debe=Decimal("0.00"),
-                    haber=monto_pago,
-                    debe_bsd=Decimal("0.00"),
-                    haber_bsd=monto_bsd,
-                    descripcion_linea=f"Abono Cliente - Venta {pago_venta.venta.localizador if pago_venta.venta else ''}",
+                    cuenta=cuenta_haber,
+                    tipo=MovimientoContable.TipoMovimiento.CREDITO,
+                    monto_usd=monto_pago,
+                    monto_ves=monto_ves,
                     agencia=pago_venta.agencia,
                 )
 
-            asiento.calcular_totales()
             logger.info(
-                f"Asiento contable {asiento.id_asiento} generado/actualizado para pago {pago_venta.pk}"
+                f"Asiento contable {asiento.pk} generado/actualizado para pago {pago_venta.pk}"
             )
             return asiento
 
     except Exception as e:
         logger.error(f"Error generando asiento para pago {pago_venta.pk}: {e}")
-        raise
+        return None

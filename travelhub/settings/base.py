@@ -104,6 +104,10 @@ STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
 DATABASE_URL = env("DATABASE_URL")
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 
+MAIN_DOMAIN = env("MAIN_DOMAIN", default="travelhub.cc")
+SITE_DOMAIN = env("SITE_DOMAIN", default="travelhub.cc")
+EMAIL_DOMAIN = env("EMAIL_DOMAIN", default="travelhub.cc")
+
 # ---------------------------------------------------------------------------
 # Auth & Login
 # ---------------------------------------------------------------------------

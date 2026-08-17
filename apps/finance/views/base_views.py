@@ -52,13 +52,21 @@ class InvoiceDetailView(SaaSMixin, LoginRequiredMixin, DetailView):
     context_object_name = "invoice"
     pk_url_kwarg = "pk"
 
+    def get_context_data(self, **kwargs):
+        """get_context_data."""
+        context = super().get_context_data(**kwargs)
+        from apps.bookings.models import Venta
+
+        context["venta"] = Venta.objects.filter(factura_id=self.object.pk).first()
+        return context
+
     def get(self, request, *args, **kwargs):
         """get."""
         # Si es una petición HTMX, devolvemos el partial
         if request.headers.get("HX-Request"):
             return super().get(request, *args, **kwargs)
-        # Si no, redirigimos al listado (o podríamos tener una página dedicada)
-        return redirect("finance:invoice_list")
+        # Si no, redirigimos a la página de detalle completa de la factura
+        return redirect("core:factura_detalle", pk=self.kwargs["pk"])
 
 
 class InvoiceIssueView(SaaSMixin, LoginRequiredMixin, View):

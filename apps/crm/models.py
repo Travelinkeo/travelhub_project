@@ -113,6 +113,9 @@ class Cliente(AgenciaMixin, SoftDeleteModel, models.Model):
 
     def __str__(self):
         """__str__."""
+        if self.tipo_cliente == self.TipoCliente.CORPORATIVO and self.nombre_empresa:
+            rif = f" [RIF: {self.cedula_identidad}]" if self.cedula_identidad else ""
+            return f"{self.nombre_empresa}{rif}"
         return f"{self.nombres} {self.apellidos or ''}".strip()
 
     def get_telegram_onboarding_url(self) -> str | None:
@@ -138,6 +141,8 @@ class Cliente(AgenciaMixin, SoftDeleteModel, models.Model):
 
     @property
     def nombre_completo(self):
+        if self.tipo_cliente == self.TipoCliente.CORPORATIVO and self.nombre_empresa:
+            return self.nombre_empresa.strip()
         return f"{self.nombres} {self.apellidos or ''}".strip()
 
     def get_nombre_completo(self):

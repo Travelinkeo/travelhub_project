@@ -1,110 +1,116 @@
 {% extends 'base_modern.html' %}
 {% load humanize %}
 
-{% block title %}Factura #{{ factura.numero_factura }} - TravelHub{% endblock %}
+{% block title %}Factura #{{ factura.numero_control }} - TravelHub Pro{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+<div class="space-y-4 sm:space-y-5 w-full">
+    <!-- Header & Back Navigation -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <div class="flex items-center gap-3 mb-1">
-                <a href="{% url 'finance:facturacion_dashboard' %}"
-                    class="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
+            <div class="flex items-center gap-3">
+                <a href="{% url 'bookings:venta_list' %}"
+                    class="p-1.5 bg-surface-2 rounded-xl text-text-muted hover:text-text-main hover:bg-surface-3 transition-all border border-border-color"
+                    title="Volver a Ventas">
+                    <span class="material-symbols-outlined text-[20px]">arrow_back</span>
                 </a>
-                <h1 class="text-2xl font-bold text-[var(--text-primary)]">Factura #{{ factura.numero_factura }}</h1>
-                <span class="px-3 py-1 text-xs font-medium rounded-full 
-                    {% if factura.estado == 'PAG' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
-                    {% elif factura.estado == 'PEN' %}bg-yellow-500/10 text-yellow-400 border border-yellow-500/20
-                    {% elif factura.estado == 'ANU' %}bg-red-500/10 text-red-500 border border-red-500/20
-                    {% else %}bg-[var(--surface-3)] text-[var(--text-secondary)] border border-[var(--border)]{% endif %}">
+                <div class="h-4 w-px bg-border-color"></div>
+                <h1 class="text-xl sm:text-2xl font-bold text-text-main">Factura #{{ factura.numero_control }}</h1>
+                <span class="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-full border
+                    {% if factura.estado == 'EMITIDA' %}bg-status-success/10 text-status-success border-status-success/20
+                    {% elif factura.estado == 'BORRADOR' %}bg-status-warning/10 text-status-warning border-status-warning/20
+                    {% else %}bg-status-danger/10 text-status-danger border-status-danger/20{% endif %}">
                     {{ factura.get_estado_display }}
                 </span>
             </div>
-            <p class="text-[var(--text-secondary)] ml-9">Emitida el {{ factura.fecha_emision|date:"d F, Y" }}</p>
+            <p class="text-xs text-text-muted mt-1 ml-9">
+                Emitida el {{ factura.fecha_emision|date:"d M Y" }} {% if factura.tasa_bcv_aplicada %}• Tasa BCV: Bs. {{ factura.tasa_bcv_aplicada|floatformat:2 }}{% endif %}
+            </p>
         </div>
-        <div class="flex gap-3">
-            {% if factura.estado == 'BOR' %}
-            <form action="{% url 'finance:factura_emitir' factura.pk %}" method="post"
-                >
+
+        <div class="flex flex-wrap items-center gap-2">
+            {% if factura.estado == 'BORRADOR' %}
+            <form action="{% url 'core:factura_emitir' factura.pk %}" method="post" id="form-emitir-factura">
                 {% csrf_token %}
                 <button type="submit"
-                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg shadow-emerald-900/20">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Emitir Factura
+                    class="px-3.5 py-2 bg-status-success hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-emerald-900/20">
+                    <span class="material-symbols-outlined text-[16px]">verified</span>
+                    <span>Emitir Factura</span>
                 </button>
             </form>
             {% endif %}
 
-            <a href="{% url 'finance:factura_pdf' factura.pk %}"
-                class="px-4 py-2 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text-primary)] rounded-lg font-medium transition-colors flex items-center gap-2 border border-[var(--border)]">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                </svg>
-                Descargar PDF
+            <a href="{% url 'core:factura_pdf' factura.pk %}" target="_blank"
+                class="px-3.5 py-2 bg-surface-2 hover:bg-surface-3 text-text-main border border-border-color rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px] text-status-danger">picture_as_pdf</span>
+                <span>Descargar PDF</span>
             </a>
-            {% if factura.venta %}
-            <a href="{% url 'bookings:venta_detail' factura.venta.pk %}"
-                class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg shadow-primary/20">
-                Ver Venta Asociada
+
+            {% if venta %}
+            <a href="{% url 'bookings:venta_detail' venta.pk %}"
+                class="px-3.5 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
+                <span class="material-symbols-outlined text-[16px]">flight_takeoff</span>
+                <span>Venta {{ venta.localizador }}</span>
             </a>
             {% endif %}
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Main Content: Items -->
-        <div class="lg:col-span-2 space-y-6">
-            <div class="glass-panel rounded-2xl overflow-hidden border border-[var(--border)]">
-                <div class="p-6 border-b border-[var(--border)] bg-[var(--surface-2)]">
-                    <h2 class="text-lg font-semibold text-[var(--text-primary)]">Ítems de Factura</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+        <!-- Main Content: Items (8/12) -->
+        <div class="lg:col-span-8 space-y-4 sm:space-y-5">
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <div class="px-5 py-3.5 border-b border-border-color bg-surface-2/50 flex items-center justify-between">
+                    <h2 class="text-sm font-bold text-text-main uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px] text-primary">receipt_long</span>
+                        Ítems y Conceptos Facturados
+                    </h2>
+                    <span class="text-xs text-text-muted">{{ items|length }} conceptos</span>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left">
+                    <table class="w-full text-left text-xs">
                         <thead>
-                            <tr class="border-b border-[var(--border)] bg-[var(--surface-2)]">
-                                <th class="px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                                    Descripción</th>
-                                <th
-                                    class="px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right">
-                                    Cant.</th>
-                                <th
-                                    class="px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right">
-                                    Precio Unit.</th>
-                                <th
-                                    class="px-6 py-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider text-right">
-                                    Total</th>
+                            <tr class="border-b border-border-color bg-surface-2/30">
+                                <th class="px-4 py-3 font-semibold text-text-muted uppercase tracking-wider">Descripción</th>
+                                <th class="px-4 py-3 font-semibold text-text-muted uppercase tracking-wider text-right">Cant.</th>
+                                <th class="px-4 py-3 font-semibold text-text-muted uppercase tracking-wider text-right">Precio Unit. (USD)</th>
+                                <th class="px-4 py-3 font-semibold text-text-muted uppercase tracking-wider text-right">Total (USD)</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-[var(--border)] bg-[var(--surface-1)]">
+                        <tbody class="divide-y divide-border-color bg-surface-1">
                             {% for item in items %}
-                            <tr class="hover:bg-[var(--surface-2)] transition-colors">
-                                <td class="px-6 py-4 text-[var(--text-primary)]">{{ item.descripcion }}</td>
-                                <td class="px-6 py-4 text-right text-[var(--text-secondary)]">{{ item.cantidad }}</td>
-                                <td class="px-6 py-4 text-right text-[var(--text-secondary)]">{{ item.precio_unitario|floatformat:2|intcomma }}</td>
-                                <td class="px-6 py-4 text-right text-[var(--text-primary)] font-medium">{{ item.subtotal_item|floatformat:2|intcomma }}</td>
+                            <tr class="hover:bg-surface-2/50 transition-colors">
+                                <td class="px-4 py-3 text-text-main font-medium">
+                                    {{ item.descripcion }}
+                                    {% if item.exento %}
+                                    <span class="inline-block ml-1.5 px-1.5 py-0.2 rounded text-[9px] font-bold bg-primary/10 text-primary border border-primary/20">Exento TSJ 256</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-right text-text-secondary">{{ item.cantidad|floatformat:0 }}</td>
+                                <td class="px-4 py-3 text-right text-text-secondary font-medium">${{ item.precio_unitario_usd|default:item.total_linea_usd|floatformat:2|intcomma }}</td>
+                                <td class="px-4 py-3 text-right text-text-main font-bold">${{ item.total_linea_usd|floatformat:2|intcomma }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-text-muted italic">No hay ítems registrados en esta factura.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
-                        <tfoot class="bg-[var(--surface-2)] border-t border-[var(--border)]">
+                        <tfoot class="bg-surface-2/40 border-t border-border-color">
                             <tr>
-                                <td colspan="3" class="px-6 py-4 text-right text-[var(--text-secondary)]">Subtotal</td>
-                                <td class="px-6 py-4 text-right text-[var(--text-primary)]">{{ factura.subtotal|floatformat:2|intcomma }}</td>
+                                <td colspan="3" class="px-4 py-2.5 text-right text-text-muted">Subtotal (USD)</td>
+                                <td class="px-4 py-2.5 text-right font-bold text-text-main">${{ factura.subtotal_usd|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
-                                <td colspan="3" class="px-6 py-4 text-right text-[var(--text-secondary)]">Impuestos</td>
-                                <td class="px-6 py-4 text-right text-[var(--text-primary)]">{{ factura.monto_impuestos|floatformat:2|intcomma }}</td>
+                                <td colspan="3" class="px-4 py-2.5 text-right text-text-muted">IVA 16% (USD)</td>
+                                <td class="px-4 py-2.5 text-right font-bold text-text-main">${{ factura.total_iva_usd|floatformat:2|intcomma }}</td>
                             </tr>
-                            <tr class="text-lg font-bold">
-                                <td colspan="3" class="px-6 py-4 text-right text-[var(--text-primary)]">Total</td>
-                                <td class="px-6 py-4 text-right text-emerald-400">{{ factura.monto_total|floatformat:2|intcomma }} {{ factura.moneda.codigo_iso }}</td>
+                            <tr class="border-t border-border-color bg-surface-2/70 font-black">
+                                <td colspan="3" class="px-4 py-3 text-right text-xs uppercase text-text-main tracking-wider">Gran Total Factura</td>
+                                <td class="px-4 py-3 text-right text-base text-primary">
+                                    ${{ factura.gran_total_usd|floatformat:2|intcomma }}
+                                    <span class="block text-[10px] text-text-muted font-medium">Bs. {{ factura.gran_total_ves|floatformat:2|intcomma }}</span>
+                                </td>
                             </tr>
                         </tfoot>
                     </table>
@@ -112,33 +118,66 @@
             </div>
         </div>
 
-        <!-- Sidebar: Client Info -->
-        <div class="space-y-6">
-            <div class="glass-panel p-6 rounded-2xl border border-[var(--border)]">
-                <h2 class="text-lg font-semibold text-[var(--text-primary)] mb-4">Cliente</h2>
-                <div class="flex items-center mb-4">
-                    <div
-                        class="w-12 h-12 rounded-full bg-[var(--primary-opacity)] text-[var(--primary)] flex items-center justify-center text-lg font-bold mr-4">
+        <!-- Sidebar: Fiscal & Client Info (4/12) -->
+        <div class="lg:col-span-4 space-y-4 sm:space-y-5">
+            <!-- Client Info Card -->
+            <div class="glass-panel p-4 sm:p-5 rounded-2xl space-y-3">
+                <h2 class="text-xs font-bold text-text-main uppercase tracking-wider flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[16px] text-primary">person</span>
+                    Cliente Receptor
+                </h2>
+                <div class="flex items-center gap-3 pb-3 border-b border-border-color">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-sm font-black shrink-0">
                         {{ factura.cliente.nombres|slice:":1" }}{{ factura.cliente.apellidos|slice:":1" }}
                     </div>
-                    <div>
-                        <p class="text-[var(--text-primary)] font-medium">{{ factura.cliente.nombres }} {{ factura.cliente.apellidos }}
-                        </p>
-                        <p class="text-sm text-[var(--text-muted)]">{{ factura.cliente.email }}</p>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-bold text-text-main truncate">{{ factura.cliente.get_nombre_completo|default:factura.cliente.nombre_empresa }}</p>
+                        <p class="text-[11px] text-text-muted truncate">{{ factura.cliente.email|default:"--" }}</p>
                     </div>
                 </div>
-                <div class="space-y-3 text-sm flex-col">
+                <div class="space-y-2 text-xs">
                     <div>
-                        <span class="text-[var(--text-muted)] block">Documento</span>
-                        <span class="text-[var(--text-secondary)]">{{ factura.cliente.tipo_documento }} {{ factura.cliente.numero_documento }}</span>
+                        <span class="text-[10px] font-bold text-text-muted uppercase tracking-wider block">Documento / RIF</span>
+                        <span class="text-text-main font-semibold">{{ factura.cliente.tipo_documento }} {{ factura.cliente.numero_documento|default:"S/D" }}</span>
                     </div>
                     <div>
-                        <span class="text-[var(--text-muted)] block">Teléfono</span>
-                        <span class="text-[var(--text-secondary)]">{{ factura.cliente.telefono_principal|default:"--" }}</span>
+                        <span class="text-[10px] font-bold text-text-muted uppercase tracking-wider block">Teléfono Principal</span>
+                        <span class="text-text-main">{{ factura.cliente.telefono_principal|default:"--" }}</span>
                     </div>
                     <div>
-                        <span class="text-[var(--text-muted)] block">Dirección</span>
-                        <span class="text-[var(--text-secondary)]">{{ factura.cliente.direccion|default:"--" }}</span>
+                        <span class="text-[10px] font-bold text-text-muted uppercase tracking-wider block">Dirección Fiscal</span>
+                        <span class="text-text-main">{{ factura.cliente.direccion|default:"--" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desglose Impositivo TSJ 256 -->
+            <div class="glass-panel p-4 sm:p-5 rounded-2xl space-y-2.5">
+                <h2 class="text-xs font-bold text-text-main uppercase tracking-wider flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[16px] text-status-info">account_balance</span>
+                    Desglose Fiscal (TSJ 256)
+                </h2>
+                <div class="space-y-1.5 text-xs">
+                    <div class="flex justify-between text-text-muted">
+                        <span>Cta. Terceros (Boletos):</span>
+                        <span class="font-bold text-text-main">${{ factura.monto_cuenta_terceros_usd|floatformat:2|intcomma }}</span>
+                    </div>
+                    <div class="flex justify-between text-text-muted">
+                        <span>Ingreso Propio (Fees/Com):</span>
+                        <span class="font-bold text-text-main">${{ factura.ingreso_propio_agencia_usd|floatformat:2|intcomma }}</span>
+                    </div>
+                    <div class="flex justify-between text-text-muted">
+                        <span>Base Imponible LOCTEM:</span>
+                        <span class="font-medium text-text-main">${{ factura.base_impuesto_municipal_usd|floatformat:2|intcomma }}</span>
+                    </div>
+                    <div class="flex justify-between text-text-muted">
+                        <span>Aporte 1% INATUR:</span>
+                        <span class="font-medium text-text-main">${{ factura.monto_inatur_1_usd|floatformat:2|intcomma }}</span>
+                    </div>
+                    <div class="h-px bg-border-color my-1"></div>
+                    <div class="flex justify-between text-text-muted font-bold">
+                        <span>Total IVA Gravado:</span>
+                        <span class="text-text-main">${{ factura.total_iva_usd|floatformat:2|intcomma }}</span>
                     </div>
                 </div>
             </div>
@@ -146,29 +185,21 @@
     </div>
 
     <!-- Audit Logs / History -->
-    <div class="mt-8">
-        <div class="glass-panel rounded-2xl overflow-hidden border border-[var(--border)]">
-            <div class="p-6 border-b border-[var(--border)] bg-[var(--surface-2)] flex justify-between items-center">
-                <h3 class="text-xl font-bold text-[var(--text-primary)] flex items-center">
-                    <svg class="w-5 h-5 mr-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Historial de Cambios
-                </h3>
-                <button onclick="cargarAuditLogs('Factura', '{{ factura.pk }}')"
-                    class="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                        </path>
-                    </svg>
-                </button>
-            </div>
-            <div id="audit-logs-container" class="p-6 space-y-4 max-h-[400px] overflow-y-auto bg-[var(--surface-1)]">
-                <div class="flex justify-center py-4">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
-                </div>
+    <div class="glass-panel rounded-2xl overflow-hidden mt-4">
+        <div class="px-5 py-3.5 border-b border-border-color bg-surface-2/50 flex justify-between items-center">
+            <h3 class="text-xs font-bold text-text-main uppercase tracking-wider flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px] text-primary">history</span>
+                Historial de Cambios
+            </h3>
+            <button onclick="cargarAuditLogs('Factura', '{{ factura.pk }}')"
+                class="p-1 text-text-muted hover:text-text-main transition-all rounded-lg"
+                title="Recargar historial">
+                <span class="material-symbols-outlined text-[16px]">refresh</span>
+            </button>
+        </div>
+        <div id="audit-logs-container" class="p-4 space-y-2.5 max-h-[300px] overflow-y-auto bg-surface-1">
+            <div class="flex justify-center py-4">
+                <span class="material-symbols-outlined text-[24px] text-primary animate-spin">progress_activity</span>
             </div>
         </div>
     </div>
@@ -177,13 +208,15 @@
 
 {% block extra_scripts %}
 <script nonce="{{ request.csp_nonce }}">
-    document.querySelector('form[action="{% url 'finance:factura_emitir' factura.pk %}"]').addEventListener('submit', function(e) {
-        if (!confirm('¿Estás seguro de emitir esta factura? No podrás modificarla después.')) {
-            e.preventDefault();
-        }
-    });
-</script>
-<script nonce="{{ request.csp_nonce }}">
+    const formEmitir = document.getElementById('form-emitir-factura');
+    if (formEmitir) {
+        formEmitir.addEventListener('submit', function(e) {
+            if (!confirm('¿Estás seguro de emitir esta factura? No podrás modificarla después.')) {
+                e.preventDefault();
+            }
+        });
+    }
+
     async function cargarAuditLogs(modelo, objectId) {
         const container = document.getElementById('audit-logs-container');
         if (!container) return;
@@ -192,8 +225,8 @@
             const response = await fetch(`/api/audit-logs/?modelo=${modelo}&object_id=${objectId}`);
             const data = await response.json();
 
-            if (data.length === 0) {
-                container.innerHTML = '<div class="text-center py-8 text-[var(--text-muted)] italic">No hay registros de cambios para este objeto.</div>';
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div class="text-center py-6 text-text-muted italic text-xs">No hay registros de cambios para esta factura.</div>';
                 return;
             }
 
@@ -202,25 +235,25 @@
                 let diffHtml = '';
 
                 if (log.datos_nuevos && Object.keys(log.datos_nuevos).length > 0) {
-                    diffHtml = '<div class="mt-2 text-[10px] space-y-1 border-t border-[var(--border)] pt-2">';
+                    diffHtml = '<div class="mt-2 text-[10px] space-y-0.5 border-t border-border-color pt-1.5">';
                     for (const [key, val] of Object.entries(log.datos_nuevos)) {
                         const prev = log.datos_previos ? (log.datos_previos[key] ?? 'N/A') : 'N/A';
-                        diffHtml += `<div class="flex flex-wrap gap-x-2 text-[var(--text-secondary)]">
-                            <span class="font-bold text-[var(--text-muted)] uppercase">${key}:</span>
-                            <span class="line-through text-red-400/60">${prev}</span>
-                            <span class="text-emerald-400">→ ${val}</span>
+                        diffHtml += `<div class="flex flex-wrap gap-x-2 text-text-secondary">
+                            <span class="font-bold text-text-muted uppercase">${key}:</span>
+                            <span class="line-through text-status-danger/70">${prev}</span>
+                            <span class="text-status-success font-semibold">→ ${val}</span>
                         </div>`;
                     }
                     diffHtml += '</div>';
                 }
 
                 return `
-                    <div class="p-3 bg-[var(--surface-2)] rounded-xl border border-[var(--border)] text-xs">
+                    <div class="p-3 bg-surface-2 rounded-xl border border-border-color text-xs">
                         <div class="flex justify-between items-start mb-1">
                             <span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 font-bold uppercase text-[9px]">${log.accion}</span>
-                            <span class="text-[9px] text-[var(--text-muted)]">${fecha}</span>
+                            <span class="text-[9px] text-text-muted">${fecha}</span>
                         </div>
-                        <p class="text-[var(--text-secondary)] font-medium">${log.descripcion}</p>
+                        <p class="text-text-secondary font-medium">${log.descripcion}</p>
                         ${diffHtml}
                     </div>
                 `;
@@ -228,7 +261,7 @@
 
         } catch (error) {
             console.error('Error cargando logs:', error);
-            container.innerHTML = '<div class="text-center py-8 text-red-500 italic">Error al cargar el historial.</div>';
+            container.innerHTML = '<div class="text-center py-6 text-status-danger italic text-xs">Error al cargar el historial.</div>';
         }
     }
 

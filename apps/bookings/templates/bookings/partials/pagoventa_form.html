@@ -2,39 +2,39 @@
     class="space-y-4">
     {% csrf_token %}
 
-    <div class="space-y-4">
+    <div class="space-y-3.5">
         <div>
-            <label class="block text-sm font-medium text-gray-400 mb-1.5">Monto Pagado (USD)</label>
-            <input type="number" step="0.01" name="monto" required
-                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all font-bold text-green-400">
+            <label class="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-1.5">Monto Pagado (USD)</label>
+            <input type="number" step="0.01" name="monto" required placeholder="0.00"
+                class="w-full bg-surface-1 border border-border-color rounded-xl px-3.5 py-2 text-xs font-bold text-text-main focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-400 mb-1.5">Método de Pago</label>
+            <label class="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-1.5">Método de Pago</label>
             <select name="metodo"
-                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all appearance-none">
-                <option value="EFE">Efectivo</option>
-                <option value="TRF">Transferencia</option>
-                <option value="ZEL">Zelle</option>
-                <option value="TAR">Tarjeta</option>
-                <option value="OTR">Otro</option>
+                class="w-full bg-surface-1 border border-border-color rounded-xl px-3.5 py-2 text-xs text-text-main focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                <option value="EFE" class="bg-surface-1 text-text-main">Efectivo</option>
+                <option value="TRF" class="bg-surface-1 text-text-main">Transferencia</option>
+                <option value="ZEL" class="bg-surface-1 text-text-main">Zelle</option>
+                <option value="TAR" class="bg-surface-1 text-text-main">Tarjeta</option>
+                <option value="OTR" class="bg-surface-1 text-text-main">Otro</option>
             </select>
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-400 mb-1.5">Referencia</label>
+            <label class="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-1.5">Referencia</label>
             <input type="text" name="referencia" placeholder="Nro de confirmación o transferencia"
-                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 transition-all">
+                class="w-full bg-surface-1 border border-border-color rounded-xl px-3.5 py-2 text-xs text-text-main placeholder-text-muted focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
         </div>
     </div>
 
-    <div class="flex justify-end gap-3 pt-6 border-t border-white/10 mt-6">
+    <div class="flex justify-end gap-2.5 pt-4 border-t border-border-color mt-4">
         <button type="button" @click="$dispatch('close-modal')"
-            class="px-6 py-2 rounded-xl text-gray-400 hover:text-white transition-all">
+            class="px-4 py-2 rounded-xl text-xs font-bold text-text-muted hover:text-text-main bg-surface-2 hover:bg-surface-3 border border-border-color transition-all">
             Cancelar
         </button>
         <button type="submit"
-            class="px-8 py-2 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold shadow-lg shadow-green-900/20 transition-all">
+            class="px-5 py-2 rounded-xl bg-status-success hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-900/20 transition-all">
             Registrar Pago
         </button>
     </div>

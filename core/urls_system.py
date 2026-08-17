@@ -17,7 +17,12 @@ from apps.cotizaciones.views import (
     CotizacionStatusView,
     CotizacionUpdateView,
 )
-from apps.finance.views.facturacion_views import generar_factura_desde_venta
+from apps.finance.views.facturacion_views import (
+    FacturaDetailView,
+    descargar_pdf_factura,
+    emitir_factura_definitiva,
+    generar_factura_desde_venta,
+)
 from apps.marketing.views.marketing_views import MarketingHubView
 from core.api.hotel_api import HotelQuoteAPI
 from core.dashboard_stats import get_dashboard_stats as dashboard_stats_api
@@ -365,6 +370,9 @@ urlpatterns = [
     ),
     path("api/ventas/<int:venta_id>/generar-voucher/", generar_voucher, name="generar_voucher"),
     path("ventas/<int:pk>/facturar/", generar_factura_desde_venta, name="venta_facturar"),
+    path("facturacion/<int:pk>/", FacturaDetailView.as_view(), name="factura_detalle"),
+    path("facturacion/<int:pk>/pdf/", descargar_pdf_factura, name="factura_pdf"),
+    path("facturacion/<int:pk>/emitir/", emitir_factura_definitiva, name="factura_emitir"),
     path("cotizaciones/nueva/", CotizacionCreateView.as_view(), name="cotizacion_nueva"),
     path("cotizaciones/<int:pk>/", CotizacionDetailView.as_view(), name="cotizacion_detalle"),
     path("cotizaciones/<int:pk>/editar/", CotizacionUpdateView.as_view(), name="cotizacion_editar"),

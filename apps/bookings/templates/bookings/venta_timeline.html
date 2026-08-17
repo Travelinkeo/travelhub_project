@@ -1,299 +1,292 @@
 {% extends 'base_modern.html' %}
 {% load static %}
 
-{% block title %}Timeline Venta {{ venta.localizador }} - TravelHub SaaS{% endblock %}
+{% block title %}Línea de Vida Venta {{ venta.localizador }} - TravelHub Pro{% endblock %}
 
 {% block extra_css %}
 <style>
-    .timeline-container { position: relative; padding-left: 2.5rem; }
+    .timeline-container { position: relative; padding-left: 2rem; }
     .timeline-container::before {
-        content: ''; position: absolute; left: 11px; top: 0; bottom: 0; width: 2px;
-        background: linear-gradient(to bottom, #3b82f6 0%, rgba(30, 41, 59, 0.2) 100%);
-        border-radius: 2px;
+        content: ''; position: absolute; left: 13px; top: 8px; bottom: 8px; width: 2px;
+        background: var(--border-color);
     }
-    .timeline-item { position: relative; margin-bottom: 2.5rem; }
+    .timeline-item { position: relative; margin-bottom: 1.75rem; }
     .timeline-icon {
-        position: absolute; left: -2.35rem; top: 0.25rem; width: 28px; height: 28px;
+        position: absolute; left: -2rem; top: 0.125rem; width: 28px; height: 28px;
         border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        background-color: #0f172a; border: 2px solid #3b82f6; z-index: 10;
-        box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+        background-color: var(--surface-1); border: 2px solid var(--border-color); z-index: 10;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
     }
-    .timeline-icon.bg-amber-500 { border-color: #f59e0b; }
-    .timeline-icon.bg-emerald-500 { border-color: #10b981; }
-    .timeline-icon.bg-brand-500 { border-color: #3b82f6; }
-    .timeline-icon.bg-slate-800 { border-color: #475569; }
 </style>
 {% endblock %}
 
 {% block content %}
-<main class="w-full">
-    <!-- NAVBAR SIMULADO (BACK BUTTON) -->
-    <div class="flex items-center gap-4 mb-8">
-        <a href="{% url 'bookings:venta_list' %}" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors text-slate-400 hover:text-white group">
-            <span class="material-symbols-outlined w-5 h-5 group-hover:-translate-x-1 transition-transform">arrow_back</span>
-        </a>
-        <div class="h-4 w-px bg-white/10"></div>
-        <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined w-4 h-4 text-slate-500">flight</span>
-            <h1 class="text-sm font-bold text-slate-300">Reserva <span class="text-white font-black">#{{ venta.id_venta }}</span></h1>
-        </div>
-    </div>
-
-    <!-- HEADER DE LA RESERVA -->
-    <div class="flex flex-col md:flex-row justify-between items-start gap-6 mb-10">
-        <div>
-            <h2 class="text-5xl font-black text-white tracking-tight flex items-center gap-4 uppercase">
-                {{ venta.localizador|default:"S/L" }}
-                <button @click="navigator.clipboard.writeText('{{ venta.localizador }}'); $dispatch('notify', { message: 'Copiado!', type: 'success' })"
-                    class="text-slate-500 hover:text-blue-500 transition-colors" title="Copiar PNR">
-                    <span class="material-symbols-outlined w-6 h-6">content_copy</span>
-                </button>
-            </h2>
-            <div class="flex flex-wrap items-center gap-3 mt-3 text-sm">
-                <span class="font-bold text-slate-200">{{ venta.cliente.get_nombre_completo }}</span>
-                <span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
-                <span class="text-slate-400 flex items-center gap-2">
-                    <span class="material-symbols-outlined w-4 h-4">calendar_month</span>
-                    Emisión: {{ venta.fecha_venta|date:"d M Y" }}
-                </span>
-                <span class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
-                <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest
-                    {% if venta.estado == 'PAG' or venta.estado == 'COM' %}bg-emerald-500/10 text-emerald-500 border border-emerald-500/20
-                    {% elif venta.estado == 'PEN' %}bg-amber-500/10 text-amber-500 border border-amber-500/20
-                    {% else %}bg-blue-500/10 text-blue-400 border border-blue-500/20{% endif %}">
-                    {{ venta.get_estado_display }}
-                </span>
+<div class="space-y-4 sm:space-y-5 w-full">
+    <!-- NAVBAR / BACK BUTTON -->
+    <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'bookings:venta_detail' venta.pk %}"
+               class="p-1.5 bg-surface-2 rounded-xl text-text-muted hover:text-text-main hover:bg-surface-3 transition-all border border-border-color"
+               title="Volver al detalle de la venta">
+                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+            </a>
+            <div class="h-4 w-px bg-border-color"></div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px] text-text-muted">history</span>
+                <h1 class="text-xs font-bold text-text-muted uppercase tracking-wider">Línea de Vida / Auditoría</h1>
             </div>
         </div>
 
-        <div class="flex gap-3">
-            <a href="{% url 'bookings:venta_update' venta.pk %}" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-3 px-6 rounded-2xl transition-all flex items-center gap-2 text-sm">
-                <span class="material-symbols-outlined w-4 h-4 text-blue-400">edit</span> Editar Venta
+        <div class="flex items-center gap-2">
+            <a href="{% url 'bookings:venta_update' venta.pk %}"
+               class="px-3.5 py-2 bg-surface-2 hover:bg-surface-3 text-text-main border border-border-color rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs">
+                <span class="material-symbols-outlined text-[16px] text-primary">edit</span>
+                <span>Editar Venta</span>
             </a>
             <button hx-get="{% url 'bookings:pago_venta_add' venta.pk %}" hx-target="#modal-content" @click="$dispatch('open-modal')"
-                class="bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 px-6 rounded-2xl transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2 text-sm">
-                <i data-lucide="circle-dollar-sign" class="w-4 h-4"></i> Registrar Pago
+                class="px-3.5 py-2 bg-status-success hover:bg-emerald-600 text-white font-bold rounded-xl transition-all shadow-md shadow-emerald-900/20 flex items-center gap-1.5 text-xs">
+                <span class="material-symbols-outlined text-[16px]">credit_card</span>
+                <span>Registrar Pago</span>
             </button>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- HEADER DE LA RESERVA -->
+    <div class="glass-panel rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <div class="flex items-center gap-3">
+                <h2 class="text-2xl sm:text-3xl font-black text-text-main tracking-tight uppercase">
+                    {{ venta.localizador|default:"S/L" }}
+                </h2>
+                <button @click="navigator.clipboard.writeText('{{ venta.localizador }}'); $dispatch('notify', { message: 'Localizador copiado!', type: 'success' })"
+                    class="p-1 text-text-muted hover:text-primary transition-colors" title="Copiar Localizador">
+                    <span class="material-symbols-outlined text-[18px]">content_copy</span>
+                </button>
+                <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border
+                    {% if venta.estado == 'PAG' or venta.estado == 'COM' %}bg-emerald-500/10 text-emerald-500 border-emerald-500/20
+                    {% elif venta.estado == 'PEN' %}bg-amber-500/10 text-amber-500 border-amber-500/20
+                    {% else %}bg-blue-500/10 text-blue-400 border-blue-500/20{% endif %}">
+                    {{ venta.get_estado_display }}
+                </span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5 mt-1.5 text-xs">
+                <span class="font-bold text-text-main">{{ venta.cliente.get_nombre_completo|default:"Cliente Sin Asignar" }}</span>
+                <span class="w-1 h-1 rounded-full bg-border-color"></span>
+                <span class="text-text-muted flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">calendar_month</span>
+                    Emisión: {{ venta.fecha_venta|date:"d M Y, H:i" }}
+                </span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="text-right">
+                <p class="text-[10px] font-bold text-text-muted uppercase tracking-wider">Total de la Venta</p>
+                <p class="text-xl sm:text-2xl font-black text-text-main">{{ venta.moneda.simbolo }}{{ venta.total_venta }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
 
         <!-- COLUMNA IZQUIERDA (8/12): EL TIMELINE -->
-        <div class="lg:col-span-8 bg-[#0f172a]/40 border border-white/5 rounded-[2.5rem] p-10 shadow-sm backdrop-blur-sm">
-            <h3 class="text-xl font-black text-white mb-10 border-b border-white/5 pb-6 flex items-center gap-3">
-                <i data-lucide="activity" class="w-6 h-6 text-blue-500"></i>
-                Línea de Vida de la Reserva
-            </h3>
+        <div class="lg:col-span-8 glass-panel rounded-2xl p-4 sm:p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-border-color pb-3">
+                <h3 class="text-sm font-bold text-text-main flex items-center gap-2 uppercase tracking-wider">
+                    <span class="material-symbols-outlined text-[18px] text-primary">timeline</span>
+                    Hitos y Registro de Actividad
+                </h3>
+                <span class="text-xs text-text-muted">{{ timeline_events|length }} eventos</span>
+            </div>
 
-            <div class="timeline-container">
+            <div class="timeline-container pt-2">
                 {% for event in timeline_events %}
                 <div class="timeline-item">
-                    <div class="timeline-icon bg-{{ event.color }}-500{% if not event.is_ia %}/20 text-{{ event.color }}-500{% else %} text-white shadow-[0_0_20px_rgba(59,130,246,0.6)]{% endif %}">
-                        <i data-lucide="{{ event.icon }}" class="w-4 h-4"></i>
+                    <div class="timeline-icon text-primary border-border-color">
+                        <span class="material-symbols-outlined text-[16px]">{{ event.icon|default:"info" }}</span>
                     </div>
 
                     {% if event.type == 'payment' and event.color == 'amber' %}
-                    <!-- Evento Especial: Pago Pendiente Highlight -->
-                    <div class="bg-white/5 border border-white/10 rounded-3xl p-6 shadow-sm">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-bold text-white text-base">{{ event.title }}</h4>
-                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{{ event.date|timesince }}</span>
+                    <!-- Evento Especial: Pago Pendiente -->
+                    <div class="bg-surface-2 border border-border-color rounded-xl p-4 shadow-sm">
+                        <div class="flex justify-between items-start mb-1">
+                            <h4 class="font-bold text-text-main text-xs sm:text-sm">{{ event.title }}</h4>
+                            <span class="text-[10px] text-text-muted font-bold uppercase tracking-wider">{{ event.date|timesince }}</span>
                         </div>
-                        <p class="text-sm text-slate-400 mb-6">{{ event.description }}</p>
-
-                        <div class="bg-slate-900/80 border border-white/5 rounded-2xl p-5 flex items-center justify-between">
+                        <p class="text-xs text-text-secondary mb-3">{{ event.description }}</p>
+                        <div class="bg-surface-1 border border-border-color rounded-xl p-3 flex items-center justify-between">
                             <div>
-                                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Monto a Cobrar</p>
-                                <p class="text-2xl font-black text-amber-500">{{ event.moneda }}{{ event.monto }}</p>
+                                <p class="text-[10px] font-bold text-text-muted uppercase tracking-wider">Monto a Cobrar</p>
+                                <p class="text-base font-black text-status-warning">{{ event.moneda }}{{ event.monto }}</p>
                             </div>
-                            <!-- TODO: Implementar reenvío de link B2C -->
-                            <button disabled class="opacity-50 cursor-not-allowed bg-blue-600 text-white text-[11px] font-black px-5 py-3 rounded-xl flex items-center gap-2 uppercase tracking-widest">
-                                <i data-lucide="link" class="w-4 h-4"></i> Reenviar Link B2C
-                            </button>
                         </div>
                     </div>
+
                     {% elif event.is_ia %}
-                    <!-- Evento Especial: Magia IA God Mode -->
-                    <div class="bg-gradient-to-r from-blue-900/30 to-white/5 border border-blue-500/30 rounded-3xl p-6 shadow-sm group hover:border-blue-500/50 transition-all">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-bold text-blue-400 text-base flex items-center gap-2">
-                                <i data-lucide="sparkles" class="w-4 h-4 animate-pulse"></i>
+                    <!-- Evento Especial: IA Parser -->
+                    <div class="bg-surface-2 border border-primary/30 rounded-xl p-4 shadow-sm">
+                        <div class="flex justify-between items-start mb-1">
+                            <h4 class="font-bold text-primary text-xs sm:text-sm flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px] animate-pulse">auto_awesome</span>
                                 {{ event.title }}
                             </h4>
-                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{{ event.date|time }}</span>
+                            <span class="text-[10px] text-text-muted font-bold uppercase tracking-wider">{{ event.date|time }}</span>
                         </div>
-                        <p class="text-sm text-blue-100/70 mb-4">{{ event.description }}</p>
+                        <p class="text-xs text-text-secondary mb-2.5">{{ event.description }}</p>
                         <div class="flex gap-2">
-                            <span class="bg-slate-950/60 border border-white/5 text-slate-400 text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-tighter">Parser: AI Engine v4.2</span>
-                            <span class="bg-slate-950/60 border border-white/5 text-emerald-400 text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-tighter flex items-center gap-1">
-                                <span class="w-1 h-1 rounded-full bg-emerald-500 animate-ping"></span> Confianza: 100%
+                            <span class="bg-surface-1 border border-border-color text-text-muted text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">Motor: UniversalAIParser</span>
+                            <span class="bg-surface-1 border border-status-success/30 text-status-success text-[10px] font-bold px-2 py-0.5 rounded-md uppercase flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-status-success"></span> Precisión: 100%
                             </span>
                         </div>
                     </div>
+
                     {% else %}
                     <!-- Evento Estándar -->
-                    <div class="flex flex-col gap-1.5 hover:bg-white/5 p-4 rounded-2xl transition-colors -ml-4 pl-4">
-                        <div class="flex items-center gap-3">
-                            <span class="font-bold text-slate-100 text-base">{{ event.title }}</span>
-                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">• {{ event.date|date:"d M, H:i" }}</span>
+                    <div class="bg-surface-2/60 hover:bg-surface-2 border border-border-color rounded-xl p-3.5 transition-colors">
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <span class="font-bold text-text-main text-xs sm:text-sm">{{ event.title }}</span>
+                            <span class="text-[10px] text-text-muted font-semibold uppercase tracking-wider shrink-0">{{ event.date|date:"d M, H:i" }}</span>
                         </div>
-                        <p class="text-sm text-slate-400 leading-relaxed">{{ event.description }}</p>
+                        <p class="text-xs text-text-secondary leading-relaxed">{{ event.description }}</p>
                     </div>
                     {% endif %}
                 </div>
                 {% empty %}
-                <div class="text-center py-20 text-slate-500 italic flex flex-col items-center gap-4">
-                    <i data-lucide="ghost" class="w-12 h-12 text-slate-700"></i>
-                    No hay hitos registrados para esta reserva.
+                <div class="text-center py-12 text-text-muted italic flex flex-col items-center gap-2">
+                    <span class="material-symbols-outlined text-[36px] text-text-muted">history_toggle_off</span>
+                    <p class="text-xs">No hay hitos registrados para esta reserva.</p>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
         <!-- COLUMNA DERECHA (4/12): SUMARIO FINANCIERO Y DOCS -->
-        <div class="lg:col-span-4 flex flex-col gap-8">
+        <div class="lg:col-span-4 space-y-4 sm:space-y-5">
 
             <!-- Resumen Financiero -->
-            <div class="bg-[#0f172a]/40 border border-white/5 rounded-[2.5rem] p-8 shadow-sm backdrop-blur-sm">
-                <h3 class="text-[11px] font-black text-slate-500 uppercase tracking-[0.25em] mb-8 flex items-center gap-2">
-                    <i data-lucide="wallet" class="w-3.5 h-3.5"></i> Resumen Financiero
+            <div class="glass-panel rounded-2xl p-4 sm:p-5 space-y-4">
+                <h3 class="text-xs font-bold text-text-main uppercase tracking-wider flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[16px] text-primary">account_balance_wallet</span>
+                    Resumen Financiero
                 </h3>
 
-                <div class="space-y-5 mb-10">
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="text-slate-400">Tarifa GDS + Impuestos</span>
-                        <span class="font-bold text-white">{{ venta.moneda.simbolo }}{{ venta.subtotal }}</span>
+                <div class="space-y-2.5">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-text-muted">Tarifa GDS + Impuestos</span>
+                        <span class="font-bold text-text-main">{{ venta.moneda.simbolo }}{{ venta.subtotal }}</span>
                     </div>
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="text-slate-400">Fees de Agencia</span>
-                        <span class="font-bold text-emerald-400">+{{ venta.moneda.simbolo }}{{ venta.impuestos }}</span>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-text-muted">Fees de Agencia</span>
+                        <span class="font-bold text-primary">+{{ venta.moneda.simbolo }}{{ venta.total_fees|default:"0.00" }}</span>
                     </div>
-                    <div class="h-px bg-white/5 w-full my-2"></div>
+                    <div class="h-px bg-border-color w-full my-2"></div>
                     <div class="flex justify-between items-center">
-                        <span class="text-sm font-bold text-slate-300">Neto a Cobrar</span>
-                        <span class="text-3xl font-black text-white">{{ venta.moneda.simbolo }}{{ venta.total_venta }}</span>
+                        <span class="text-xs font-black text-text-main uppercase tracking-wider">Neto a Cobrar</span>
+                        <span class="text-2xl font-black text-text-main">{{ venta.moneda.simbolo }}{{ venta.total_venta }}</span>
                     </div>
                 </div>
 
                 {% if venta.saldo_pendiente > 0 %}
-                <div class="bg-amber-500/10 border border-amber-500/20 rounded-3xl p-6 flex flex-col gap-1 relative overflow-hidden group">
-                    <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform">
-                        <i data-lucide="alert-circle" class="w-24 h-24 text-amber-500"></i>
-                    </div>
-                    <span class="text-[10px] font-black text-amber-500 uppercase tracking-widest relative z-10">Saldo Pendiente</span>
-                    <span class="text-3xl font-black text-amber-500 relative z-10">{{ venta.moneda.simbolo }}{{ venta.saldo_pendiente }}</span>
+                <div class="bg-status-warning/10 border border-status-warning/20 rounded-xl p-3.5 flex flex-col gap-1">
+                    <span class="text-[10px] font-bold text-status-warning uppercase tracking-wider">Saldo Pendiente</span>
+                    <span class="text-xl font-black text-status-warning">{{ venta.moneda.simbolo }}{{ venta.saldo_pendiente }}</span>
                 </div>
                 {% else %}
-                <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 flex items-center gap-4 border-dashed">
-                    <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
-                        <i data-lucide="party-popper" class="w-6 h-6"></i>
+                <div class="bg-status-success/10 border border-status-success/20 rounded-xl p-3.5 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-status-success/20 text-status-success flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[18px]">verified</span>
                     </div>
                     <div>
-                        <p class="text-[11px] font-black text-emerald-500 uppercase tracking-widest">Pago Completo</p>
-                        <p class="text-xs text-slate-400">Reserva 100% cobrada</p>
+                        <p class="text-[11px] font-bold text-status-success uppercase tracking-wider">Pago Completo</p>
+                        <p class="text-[11px] text-text-muted">Reserva 100% cobrada</p>
                     </div>
                 </div>
                 {% endif %}
             </div>
 
             <!-- Documentos y Anexos -->
-            <div class="bg-[#0f172a]/40 border border-white/5 rounded-[2.5rem] p-8 shadow-sm backdrop-blur-sm">
-                <h3 class="text-[11px] font-black text-slate-500 uppercase tracking-[0.25em] mb-8 flex items-center justify-between">
-                    <span>Documentos Digitales</span>
-                    <span class="bg-white/10 text-slate-300 px-3 py-1 rounded-full text-[10px] font-black">{{ venta.boletos_adjuntos.count }}</span>
-                </h3>
+            <div class="glass-panel rounded-2xl p-4 sm:p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-text-main uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px] text-text-muted">description</span>
+                        Documentos Digitales
+                    </h3>
+                    <span class="bg-surface-2 text-text-muted px-2 py-0.5 rounded-full text-[10px] font-bold border border-border-color">{{ venta.boletos_adjuntos.count }}</span>
+                </div>
 
-                <div class="space-y-4">
+                <div class="space-y-2.5">
                     {% for boleto in venta.boletos_adjuntos.all %}
                     <!-- Original -->
-                    <div class="group flex items-center justify-between p-4 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all">
-                        <div class="flex items-center gap-4 overflow-hidden">
-                            <div class="w-10 h-10 min-w-[40px] rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <i data-lucide="file-text" class="w-5 h-5"></i>
+                    <div class="flex items-center justify-between p-3 rounded-xl border border-border-color bg-surface-2 hover:bg-surface-3 transition-all">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <div class="w-8 h-8 min-w-[32px] rounded-lg bg-status-danger/10 text-status-danger flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[16px]">draft</span>
                             </div>
                             <div class="overflow-hidden">
-                                <p class="text-xs font-bold text-slate-200 truncate capitalize">{{ boleto.archivo_boleto.name|truncatechars:25 }}</p>
-                                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight">{{ boleto.formato_detectado }} ORIGINAL</p>
+                                <p class="text-xs font-bold text-text-main truncate">{{ boleto.archivo_boleto.name|truncatechars:22 }}</p>
+                                <p class="text-[10px] text-text-muted font-bold uppercase tracking-tight">{{ boleto.formato_detectado }} ORIGINAL</p>
                             </div>
                         </div>
-                        <a href="{{ boleto.archivo_boleto.url }}" download class="p-2 text-slate-500 hover:text-white transition-colors">
-                            <i data-lucide="download" class="w-4 h-4"></i>
+                        <a href="{{ boleto.archivo_boleto.url }}" download class="p-1.5 text-text-muted hover:text-text-main transition-colors" title="Descargar original">
+                            <span class="material-symbols-outlined text-[16px]">download</span>
                         </a>
                     </div>
 
                     {% if boleto.archivo_pdf_generado %}
                     <!-- TravelHub PDF -->
-                    <div class="group flex items-center justify-between p-4 rounded-2xl border border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 transition-all ring-1 ring-blue-500/0 hover:ring-blue-500/30">
-                        <div class="flex items-center gap-4 overflow-hidden">
-                            <div class="w-10 h-10 min-w-[40px] rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center group-hover:rotate-12 transition-transform">
-                                <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    <div class="flex items-center justify-between p-3 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <div class="w-8 h-8 min-w-[32px] rounded-lg bg-primary/20 text-primary flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
                             </div>
                             <div class="overflow-hidden">
-                                <p class="text-xs font-bold text-blue-300 truncate">Voucher_Oficial.pdf</p>
-                                <p class="text-[10px] text-blue-500/70 font-bold uppercase tracking-tight">Copia TravelHub</p>
+                                <p class="text-xs font-bold text-text-main truncate">Boleto_Unificado.pdf</p>
+                                <p class="text-[10px] text-primary font-bold uppercase tracking-tight">Copia TravelHub</p>
                             </div>
                         </div>
-                        <a href="{{ boleto.archivo_pdf_generado.url }}" target="_blank" class="px-3 py-1.5 bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white rounded-lg transition-all text-[10px] font-black uppercase tracking-widest">
+                        <a href="{{ boleto.archivo_pdf_generado.url }}" target="_blank" class="px-2.5 py-1 bg-primary text-white hover:bg-primary-hover rounded-lg transition-all text-[10px] font-bold uppercase tracking-wider">
                             Ver
                         </a>
                     </div>
                     {% endif %}
                     {% empty %}
-                    <div class="text-center py-10">
-                        <i data-lucide="folder-x" class="w-10 h-10 text-slate-800 mx-auto mb-3"></i>
-                        <p class="text-[10px] font-black text-slate-600 uppercase tracking-widest">No hay archivos</p>
+                    <div class="text-center py-6">
+                        <span class="material-symbols-outlined text-[28px] text-text-muted mx-auto mb-1">folder_off</span>
+                        <p class="text-[10px] font-bold text-text-muted uppercase tracking-wider">Sin archivos adjuntos</p>
                     </div>
                     {% endfor %}
                 </div>
-
-                <!-- TODO: Implementar subida de documentos -->
-                <button disabled class="w-full mt-6 py-4 border-2 border-dashed border-white/5 rounded-2xl text-[11px] font-black text-slate-500 transition-all uppercase tracking-[0.2em] flex items-center justify-center gap-2 opacity-50 cursor-not-allowed">
-                    <i data-lucide="plus" class="w-4 h-4"></i> Subir Documentos
-                </button>
             </div>
 
         </div>
     </div>
-</main>
+</div>
 
 <!-- Modal Global para HTMX -->
 <div x-data="{ open: false }" @open-modal.window="open = true" @close-modal.window="open = false" x-show="open"
     class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-cloak>
-    <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md" @click="open = false"
+    <div class="fixed inset-0 bg-surface-base/80 backdrop-blur-sm" @click="open = false"
         x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
         x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
 
-    <div class="relative bg-slate-900 border border-white/10 rounded-[2.5rem] shadow-2xl w-full max-w-xl overflow-hidden"
+    <div class="relative bg-surface-1 border border-border-color rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
         x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 translate-y-4" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
         x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-95 translate-y-4">
 
-        <div class="flex items-center justify-between p-6 border-b border-white/5 bg-white/5">
-            <h3 class="text-lg font-black text-white uppercase tracking-widest">Acción de Reserva</h3>
-            <button @click="open = false" class="text-slate-500 hover:text-white transition-colors">
-                <i data-lucide="x" class="w-6 h-6"></i>
+        <div class="flex items-center justify-between px-5 py-3.5 border-b border-border-color bg-surface-2/50">
+            <h3 class="text-base font-bold text-text-main">Acción de Reserva</h3>
+            <button @click="open = false" class="text-text-muted hover:text-text-main transition-colors p-1">
+                <span class="material-symbols-outlined text-[18px]">close</span>
             </button>
         </div>
 
-        <div id="modal-content" class="p-10">
-            <div class="flex flex-col items-center justify-center py-12 gap-4">
-                <div class="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
-                <p class="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">Cargando Interfaz</p>
+        <div id="modal-content" class="p-5">
+            <div class="flex flex-col items-center justify-center py-8 gap-3">
+                <span class="material-symbols-outlined text-[32px] text-primary animate-spin">progress_activity</span>
+                <p class="text-xs font-bold text-text-muted uppercase tracking-wider">Cargando Formulario</p>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_scripts %}
-<script nonce="{{ request.csp_nonce }}">
-    document.addEventListener('DOMContentLoaded', () => { lucide.createIcons(); });
-    document.body.addEventListener('htmx:afterSwap', () => { lucide.createIcons(); });
-
-    // Notificaciones Simples
-    window.addEventListener('notify', (e) => {
-        // Podríamos usar Toastify o similar aquí
-        console.log('Notificación:', e.detail.message);
-    });
-</script>
 {% endblock %}

@@ -86,6 +86,49 @@ class SalesIntelligenceService:
             }
 
     @classmethod
+    def format_report_for_display(cls, report: Any) -> str:
+        """
+        Formatea el reporte estructurado en texto limpio, profesional y legible para agentes.
+        """
+        if not report:
+            return ""
+
+        if hasattr(report, "model_dump"):
+            data = report.model_dump()
+        elif hasattr(report, "dict"):
+            data = report.dict()
+        elif isinstance(report, dict):
+            data = report
+        else:
+            return str(report)
+
+        summary = data.get("summary", "")
+        opportunities = data.get("opportunities", [])
+        urgency = data.get("urgency_score", None)
+
+        lines = []
+        if summary:
+            lines.append(f"🎯 Estrategia Comercial:\n{summary}")
+
+        if opportunities:
+            lines.append("\n💡 Oportunidades de Venta Cruzada:")
+            for op in opportunities:
+                p_type = op.get("product_type", "Servicio Adicional")
+                est_rev = op.get("estimated_revenue", "")
+                rationale = op.get("rationale", "")
+                copy = op.get("marketing_copy", "")
+
+                rev_str = f" [Ingreso est: {est_rev}]" if est_rev else ""
+                lines.append(f"• {p_type}{rev_str}:\n  {rationale}")
+                if copy:
+                    lines.append(f'  Gancho sugerido: "{copy}"')
+
+        if urgency:
+            lines.append(f"\n⚡ Nivel de Urgencia sugerido: {urgency}/10")
+
+        return "\n".join(lines)
+
+    @classmethod
     def get_destination_insight(cls, destination_city: str) -> str:
         """Obtiene un fun fact o tip de ventas sobre un destino específico."""
         prompt = f"Dame un consejo de venta rápido (1 línea) para un agente de viajes que está vendiendo {destination_city}."

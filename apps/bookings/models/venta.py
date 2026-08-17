@@ -425,13 +425,47 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
             return self.notas.split("[IA SALES REPORT]")[0].strip()
         return self.notas.strip()
 
+    @staticmethod
+    def _clean_legacy_ai_report(text: str) -> str:
+        """Convierte representaciones legacy de Python repr a texto limpio formateado."""
+        import re
+
+        summary_m = re.search(r"summary=['\"](.*?)['\"]\s*(?:opportunities=|,)", text, re.DOTALL)
+        summary = summary_m.group(1) if summary_m else ""
+
+        opp_matches = re.findall(
+            r"UpsellingOpportunity\(product_type=['\"](.*?)['\"],\s*rationale=['\"](.*?)['\"],\s*marketing_copy=['\"](.*?)['\"],\s*estimated_revenue=['\"](.*?)['\"]\)",
+            text,
+            re.DOTALL,
+        )
+
+        urgency_m = re.search(r"urgency_score=(\d+)", text)
+        urgency = urgency_m.group(1) if urgency_m else None
+
+        lines = []
+        if summary:
+            lines.append(f"🎯 Estrategia Comercial:\n{summary.strip()}")
+        if opp_matches:
+            lines.append("\n💡 Oportunidades de Venta Cruzada:")
+            for p_type, rationale, copy, rev in opp_matches:
+                rev_str = f" [Ingreso est: {rev}]" if rev else ""
+                lines.append(f"• {p_type}{rev_str}:\n  {rationale}")
+                if copy:
+                    lines.append(f'  Gancho sugerido: "{copy}"')
+        if urgency:
+            lines.append(f"\n⚡ Nivel de Urgencia sugerido: {urgency}/10")
+
+        return "\n".join(lines) if lines else text
+
     @property
     def ai_report(self) -> str | None:
         if not self.notas or "[IA SALES REPORT]" not in self.notas:
             return None
-        parts = self.notas.split("[IA SALES REPORT]", 1)
-        if len(parts) > 1:
-            report_content = parts[1].strip()
+        parts = self.notas.split("[IA SALES REPORT]")
+        for part in reversed(parts):
+            report_content = part.strip()
+            if not report_content:
+                continue
             # Si hay un error de API en el reporte, devolvemos un mensaje de advertencia limpio
             if (
                 "{'error':" in report_content
@@ -439,6 +473,8 @@ class Venta(AgenciaMixin, SoftDeleteModel, models.Model):
                 or "API key not valid" in report_content
             ):
                 return "La inteligencia de ventas IA no pudo ejecutarse debido a un problema con la clave de API o la cuota de Gemini."
+            if "summary=" in report_content and "opportunities=" in report_content:
+                return self._clean_legacy_ai_report(report_content)
             return report_content
         return None
 

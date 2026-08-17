@@ -70,11 +70,16 @@ def audit_delete_itemventa(sender, instance, **kwargs):
     """audit_delete_itemventa."""
     if are_signals_blocked():
         return
+    v = None
+    try:
+        v = instance.venta
+    except Exception as e:
+        logger.debug("Venta no disponible para audit_delete_itemventa: %s", e)
     crear_audit_log(
         modelo="ItemVenta",
         object_id=instance.pk,
         accion=AuditLog.Accion.DELETE,
-        venta=instance.venta,
+        venta=v,
         descripcion=f"Borrado de ItemVenta {instance.pk} ({instance.descripcion_personalizada})",
     )
 

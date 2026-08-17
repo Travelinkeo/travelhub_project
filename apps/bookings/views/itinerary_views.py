@@ -21,7 +21,8 @@ def public_itinerary_view(request, token):
         # Si el token expiró o fue alterado, mostramos una plantilla elegante de enlace vencido
         return render(request, "bookings/itinerary_expired.html", status=403)
 
-    from core.api import Agencia, agency_context
+    from core.middleware.tenant import agency_context
+    from core.models.agencia import Agencia
 
     try:
         agencia = Agencia.objects.get(pk=agencia_id)

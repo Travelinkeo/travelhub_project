@@ -4,59 +4,59 @@
 {% block title %}Venta {{ venta.localizador }} - TravelHub Pro{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
+<div class="space-y-4 sm:space-y-5">
     <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center gap-4">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
             <a href="{% url 'bookings:venta_list' %}"
-            class="p-2 bg-surface-2 rounded-xl text-text-muted hover:text-text-main hover:bg-surface-3 transition-all border border-border-color">
-            <span class="material-symbols-outlined text-[22px]">arrow_back</span>
+            class="p-1.5 bg-surface-2 rounded-xl text-text-muted hover:text-text-main hover:bg-surface-3 transition-all border border-border-color">
+            <span class="material-symbols-outlined text-[20px]">arrow_back</span>
         </a>
             <div>
-                <div class="flex items-center gap-3">
-                    <h1 class="text-3xl font-black text-text-main uppercase tracking-tight">
+                <div class="flex items-center gap-2.5">
+                    <h1 class="text-2xl font-black text-text-main uppercase tracking-tight">
                         <span class="bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent">{{ venta.localizador }}</span>
                     </h1>
-                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border
                         {% if venta.estado == 'PAG' or venta.estado == 'COM' %}bg-emerald-500/10 text-emerald-500 border-emerald-500/20
                         {% elif venta.estado == 'PEN' %}bg-amber-500/10 text-amber-400 border-amber-500/20
                         {% else %}bg-blue-500/10 text-blue-400 border-blue-500/20{% endif %}">
                         {{ venta.get_estado_display }}
                     </span>
                 </div>
-                <p class="text-text-muted text-sm mt-1">Registrado el {{ venta.fecha_venta|date:"d M Y, H:i" }}</p>
+                <p class="text-text-muted text-xs mt-0.5">Registrado el {{ venta.fecha_venta|date:"d M Y, H:i" }}</p>
             </div>
         </div>
-        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <div class="flex flex-wrap items-center gap-2">
             <!-- Botón Ficha Digital Web -->
             {% if itinerary_url %}
             <a href="{{ itinerary_url }}" target="_blank"
-               class="px-4 py-2.5 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-xl font-bold shadow-md shadow-[var(--primary)]/25 transition-all flex items-center gap-1.5 text-xs active:scale-95"
+               class="px-3.5 py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-xl font-bold shadow-md shadow-[var(--primary)]/20 transition-all flex items-center gap-1.5 text-xs active:scale-95"
                title="Ver Ficha Digital Interactiva del Pasajero">
-                <span class="material-symbols-outlined text-[18px]">flight_takeoff</span>
-                <span>Ficha Digital Web</span>
+                <span class="material-symbols-outlined text-[16px]">flight_takeoff</span>
+                <span>Ficha Digital</span>
             </a>
 
             <button @click="navigator.clipboard.writeText('{{ itinerary_url }}'); window.dispatchEvent(new CustomEvent('notify', { detail: { message: 'Enlace a Ficha Digital copiado al portapapeles', type: 'success' } }));"
-                    class="p-2.5 bg-surface-2 hover:bg-surface-3 text-text-secondary hover:text-text-main border border-border-color rounded-xl font-semibold transition-all flex items-center justify-center"
+                    class="p-2 bg-surface-2 hover:bg-surface-3 text-text-secondary hover:text-text-main border border-border-color rounded-xl font-semibold transition-all flex items-center justify-center"
                     title="Copiar enlace para el cliente">
-                <span class="material-symbols-outlined text-[18px]">content_copy</span>
+                <span class="material-symbols-outlined text-[16px]">content_copy</span>
             </button>
             {% endif %}
 
             {% if venta.cliente and venta.cliente.telefono_principal and itinerary_url %}
             <a href="https://wa.me/{{ venta.cliente.telefono_principal|cut:'+'|cut:' '|cut:'-' }}?text=Hola%20{{ venta.cliente.nombres|urlencode }}!%20Aqu%C3%AD%20tienes%20tu%20itinerario%20y%20ficha%20digital%20de%20viaje%20confirmado%20(Localizador:%20{{ venta.localizador }}):%20{{ itinerary_url|urlencode }}"
                target="_blank"
-               class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-md shadow-emerald-600/20 transition-all flex items-center gap-1.5 text-xs active:scale-95"
+               class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-md shadow-emerald-600/20 transition-all flex items-center gap-1.5 text-xs active:scale-95"
                title="Enviar Ficha por WhatsApp">
-                <span class="material-symbols-outlined text-[18px]">chat</span>
+                <span class="material-symbols-outlined text-[16px]">chat</span>
                 <span>WhatsApp</span>
             </a>
             {% endif %}
 
             <a href="{% url 'bookings:venta_timeline' venta.pk %}"
-                class="px-4 py-2.5 bg-status-info/10 hover:bg-status-info/20 text-status-info border border-status-info/30 rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs">
-                <span class="material-symbols-outlined text-[18px]">history</span>
+                class="px-3.5 py-2 bg-status-info/10 hover:bg-status-info/20 text-status-info border border-status-info/30 rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs">
+                <span class="material-symbols-outlined text-[16px]">history</span>
                 <span>Línea de Vida</span>
             </a>
 
@@ -64,81 +64,90 @@
             <div class="flex gap-2">
                 <button hx-post="{% url 'core:venta_facturar' venta.pk %}" hx-target="#modal-content"
                     @click="$dispatch('open-modal')"
-                    class="px-4 py-2.5 bg-surface-2 hover:bg-surface-3 text-text-main border border-border-color rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs">
-                    <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                    class="px-3.5 py-2 bg-surface-2 hover:bg-surface-3 text-text-main border border-border-color rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs">
+                    <span class="material-symbols-outlined text-[16px]">receipt_long</span>
                     <span>Facturar</span>
                 </button>
             </div>
             {% else %}
             <button hx-get="{% url 'finance:invoice_detail' venta.factura.pk %}" hx-target="#modal-content"
                 @click="$dispatch('open-modal')"
-                class="px-4 py-2.5 bg-surface-2 hover:bg-surface-3 text-text-main border border-border-color rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs">
-                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                class="px-3.5 py-2 bg-surface-2 hover:bg-surface-3 text-text-main border border-border-color rounded-xl font-bold transition-all flex items-center gap-1.5 text-xs">
+                <span class="material-symbols-outlined text-[16px]">visibility</span>
                 <span>Ver Factura</span>
             </button>
             {% endif %}
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
         <!-- Main Column: Services and Payments -->
-        <div class="lg:col-span-2 space-y-8">
+        <div class="lg:col-span-2 space-y-4 sm:space-y-5">
 
             <!-- Items / Services Card -->
-            <div class="glass-panel rounded-3xl overflow-hidden">
-                <div class="p-6 border-b border-border-color bg-surface-2/50 flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-text-main flex items-center">
-                        <span class="material-symbols-outlined text-[20px] mr-3 text-status-info">package_2</span>
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-border-color bg-surface-2/50 flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-text-main flex items-center">
+                        <span class="material-symbols-outlined text-[18px] mr-2.5 text-status-info">package_2</span>
                         Servicios y Productos
                     </h3>
                     <button hx-get="{% url 'bookings:item_venta_add' venta.pk %}" hx-target="#modal-content"
                         @click="$dispatch('open-modal')"
-                        class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--text-on-primary)] p-1.5 rounded-lg transition-all">
-                        <span class="material-symbols-outlined text-[18px]">add</span>
+                        class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--text-on-primary)] p-1 rounded-lg transition-all"
+                        title="Agregar Servicio">
+                        <span class="material-symbols-outlined text-[16px]">add</span>
                     </button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left table-responsive">
-                        <thead class="bg-surface-2/50 border-b border-border-color">
+                        <thead class="bg-surface-2/30 border-b border-border-color">
                             <tr>
-                                <th class="px-6 py-4 text-xs font-semibold text-text-muted uppercase">Item</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-text-muted uppercase">Cant.</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-text-muted uppercase">Precio Unit.</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-text-muted uppercase">Total</th>
-                                <th class="px-6 py-4 text-xs font-semibold text-text-muted uppercase text-right"></th>
+                                <th class="px-4 py-2.5 text-[11px] font-bold text-text-muted uppercase tracking-wider">Item</th>
+                                <th class="px-4 py-2.5 text-[11px] font-bold text-text-muted uppercase tracking-wider">Cant.</th>
+                                <th class="px-4 py-2.5 text-[11px] font-bold text-text-muted uppercase tracking-wider">Precio Unit.</th>
+                                <th class="px-4 py-2.5 text-[11px] font-bold text-text-muted uppercase tracking-wider">Total</th>
+                                <th class="px-4 py-2.5 text-[11px] font-bold text-text-muted uppercase tracking-wider text-right"></th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-white/5">
+                        <tbody class="divide-y divide-border-color/30">
                             {% for item in items %}
-                            <tr class="hover:bg-white/5 transition-colors">
-                                <td class="px-6 py-4">
-                                    <div class="font-bold text-text-main">{{ item.producto_servicio.nombre }}</div>
-                                    <div class="text-xs text-text-muted">{{ item.descripcion_personalizada|default:"" }}
-                                    </div>
-                                    <div class="flex items-center mt-1 text-[10px] text-text-muted">
+                            <tr class="hover:bg-surface-2/40 transition-colors">
+                                <td class="px-4 py-2.5">
+                                    <div class="font-bold text-xs text-text-main">{{ item.producto_servicio.nombre }}</div>
+                                    <div class="text-[11px] text-text-muted">{{ item.descripcion_personalizada|default:"" }}</div>
+                                    <div class="flex items-center mt-0.5 text-[10px] text-text-muted">
                                         <span class="material-symbols-outlined text-[12px] mr-1">local_shipping</span>
                                         {{ item.proveedor_servicio.nombre|default:"Proveedor no asignado" }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-text-main font-medium">{{ item.cantidad }}</td>
-                                <td class="px-6 py-4 text-text-main font-medium">
+                                <td class="px-4 py-2.5 text-xs text-text-main font-medium">{{ item.cantidad }}</td>
+                                <td class="px-4 py-2.5 text-xs text-text-main font-medium">
                                     <span>{{ venta.moneda.simbolo }}</span><span>{{ item.precio_unitario_venta }}</span>
                                 </td>
-                                <td class="px-6 py-4 text-text-main font-bold">
+                                <td class="px-4 py-2.5 text-xs text-text-main font-bold">
                                     <span>{{ venta.moneda.simbolo }}</span><span>{{ item.total_item_venta }}</span>
                                 </td>
-                                <td class="px-6 py-4 text-right">
-                                    <button hx-get="{% url 'bookings:item_venta_edit' item.pk %}"
-                                        hx-target="#modal-content" @click="$dispatch('open-modal')"
-                                        class="p-2 text-text-muted hover:text-status-info transition-all">
-                                        <span class="material-symbols-outlined text-[18px]">edit</span>
-                                    </button>
+                                <td class="px-4 py-2.5 text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button hx-get="{% url 'bookings:item_venta_edit' item.pk %}"
+                                            hx-target="#modal-content" @click="$dispatch('open-modal')"
+                                            class="p-1.5 text-text-muted hover:text-status-info transition-all"
+                                            title="Editar Servicio">
+                                            <span class="material-symbols-outlined text-[16px]">edit</span>
+                                        </button>
+                                        <button hx-post="{% url 'bookings:item_venta_delete' item.pk %}"
+                                            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                                            hx-confirm="¿Estás seguro de eliminar este producto/servicio?"
+                                            class="p-1.5 text-text-muted hover:text-status-danger hover:bg-status-danger/10 rounded-lg transition-all"
+                                            title="Eliminar Servicio">
+                                            <span class="material-symbols-outlined text-[16px]">delete</span>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="px-6 py-12 text-center text-text-muted italic">No hay servicios
-                                    agregados.</td>
+                                <td colspan="5" class="px-4 py-8 text-center text-xs text-text-muted italic">No hay servicios agregados.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -147,165 +156,181 @@
             </div>
 
             <!-- Fees & Extra Charges -->
-            <div class="glass-panel rounded-3xl overflow-hidden">
-                <div class="p-6 border-b border-border-color bg-surface-2/50 flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-text-main flex items-center">
-                        <span class="material-symbols-outlined text-[20px] mr-3 text-primary">add_card</span>
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-border-color bg-surface-2/50 flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-text-main flex items-center">
+                        <span class="material-symbols-outlined text-[18px] mr-2.5 text-primary">add_card</span>
                         Otros Cargos / Fees
                     </h3>
                     <button hx-get="{% url 'bookings:fee_venta_add' venta.pk %}" hx-target="#modal-content"
                         @click="$dispatch('open-modal')"
-                        class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--text-on-primary)] p-1.5 rounded-lg transition-all">
-                        <span class="material-symbols-outlined text-[18px]">add</span>
+                        class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--text-on-primary)] p-1 rounded-lg transition-all"
+                        title="Agregar Fee">
+                        <span class="material-symbols-outlined text-[16px]">add</span>
                     </button>
                 </div>
-                <div class="p-6">
-                    <div class="flex flex-wrap gap-4">
+                <div class="p-4">
+                    <div class="flex flex-wrap gap-3">
                         {% for fee in fees %}
-                        <div class="bg-surface-2 border border-border-color rounded-2xl p-4 flex-1 min-w-[200px]">
+                        <div class="bg-surface-2 border border-border-color rounded-xl p-3 flex-1 min-w-[180px]">
                             <div class="flex justify-between items-start">
-                                <span class="text-xs font-bold text-primary uppercase">
+                                <span class="text-[10px] font-bold text-primary uppercase tracking-wider">
                                     {{ fee.get_tipo_fee_display }}
                                 </span>
-                                <span class="material-symbols-outlined text-[14px] text-text-muted">info</span>
+                                <button hx-post="{% url 'bookings:fee_venta_delete' fee.pk %}"
+                                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                                    hx-confirm="¿Estás seguro de eliminar este fee?"
+                                    class="text-text-muted hover:text-status-danger p-0.5 rounded transition-all"
+                                    title="Eliminar Fee">
+                                    <span class="material-symbols-outlined text-[14px]">delete</span>
+                                </button>
                             </div>
-                            <p class="text-lg font-bold text-text-main mt-1">{{ venta.moneda.simbolo }}{{ fee.monto }}</p>
-                            <p class="text-xs text-text-muted mt-1 truncate">{{ fee.descripcion }}</p>
+                            <p class="text-base font-bold text-text-main mt-0.5">{{ venta.moneda.simbolo }}{{ fee.monto }}</p>
+                            <p class="text-[11px] text-text-muted mt-0.5 truncate">{{ fee.descripcion }}</p>
                         </div>
                         {% empty %}
-                        <div class="w-full text-center py-4 text-text-muted text-sm italic">Sin cargos adicionales
-                            registrados.</div>
+                        <div class="w-full text-center py-2 text-text-muted text-xs italic">Sin cargos adicionales registrados.</div>
                         {% endfor %}
                     </div>
                 </div>
             </div>
 
             <!-- Payments Card -->
-            <div class="glass-panel rounded-3xl overflow-hidden">
-                <div class="p-6 border-b border-border-color bg-surface-2/50 flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-text-main flex items-center">
-                        <span class="material-symbols-outlined text-[20px] mr-3 text-status-success">credit_card</span>
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-border-color bg-surface-2/50 flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-text-main flex items-center">
+                        <span class="material-symbols-outlined text-[18px] mr-2.5 text-status-success">credit_card</span>
                         Registro de Pagos
                     </h3>
                     <button hx-get="{% url 'bookings:pago_venta_add' venta.pk %}" hx-target="#modal-content"
                         @click="$dispatch('open-modal')"
-                        class="bg-status-success hover:bg-status-success/80 text-white p-1.5 rounded-lg transition-all">
-                        <span class="material-symbols-outlined text-[18px]">add</span>
+                        class="bg-status-success hover:bg-status-success/80 text-white p-1 rounded-lg transition-all"
+                        title="Registrar Pago">
+                        <span class="material-symbols-outlined text-[16px]">add</span>
                     </button>
                 </div>
-                <div class="p-6 space-y-4">
+                <div class="p-4 space-y-2.5">
                     {% for pago in pagos %}
-                    <div class="flex items-center justify-between p-4 bg-surface-2 rounded-2xl border border-border-color">
-                        <div class="flex items-center gap-4">
+                    <div class="flex items-center justify-between p-3 bg-surface-2 rounded-xl border border-border-color">
+                        <div class="flex items-center gap-3">
                             <div
-                                class="w-10 h-10 rounded-full bg-status-success/10 flex items-center justify-center text-status-success">
-                                <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                                class="w-8 h-8 rounded-full bg-status-success/10 flex items-center justify-center text-status-success">
+                                <span class="material-symbols-outlined text-[16px]">check_circle</span>
                             </div>
                             <div>
-                                <p class="text-text-main font-bold">{{ venta.moneda.simbolo }}{{ pago.monto }}</p>
-                                <p class="text-xs text-text-muted">
+                                <p class="text-text-main text-xs font-bold">{{ venta.moneda.simbolo }}{{ pago.monto }}</p>
+                                <p class="text-[11px] text-text-muted">
                                     {{ pago.get_metodo_display }} - Ref: <span>{{ pago.referencia|default:"--" }}</span>
                                 </p>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <p class="text-xs text-text-muted">{{ pago.fecha_pago|date:"d M, Y" }}</p>
-                            <span class="text-[10px] font-bold text-green-400 uppercase">Confirmado</span>
+                        <div class="flex items-center gap-2.5">
+                            <div class="text-right">
+                                <p class="text-[11px] text-text-muted">{{ pago.fecha_pago|date:"d M, Y" }}</p>
+                                <span class="text-[9px] font-bold text-status-success uppercase tracking-wider">Confirmado</span>
+                            </div>
+                            <button hx-post="{% url 'bookings:pago_venta_delete' pago.pk %}"
+                                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                                hx-confirm="¿Estás seguro de eliminar este pago de {{ venta.moneda.simbolo }}{{ pago.monto }}?"
+                                class="p-1 text-text-muted hover:text-status-danger hover:bg-status-danger/10 rounded-lg transition-all"
+                                title="Eliminar Pago">
+                                <span class="material-symbols-outlined text-[16px]">delete</span>
+                            </button>
                         </div>
                     </div>
                     {% empty %}
-                    <div class="text-center py-8 text-text-muted italic">No hay pagos registrados aún.</div>
+                    <div class="text-center py-4 text-text-muted text-xs italic">No hay pagos registrados aún.</div>
                     {% endfor %}
                 </div>
             </div>
 
             <!-- Audit Logs / History -->
-            <div class="glass-panel rounded-3xl overflow-hidden">
-                <div class="p-6 border-b border-border-color bg-surface-2/50 flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-text-main flex items-center">
-                        <span class="material-symbols-outlined text-[20px] mr-3 text-status-warning">history</span>
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-border-color bg-surface-2/50 flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-text-main flex items-center">
+                        <span class="material-symbols-outlined text-[18px] mr-2.5 text-status-warning">history</span>
                         Historial de Cambios
                     </h3>
                     <button onclick="cargarAuditLogs('Venta', '{{ venta.pk }}')"
-                        class="p-1.5 text-text-muted hover:text-text-main transition-all">
-                        <span class="material-symbols-outlined text-[18px]">refresh</span>
+                        class="p-1 text-text-muted hover:text-text-main transition-all"
+                        title="Actualizar Historial">
+                        <span class="material-symbols-outlined text-[16px]">refresh</span>
                     </button>
                 </div>
-                <div id="audit-logs-container" class="p-6 space-y-4 max-h-[400px] overflow-y-auto">
+                <div id="audit-logs-container" class="p-3.5 space-y-2 max-h-[260px] overflow-y-auto">
                     <div class="flex justify-center py-4">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-500"></div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Sidebar Column: Summary, Communication and Client -->
-        <div class="space-y-8">
+        <div class="space-y-4 sm:space-y-5">
             <!-- Bandeja Conversacional y Comunicación con el Pasajero -->
             {% include "bookings/partials/comunicacion_chat_panel.html" %}
 
             <!-- Financial Summary -->
             <div id="venta-totals-card"
-                class="glass-panel rounded-3xl p-8 bg-gradient-to-br from-[var(--primary)]/20 to-[var(--surface-3)]/20 border-[var(--primary)]/30">
+                class="glass-panel rounded-2xl p-4 bg-surface-1 border border-border-color shadow-sm">
                 {% include 'bookings/partials/venta_totals_card.html' %}
             </div>
 
             <!-- Client Info Card -->
-            <div class="glass-panel rounded-3xl p-8 space-y-6">
-                <h3 class="text-lg font-bold text-text-main flex items-center">
-                    <span class="material-symbols-outlined text-[20px] mr-3 text-text-muted">person</span>
+            <div class="glass-panel rounded-2xl p-4 space-y-3">
+                <h3 class="text-xs font-bold text-text-main uppercase tracking-wider flex items-center">
+                    <span class="material-symbols-outlined text-[16px] mr-2 text-text-muted">person</span>
                     Cliente Pagador
                 </h3>
                 {% if venta.cliente %}
-                <div class="flex flex-col items-center text-center p-4 bg-surface-2 rounded-2xl border border-border-color">
+                <div class="flex flex-col items-center text-center p-3 bg-surface-2 rounded-xl border border-border-color">
                     <div
-                        class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold mb-4 shadow-lg overflow-hidden">
+                        class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-base font-bold mb-2 shadow-md overflow-hidden">
                         {% if venta.cliente.foto_perfil %}
                         <img src="{{ venta.cliente.foto_perfil.url }}" class="w-full h-full object-cover">
                         {% else %}
                         {{ venta.cliente.nombres|slice:":1" }}{{ venta.cliente.apellidos|slice:":1" }}
                         {% endif %}
                     </div>
-                    <h4 class="text-text-main font-bold truncate w-full">{{ venta.cliente.get_nombre_completo }}</h4>
-                    <p class="text-xs text-text-muted mt-1">{{ venta.cliente.email }}</p>
+                    <h4 class="text-text-main text-xs font-bold truncate w-full">{{ venta.cliente.get_nombre_completo }}</h4>
+                    <p class="text-[11px] text-text-muted mt-0.5">{{ venta.cliente.email }}</p>
                     <a href="{% url 'crm:cliente_detail' venta.cliente.pk %}"
-                        class="mt-4 text-xs text-blue-400 hover:text-blue-300 font-bold transition-all uppercase tracking-widest">Ver
+                        class="mt-2.5 text-[10px] text-primary hover:underline font-bold transition-all uppercase tracking-wider">Ver
                         Historial del Cliente</a>
                 </div>
                 {% else %}
-                <div class="text-center p-8 border-2 border-dashed border-border-color rounded-2xl">
-                    <p class="text-gray-500 text-sm mb-4">No hay un cliente principal asignado a esta venta.</p>
-                    <!-- TODO: Implementar asignación de cliente -->
-                    <button class="text-blue-400 font-bold text-sm" disabled>Asignar Cliente</button>
+                <div class="text-center p-4 border-2 border-dashed border-border-color rounded-xl">
+                    <p class="text-text-muted text-xs mb-2">No hay un cliente asignado.</p>
+                    <button class="text-primary font-bold text-xs" disabled>Asignar Cliente</button>
                 </div>
                 {% endif %}
             </div>
 
             <!-- Internal Notes & AI Report -->
-            <div class="glass-panel rounded-3xl p-8 space-y-6">
-                <div class="space-y-4">
-                    <h3 class="text-lg font-bold text-text-main flex items-center">
-                        <span class="material-symbols-outlined text-[20px] mr-3 text-status-warning">sticky_note_2</span>
+            <div class="glass-panel rounded-2xl p-4 space-y-3">
+                <div class="space-y-2">
+                    <h3 class="text-xs font-bold text-text-main uppercase tracking-wider flex items-center">
+                        <span class="material-symbols-outlined text-[16px] mr-2 text-status-warning">sticky_note_2</span>
                         Notas de Oficina
                     </h3>
-                    <div class="text-sm text-text-secondary leading-relaxed {% if not venta.notas_manuales %}italic{% endif %}">
+                    <div class="text-xs text-text-secondary leading-relaxed {% if not venta.notas_manuales %}italic text-text-muted{% endif %}">
                         {{ venta.notas_manuales|default:"Sin notas internas registradas." }}
                     </div>
                 </div>
 
                 {% if venta.ai_report %}
-                <div class="border-t border-white/10 pt-6 space-y-4">
-                    <h3 class="text-lg font-bold text-text-main flex items-center">
-                        <span class="material-symbols-outlined text-[20px] mr-3 text-status-success animate-pulse">auto_awesome</span>
+                <div class="border-t border-border-color/60 pt-3 space-y-2">
+                    <h3 class="text-xs font-bold text-text-main uppercase tracking-wider flex items-center">
+                        <span class="material-symbols-outlined text-[16px] mr-2 text-status-success animate-pulse">auto_awesome</span>
                         Inteligencia de Ventas (IA)
                     </h3>
                     {% if "La inteligencia de ventas IA no pudo ejecutarse" in venta.ai_report %}
-                    <div class="p-4 rounded-2xl bg-status-warning/10 border border-status-warning/20 text-xs text-status-warning flex items-start gap-3">
-                        <span class="material-symbols-outlined text-[16px] mt-0.5 shrink-0">warning</span>
+                    <div class="p-3 rounded-xl bg-status-warning/10 border border-status-warning/20 text-xs text-status-warning flex items-start gap-2">
+                        <span class="material-symbols-outlined text-[15px] mt-0.5 shrink-0">warning</span>
                         <div>{{ venta.ai_report }}</div>
                     </div>
                     {% else %}
-                    <div class="text-sm text-text-secondary leading-relaxed bg-status-success/5 border border-status-success/10 p-4 rounded-2xl">
+                    <div class="text-xs text-text-secondary leading-relaxed bg-status-success/5 border border-status-success/15 p-3 rounded-xl">
                         {{ venta.ai_report|linebreaksbr }}
                     </div>
                     {% endif %}
@@ -330,19 +355,19 @@
         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200"
         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-        class="relative bg-surface-1 border border-border-color rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden">
+        class="relative bg-surface-1 border border-border-color rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
 
-        <div class="p-6 border-b border-border-color flex items-center justify-between bg-surface-2/50">
-            <h3 class="text-xl font-bold text-text-main">Editar Información</h3>
-            <button @click="open = false" class="text-text-muted hover:text-text-main transition-colors">
-                <span class="material-symbols-outlined text-[22px]">close</span>
+        <div class="px-5 py-3.5 border-b border-border-color flex items-center justify-between bg-surface-2/50">
+            <h3 class="text-base font-bold text-text-main">Detalle & Gestión</h3>
+            <button @click="open = false" class="text-text-muted hover:text-text-main transition-colors p-1">
+                <span class="material-symbols-outlined text-[18px]">close</span>
             </button>
         </div>
 
-        <div id="modal-content" class="p-8">
+        <div id="modal-content" class="p-5">
             <!-- HTMX will load content here -->
-            <div class="flex justify-center py-8">
-                <span class="material-symbols-outlined text-[32px] text-status-info animate-spin">progress_activity</span>
+            <div class="flex justify-center py-6">
+                <span class="material-symbols-outlined text-[28px] text-status-info animate-spin">progress_activity</span>
             </div>
         </div>
     </div>
@@ -396,8 +421,21 @@
 
                 if (log.datos_nuevos && Object.keys(log.datos_nuevos).length > 0) {
                     diffHtml = '<div class="mt-2 text-[10px] space-y-1 border-t border-white/5 pt-2">';
-                    for (const [key, val] of Object.entries(log.datos_nuevos)) {
-                        const prev = log.datos_previos ? (log.datos_previos[key] ?? 'N/A') : 'N/A';
+                    for (const [key, rawVal] of Object.entries(log.datos_nuevos)) {
+                        let prev = log.datos_previos ? (log.datos_previos[key] ?? 'N/A') : 'N/A';
+                        let val = rawVal;
+
+                        // Si el campo es notas, filtrar el bloque de reporte de IA para no ensuciar el historial
+                        if (key === 'notas') {
+                            if (typeof val === 'string' && val.includes('[IA SALES REPORT]')) {
+                                val = val.split('[IA SALES REPORT]')[0].trim() || 'Reporte de Estrategia IA actualizado';
+                            }
+                            if (typeof prev === 'string' && prev.includes('[IA SALES REPORT]')) {
+                                prev = prev.split('[IA SALES REPORT]')[0].trim() || 'Reporte de Estrategia IA anterior';
+                            }
+                            if (val === prev) continue;
+                        }
+
                         diffHtml += `<div class="flex flex-wrap gap-x-2 text-gray-400">
                             <span class="font-bold text-gray-500 uppercase">${key}:</span>
                             <span class="line-through text-red-400/60">${prev}</span>

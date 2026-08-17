@@ -12,7 +12,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView, View
 
 from apps.common.mixins.export_mixin import ExportMixin
 from apps.crm.models import OportunidadViaje
@@ -443,6 +443,81 @@ class PagoVentaCreateView(BookingBaseMixin, CreateView):
             response["HX-Refresh"] = "true"
             return response
         return redirect("bookings:venta_detail", pk=venta.pk)
+
+
+class PagoVentaDeleteView(BookingBaseMixin, View):
+    """
+    Elimina un pago registrado y recalcula las finanzas y saldos de la venta.
+    """
+
+    def post(self, request, *args, **kwargs):
+        pago = get_object_or_404(PagoVenta, pk=self.kwargs["pk"])
+        venta_pk = pago.venta_id
+        pago.delete()
+
+        if venta_pk:
+            from apps.bookings.services.venta_service import VentaService
+
+            VentaService.recalculate_finances(venta_pk)
+
+        if request.headers.get("HX-Request"):
+            from django.http import HttpResponse
+
+            response = HttpResponse()
+            response["HX-Refresh"] = "true"
+            return response
+
+        return redirect("bookings:venta_detail", pk=venta_pk)
+
+
+class FeeVentaDeleteView(BookingBaseMixin, View):
+    """
+    Elimina un fee/cargo adicional y recalcula las finanzas de la venta.
+    """
+
+    def post(self, request, *args, **kwargs):
+        fee = get_object_or_404(FeeVenta, pk=self.kwargs["pk"])
+        venta_pk = fee.venta_id
+        fee.delete()
+
+        if venta_pk:
+            from apps.bookings.services.venta_service import VentaService
+
+            VentaService.recalculate_finances(venta_pk)
+
+        if request.headers.get("HX-Request"):
+            from django.http import HttpResponse
+
+            response = HttpResponse()
+            response["HX-Refresh"] = "true"
+            return response
+
+        return redirect("bookings:venta_detail", pk=venta_pk)
+
+
+class ItemVentaDeleteView(BookingBaseMixin, View):
+    """
+    Elimina un producto/servicio asociado a la venta y recalcula los totales.
+    """
+
+    def post(self, request, *args, **kwargs):
+        item = get_object_or_404(ItemVenta, pk=self.kwargs["pk"])
+        venta_pk = item.venta_id
+        item.delete()
+
+        if venta_pk:
+            from apps.bookings.services.venta_service import VentaService
+
+            VentaService.recalculate_finances(venta_pk)
+
+        if request.headers.get("HX-Request"):
+            from django.http import HttpResponse
+
+            response = HttpResponse()
+            response["HX-Refresh"] = "true"
+            return response
+
+        return redirect("bookings:venta_detail", pk=venta_pk)
 
 
 class ItemVentaUpdateView(BookingBaseMixin, UpdateView):

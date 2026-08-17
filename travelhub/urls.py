@@ -137,12 +137,22 @@ urlpatterns = [
         generate_ical_calendar,
         name="public_itinerary_calendar_ics_root",
     ),
-    # --- DASHBOARD PRINCIPAL ---
+    # --- DASHBOARD PRINCIPAL & ACCESOS ---
     path("", public_landing, name="home"),
     path(
         "dashboard/",
         RedirectView.as_view(pattern_name="bookings:modern_dashboard", permanent=False),
         name="dashboard_root",
+    ),
+    path(
+        "mensajes/",
+        RedirectView.as_view(pattern_name="crm:inbox", permanent=False),
+        name="mensajes_root",
+    ),
+    path(
+        "inbox/",
+        RedirectView.as_view(pattern_name="crm:inbox", permanent=False),
+        name="inbox_root",
     ),
     path("prometheus/", include("django_prometheus.urls")),
     path("health/", health_check, name="health"),

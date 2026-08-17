@@ -78,12 +78,17 @@ def agency_context(request):
         tasa_eur = "N/D"
         tasa_p2p = "N/D"
 
+    user = getattr(request, "user", None)
+    is_super = bool(
+        user and getattr(user, "is_authenticated", False) and getattr(user, "is_superuser", False)
+    )
+
     session = getattr(request, "session", {})
     return {
         "current_agency": agencia,
         "user_agency_role": rol,
         "user_agencies": user_agencies,
-        "is_superuser": request.user.is_authenticated and request.user.is_superuser,
+        "is_superuser": is_super,
         "tasa_usd": tasa_usd,
         "tasa_eur": tasa_eur,
         "tasa_p2p": tasa_p2p,

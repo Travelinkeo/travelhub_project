@@ -8,9 +8,12 @@ from rest_framework.routers import DefaultRouter
 
 from apps.bookings.bookings_views import (
     FeeVentaCreateView,
+    FeeVentaDeleteView,
     ItemVentaCreateView,
+    ItemVentaDeleteView,
     ItemVentaUpdateView,
     PagoVentaCreateView,
+    PagoVentaDeleteView,
     RevenueLeakDashboardView,
     VentaCreateView,
     VentaDeleteView,
@@ -152,9 +155,16 @@ urlpatterns = [
         "ventas/<int:venta_pk>/items/agregar/", ItemVentaCreateView.as_view(), name="item_venta_add"
     ),
     path("ventas/items/<int:pk>/editar/", ItemVentaUpdateView.as_view(), name="item_venta_edit"),
+    path(
+        "ventas/items/<int:pk>/eliminar/", ItemVentaDeleteView.as_view(), name="item_venta_delete"
+    ),
     path("ventas/<int:venta_pk>/fees/agregar/", FeeVentaCreateView.as_view(), name="fee_venta_add"),
+    path("ventas/fees/<int:pk>/eliminar/", FeeVentaDeleteView.as_view(), name="fee_venta_delete"),
     path(
         "ventas/<int:venta_pk>/pagos/agregar/", PagoVentaCreateView.as_view(), name="pago_venta_add"
+    ),
+    path(
+        "ventas/pagos/<int:pk>/eliminar/", PagoVentaDeleteView.as_view(), name="pago_venta_delete"
     ),
     # Dashboard de Flujo de Caja
     path("dashboard/", dashboard_main, name="dashboard_main"),

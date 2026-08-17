@@ -348,6 +348,43 @@
             color: var(--text-muted);
         }
 
+        /* ── Controles de Formulario e Inputs (Alto Contraste Claro/Oscuro) ── */
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="time"],
+        input[type="password"],
+        input[type="search"],
+        input[type="url"],
+        select,
+        textarea,
+        .input-base {
+            background-color: var(--surface-1) !important;
+            color: var(--text-main) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: var(--text-muted) !important;
+            opacity: 0.8 !important;
+        }
+
+        select option {
+            background-color: var(--surface-1) !important;
+            color: var(--text-main) !important;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15) !important;
+        }
+
         /* ── Tablas Flexibles Theme ── */
         table { border-collapse: collapse; width: 100%; }
         thead th {

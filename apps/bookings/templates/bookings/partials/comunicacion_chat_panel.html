@@ -1,8 +1,8 @@
 {% load i18n humanize static %}
 
-<div class="glass-panel rounded-3xl overflow-hidden border border-[var(--border-color)] shadow-xl flex flex-col h-[650px] bg-[var(--surface-1)]">
+<div class="glass-panel rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-xl flex flex-col h-[440px] bg-[var(--surface-1)]">
     <!-- Header del Panel Conversacional -->
-    <div class="px-5 py-4 border-b border-[var(--border-color)] bg-[var(--surface-2)]/70 flex items-center justify-between">
+    <div class="px-4 py-3 border-b border-[var(--border-color)] bg-[var(--surface-2)]/70 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <div class="relative flex h-2.5 w-2.5">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -81,7 +81,7 @@
                       placeholder="Escribe un mensaje o actualización para el pasajero..."
                       class="flex-1 bg-[var(--surface-1)] border border-[var(--border-color)] text-[var(--text-main)] placeholder-[var(--text-muted)] rounded-2xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-[var(--primary)]/30 focus:border-[var(--primary)] outline-none resize-none transition-all"
                       required
-                      onkeydown="if(event.ctrlKey && event.keyCode == 13){ event.preventDefault(); this.form.dispatchEvent(new Event('submit', {cancelable: true})); }"></textarea>
+                      hx-on:keydown="if(event.ctrlKey && event.key === 'Enter'){ event.preventDefault(); this.form.requestSubmit(); }"></textarea>
 
             <button type="submit"
                     class="h-12 px-4 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white rounded-2xl font-bold shadow-md shadow-[var(--primary)]/20 transition-all flex items-center justify-center gap-1.5 active:scale-95 text-xs">

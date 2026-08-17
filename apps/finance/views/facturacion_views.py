@@ -81,12 +81,13 @@ class FacturaDetailView(HtmxResponseMixin, SaaSMixin, LoginRequiredMixin, Detail
         """get_context_data."""
         context = super().get_context_data(**kwargs)
         context["items"] = self.object.items.all()
+        from apps.bookings.models import Venta
+
+        context["venta"] = Venta.objects.filter(factura_id=self.object.pk).first()
         return context
 
 
-@agency_role_required(
-    ["admin", "gerente", "contador"]
-)  # Contador también puede facturar según rol clásico
+@agency_role_required(["admin", "gerente", "contador"])
 def generar_factura_desde_venta(request, pk):
     """
     Vista para generar una factura desde una venta.
@@ -96,34 +97,45 @@ def generar_factura_desde_venta(request, pk):
     venta = get_object_tenant_or_404(Venta, agencia, pk=pk)
 
     if venta.factura:
-        messages.warning(
-            request, f"La venta {venta.localizador or venta.pk} ya tiene una factura asociada."
-        )
-        return redirect("bookings:venta_detail", pk=pk)
+        if request.headers.get("HX-Request"):
+            from django.shortcuts import render
+
+            return render(
+                request,
+                "finance/partials/invoice_detail_modal.html",
+                {"invoice": venta.factura, "venta": venta},
+            )
+        return redirect("core:factura_detalle", pk=venta.factura.pk)
 
     if not venta.cliente:
-        messages.error(request, _("La venta debe tener un cliente asignado para poder facturar."))
+        error_msg = _("La venta debe tener un cliente asignado para poder facturar.")
+        if request.headers.get("HX-Request"):
+            return HttpResponse(
+                f'<div class="p-4 bg-amber-500/10 text-amber-500 rounded-xl border border-amber-500/20 text-xs font-bold">{error_msg}</div>'
+            )
+        messages.error(request, error_msg)
         return redirect("bookings:venta_detail", pk=pk)
 
     try:
         factura = FacturacionService.generar_factura_desde_venta(venta, venta.cliente)
 
         if request.headers.get("HX-Request"):
-            # Return partial for the modal
             from django.shortcuts import render
 
             return render(
-                request, "finance/partials/invoice_detail_modal.html", {"invoice": factura}
+                request,
+                "finance/partials/invoice_detail_modal.html",
+                {"invoice": factura, "venta": venta},
             )
 
         messages.success(request, f"Factura {factura.numero_control} generada exitosamente.")
         return redirect("core:factura_detalle", pk=factura.pk)
-    except Exception:
-        logger.exception("Error generando factura desde venta %s", pk)
-        error_msg = "Error al generar la factura. Contacte a soporte."
+    except Exception as e:
+        logger.exception("Error generando factura desde venta %s: %s", pk, e)
+        error_msg = f"Error al generar la factura: {str(e)}"
         if request.headers.get("HX-Request"):
             return HttpResponse(
-                f'<div class="p-4 bg-red-900/20 text-red-400 rounded-xl border border-red-900/50">{error_msg}</div>',
+                f'<div class="p-4 bg-red-900/20 text-red-400 rounded-xl border border-red-900/50 text-xs font-bold">{error_msg}</div>',
                 status=500,
             )
         messages.error(request, error_msg)

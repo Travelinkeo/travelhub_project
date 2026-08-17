@@ -200,7 +200,27 @@ class FacturacionService:
         factura.base_impuesto_municipal_ves = desglose["base_impuesto_municipal_ves"]
         factura.monto_impuesto_municipal_usd = desglose["monto_impuesto_municipal_usd"]
         factura.monto_impuesto_municipal_ves = desglose["monto_impuesto_municipal_ves"]
+
+        # Calcular subtotales y gran total de la factura
+        subtotal_calc_usd = (
+            factura.monto_cuenta_terceros_usd + factura.ingreso_propio_agencia_usd
+        ).quantize(Decimal("0.01"))
+        total_iva_calc_usd = desglose.get("total_iva_usd", Decimal("0.00")).quantize(
+            Decimal("0.01")
+        )
+        gran_total_calc_usd = (subtotal_calc_usd + total_iva_calc_usd).quantize(Decimal("0.01"))
+
+        factura.subtotal_usd = subtotal_calc_usd
+        factura.subtotal_ves = (subtotal_calc_usd * tasa_bcv).quantize(Decimal("0.01"))
+        factura.total_iva_usd = total_iva_calc_usd
+        factura.total_iva_ves = (total_iva_calc_usd * tasa_bcv).quantize(Decimal("0.01"))
+        factura.gran_total_usd = gran_total_calc_usd
+        factura.gran_total_ves = (gran_total_calc_usd * tasa_bcv).quantize(Decimal("0.01"))
         factura.save()
+
+        # Enlazar la factura generada a la Venta
+        venta.factura = factura
+        venta.save(update_fields=["factura_id"])
 
         logger.info(
             f"Factura {factura.numero_control} generada exitosamente para PNR {venta.localizador} con {len(boletos_asociados)} boletos (ID: {factura.pk})."

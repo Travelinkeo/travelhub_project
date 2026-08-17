@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 
 from apps.bookings.models import Venta, VentaMensaje
 from apps.bookings.services.itinerary_service import ItineraryCryptoService
-from core.api import agency_context, get_agencia_from_request
+from core.api import agency_context, get_agencia_from_request, get_object_tenant_or_404
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +21,8 @@ def venta_messages_stream(request, pk):
     Retorna el flujo de mensajes de una venta específica para streaming HTMX.
     """
     agencia = get_agencia_from_request(request)
-    venta = get_object_or_404(
-        Venta.all_objects.prefetch_related("mensajes_comunicacion__adjuntos"),
-        pk=pk,
-        agencia=agencia,
-    )
+    qs = Venta.all_objects.prefetch_related("mensajes_comunicacion__adjuntos")
+    venta = get_object_tenant_or_404(qs, agencia, pk=pk)
 
     messages = venta.mensajes_comunicacion.all().order_by("created_at")
     return render(
@@ -45,9 +42,8 @@ def venta_message_send(request, pk):
     crea el mensaje y delega el despacho asíncrono a Celery.
     """
     agencia = get_agencia_from_request(request)
-    venta = get_object_or_404(
-        Venta.all_objects.select_related("cliente", "agencia"), pk=pk, agencia=agencia
-    )
+    qs = Venta.all_objects.select_related("cliente", "agencia")
+    venta = get_object_tenant_or_404(qs, agencia, pk=pk)
 
     body_text = request.POST.get("body", "").strip()
     attach_ticket = (
@@ -77,7 +73,7 @@ def venta_message_send(request, pk):
     # 2. Generar enlace a Ficha Digital si se solicita
     enlace_ficha = ""
     if include_itinerary:
-        enlace_ficha = ItineraryCryptoService.generar_enlace_itinerario(venta)
+        enlace_ficha = ItineraryCryptoService.generar_enlace_itinerario(venta, request=request)
 
     # 3. Mantener hilo RFC 2822
     last_message = (
@@ -89,7 +85,10 @@ def venta_message_send(request, pk):
     new_message_id = f"<{venta.localizador}-{uuid.uuid4().hex[:8]}@{domain}>"
 
     # 4. Persistir mensaje saliente
-    remitente = f"{request.user.get_full_name() or request.user.username} ({agencia.nombre})"
+    agency_name = (
+        agencia.nombre if agencia else (venta.agencia.nombre if venta.agencia else "TravelHub")
+    )
+    remitente = f"{request.user.get_full_name() or request.user.username} ({agency_name})"
     msg = VentaMensaje.objects.create(
         venta=venta,
         direccion="OUT",
@@ -167,7 +166,11 @@ def generate_ical_calendar(request, token):
             dest = seg.destino.codigo_iata if seg.destino else "Destino"
             aero = f"{seg.aerolinea} {seg.numero_vuelo}".strip() or "Vuelo"
             summary = f"✈️ Vuelo {aero}: {orig} ➔ {dest}"
-            desc = f"Localizador PNR: {venta.localizador}\\nAerolínea: {aero}\\nCabina: {seg.cabina or 'Turista'}\\nEquipaje: {seg.equipaje_permitido or 'Consultar franquicia'}"
+            equipaje_info = (
+                getattr(seg, "equipaje_permitido", getattr(seg, "notas", None))
+                or "Consultar franquicia"
+            )
+            desc = f"Localizador PNR: {venta.localizador}\\nAerolínea: {aero}\\nCabina: {seg.cabina or 'Turista'}\\nEquipaje: {equipaje_info}"
             loc = f"Aeropuerto {seg.origen.nombre if seg.origen else orig}"
 
             lines.extend(

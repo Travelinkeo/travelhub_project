@@ -628,7 +628,8 @@ def generar_pdf_ticket_async_task(boleto_id, **kwargs):
         else f"Boleto_{boleto.pk}.pdf"
     )
 
-    if not boleto.archivo_pdf_generado:
+    force = kwargs.get("force", True)
+    if not boleto.archivo_pdf_generado or force:
         if not boleto.datos_parseados:
             logger.warning(
                 f"⚠️ El boleto {boleto_id} no tiene datos parseados. No se puede generar PDF."

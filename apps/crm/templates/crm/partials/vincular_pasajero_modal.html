@@ -1,44 +1,49 @@
 <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
     @click.self="showVincularModal = false">
-    <div class="bg-[var(--surface-1)] border border-[var(--border)] rounded-2xl shadow-xl w-full max-w-lg overflow-hidden"
+    <div class="bg-surface-1 border border-border-color rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
         @click.stop>
-        <div class="h-0.5 w-full bg-gradient-to-r from-[var(--primary)] to-indigo-500"></div>
+        <div class="h-1 w-full bg-gradient-to-r from-primary via-indigo-500 to-primary"></div>
 
         <!-- Modal Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
-            <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
-                <span class="material-symbols-outlined text-[var(--primary)] text-[20px]">person_add</span>
-                Vincular Pasajero
-            </h2>
+        <div class="flex items-center justify-between px-6 py-4 border-b border-border-color">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-[18px]">person_add</span>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-text-main">Vincular Pasajero</h2>
+                    <p class="text-[11px] text-text-muted">Asocia un viajero o dependiente a este cliente</p>
+                </div>
+            </div>
             <button @click="showVincularModal = false"
-                class="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors">
-                <span class="material-symbols-outlined text-[20px]">close</span>
+                class="w-8 h-8 flex items-center justify-center rounded-xl text-text-muted hover:text-text-main hover:bg-surface-2 transition-colors">
+                <span class="material-symbols-outlined text-[18px]">close</span>
             </button>
         </div>
 
         <!-- Search -->
         <div class="px-6 py-4">
             <div class="relative">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-[18px]">search</span>
-                <input type="text" placeholder="Buscar por nombre o documento..."
-                    class="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded h-11 pl-10 pr-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] transition-all"
-                    hx-get="{% url 'crm:pasajero_search' %}"
-                    hx-trigger="keyup changed delay:400ms"
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">search</span>
+                <input type="text" name="q" placeholder="Buscar por nombre, apellido, cédula o pasaporte..." autofocus
+                    class="w-full bg-surface-2 border border-border-color rounded-xl h-11 pl-10 pr-4 text-xs font-semibold text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    hx-get="{% url 'crm:pasajero_search' %}?cliente_id={{ cliente_id }}"
+                    hx-trigger="input changed delay:250ms, keyup changed delay:250ms"
                     hx-target="#pasajero-search-results"
                     hx-include="this">
             </div>
         </div>
 
         <!-- Results -->
-        <div id="pasajero-search-results" class="px-6 pb-2 max-h-64 overflow-y-auto space-y-1">
-            <p class="text-sm text-[var(--text-muted)] text-center py-4">Escribe para buscar pasajeros...</p>
+        <div id="pasajero-search-results" class="px-6 pb-4 max-h-72 overflow-y-auto space-y-1">
+            <p class="text-xs text-text-muted text-center py-6">Escribe para buscar pasajeros en el catálogo...</p>
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 border-t border-[var(--border)] bg-[var(--surface-2)] flex justify-end">
+        <div class="px-6 py-3.5 border-t border-border-color bg-surface-2/50 flex justify-end">
             <button @click="showVincularModal = false"
-                class="h-9 px-4 text-sm font-bold text-[var(--text-secondary)] bg-[var(--surface-1)] border border-[var(--border)] rounded hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors">
-                Cancelar
+                class="px-4 py-2 text-xs font-bold text-text-muted hover:text-text-main bg-surface-2 border border-border-color rounded-xl hover:bg-surface-3 transition-colors">
+                Cerrar
             </button>
         </div>
     </div>

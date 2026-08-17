@@ -51,27 +51,39 @@ class PasajeroConvertToClienteView(CRMBaseMixin, View):
 
 
 class PasajeroSearchView(CRMBaseMixin, View):
-    """PasajeroSearchView."""
+    """PasajeroSearchView: Búsqueda dinámica y flexible de pasajeros."""
 
     def get(self, request, *args, **kwargs):
         """get."""
         q = request.GET.get("q", "").strip()
+        cliente_id = request.GET.get("cliente_id")
+
         if len(q) < 2:
             return HttpResponse(
-                '<p class="text-gray-500 text-sm text-center py-4">Sigue escribiendo...</p>'
+                '<p class="text-text-muted text-sm text-center py-4">Escribe al menos 2 letras para buscar...</p>'
             )
 
-        pasajeros = Pasajero.objects.filter(
-            Q(nombres__icontains=q)
-            | Q(apellidos__icontains=q)
-            | Q(numero_pasaporte__icontains=q)
-            | Q(cedula_identidad__icontains=q)
-        ).exclude(clientes=request.GET.get("cliente_id"))[:10]
+        qs = Pasajero.objects.all()
+
+        # Búsqueda por múltiples palabras (tokens: ej. 'Josue Rosales Moreno')
+        words = q.split()
+        for word in words:
+            qs = qs.filter(
+                Q(nombres__icontains=word)
+                | Q(apellidos__icontains=word)
+                | Q(numero_pasaporte__icontains=word)
+                | Q(cedula_identidad__icontains=word)
+            )
+
+        if cliente_id:
+            qs = qs.exclude(clientes__id=cliente_id)
+
+        pasajeros = qs.order_by("apellidos", "nombres")[:15]
 
         return render(
             request,
             "crm/partials/pasajero_search_results.html",
-            {"pasajeros": pasajeros, "cliente_id": request.GET.get("cliente_id")},
+            {"pasajeros": pasajeros, "cliente_id": cliente_id},
         )
 
 

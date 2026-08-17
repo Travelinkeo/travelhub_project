@@ -1,20 +1,33 @@
-<div class="divide-y divide-slate-700">
+<div class="divide-y divide-border-color">
     {% for p in pasajeros %}
-    <div class="py-3 flex justify-between items-center group">
-        <div>
-            <p class="text-white font-medium">{{ p.get_nombre_completo }}</p>
-            <p class="text-gray-500 text-xs">C.I: {{ p.cedula_identidad|default:"N/A" }} | PASS: {{ p.numero_pasaporte|default:"N/A" }}</p>
+    <div class="py-3 px-2 flex justify-between items-center group hover:bg-surface-2/40 rounded-xl transition-all">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-surface-3 border border-border-color flex items-center justify-center text-text-main font-bold text-xs">
+                {{ p.nombres|slice:":1" }}{{ p.apellidos|slice:":1" }}
+            </div>
+            <div>
+                <p class="text-text-main font-bold text-xs">{{ p.get_nombre_completo }}</p>
+                <div class="flex items-center gap-2 text-[11px] text-text-muted font-mono">
+                    {% if p.cedula_identidad %}<span>C.I: {{ p.cedula_identidad }}</span>{% endif %}
+                    {% if p.numero_pasaporte %}<span>PASS: {{ p.numero_pasaporte }}</span>{% endif %}
+                    {% if not p.cedula_identidad and not p.numero_pasaporte %}<span>Doc: S/D</span>{% endif %}
+                </div>
+            </div>
         </div>
         <form hx-post="{% url 'crm:vincular_pasajero' cliente_id %}" hx-swap="none">
             {% csrf_token %}
             <input type="hidden" name="pasajero_id" value="{{ p.pk }}">
             <button type="submit"
-                class="p-2 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white rounded-lg transition-all">
+                class="px-3 py-1.5 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
                 <span class="material-symbols-outlined text-[14px]">link</span>
+                <span>Vincular</span>
             </button>
         </form>
     </div>
     {% empty %}
-    <p class="text-gray-500 text-sm text-center py-4">No se encontraron pasajeros que coincidan.</p>
+    <div class="py-6 text-center">
+        <span class="material-symbols-outlined text-text-muted text-3xl mb-1">person_search</span>
+        <p class="text-xs text-text-muted">No se encontraron pasajeros que coincidan con la búsqueda.</p>
+    </div>
     {% endfor %}
 </div>

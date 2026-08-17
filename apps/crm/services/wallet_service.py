@@ -70,7 +70,94 @@ class WalletClienteService:
         logger.info(
             f"💳 Saldo recargado: +${monto_dec} para Cliente #{cliente.pk} ({cliente.get_nombre_completo()}). Nuevo saldo: ${saldo_nuevo}"
         )
+
+        # Auto-liquidar ventas pendientes del cliente o sus dependientes si existen
+        cls.auto_liquidar_ventas_pendientes(cliente, usuario=usuario)
+
         return movimiento
+
+    @classmethod
+    @transaction.atomic
+    def auto_liquidar_ventas_pendientes(cls, cliente, usuario=None):
+        """
+        Liquida automáticamente las ventas pendientes del cliente titular y sus pasajeros dependientes
+        utilizando el saldo a favor disponible.
+        """
+        saldo_disponible = cliente.saldo_a_favor
+        if saldo_disponible <= Decimal("0.00"):
+            return []
+
+        Venta = apps.get_model("bookings", "Venta")
+        pasajeros_ids = list(
+            cliente.pasajeros.filter(is_deleted=False).values_list("id_pasajero", flat=True)
+        )
+
+        from django.db.models import Q
+
+        q_pendientes = Q(cliente=cliente, saldo_pendiente__gt=Decimal("0.00"), is_deleted=False)
+        if pasajeros_ids:
+            q_pendientes |= Q(
+                pasajeros__id_pasajero__in=pasajeros_ids,
+                saldo_pendiente__gt=Decimal("0.00"),
+                is_deleted=False,
+            )
+
+        ventas_pendientes = (
+            Venta.all_objects.filter(q_pendientes).distinct().order_by("fecha_venta")
+        )
+
+        pagos_aplicados = []
+        for v in ventas_pendientes:
+            saldo_actual = cliente.saldo_a_favor
+            if saldo_actual <= Decimal("0.00"):
+                break
+            if v.saldo_pendiente <= Decimal("0.00"):
+                continue
+
+            monto_a_pagar = min(v.saldo_pendiente, saldo_actual)
+            pago, mov = cls.aplicar_saldo_a_venta(
+                venta=v,
+                monto=monto_a_pagar,
+                usuario=usuario,
+                notas=f"Auto-liquidación con saldo disponible (Cliente #{cliente.pk})",
+            )
+            pagos_aplicados.append((pago, mov))
+            logger.info(
+                f"⚡ Venta #{v.pk} auto-liquidada con ${monto_a_pagar} de saldo de #{cliente.pk}."
+            )
+
+        return pagos_aplicados
+
+    @classmethod
+    @transaction.atomic
+    def aplicar_saldo_automatico_a_venta(cls, venta, usuario=None):
+        """
+        Evalúa si el cliente titular o el cliente padre de algún pasajero de la venta tiene saldo a favor
+        y lo aplica automáticamente a la venta.
+        """
+        if not venta or (venta.saldo_pendiente or Decimal("0.00")) <= Decimal("0.00"):
+            return None
+
+        cliente = venta.cliente
+        if not cliente and hasattr(venta, "pasajeros"):
+            for p in venta.pasajeros.all():
+                cli_padre = p.clientes_asociados.filter(is_deleted=False).first()
+                if cli_padre:
+                    cliente = cli_padre
+                    venta.cliente = cliente
+                    venta.save(update_fields=["cliente"])
+                    break
+
+        if cliente and cliente.saldo_a_favor > Decimal("0.00"):
+            monto_a_pagar = min(venta.saldo_pendiente, cliente.saldo_a_favor)
+            pago, mov = cls.aplicar_saldo_a_venta(
+                venta=venta,
+                monto=monto_a_pagar,
+                usuario=usuario,
+                notas="Auto-deducción automática al procesar venta/boleto",
+            )
+            return pago, mov
+        return None
 
     @classmethod
     @transaction.atomic

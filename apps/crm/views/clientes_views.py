@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView, View
 
 from apps.common.mixins.export_mixin import ExportMixin
 from apps.crm.models import Cliente
@@ -97,12 +97,16 @@ class ClienteDetailView(CRMBaseMixin, DetailView):
             .select_related("moneda", "consultor")
             .order_by("-fecha_emision")
         )
-        context["movimientos_saldo"] = (
-            self.object.movimientos_saldo.filter(is_deleted=False)
-            .select_related("moneda", "venta", "registrado_por")
-            .order_by("-creado")
+        from apps.crm.services.account_statement_service import AccountStatementService
+
+        fecha_inicio = self.request.GET.get("fecha_inicio")
+        fecha_fin = self.request.GET.get("fecha_fin")
+        statement = AccountStatementService.get_statement_data(
+            self.object, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin
         )
-        context["saldo_a_favor"] = self.object.saldo_a_favor
+        context.update(statement)
+        context["movimientos_saldo"] = statement["movimientos"]
+        context["saldo_a_favor"] = statement["saldo_a_favor_actual"]
         return context
 
 
@@ -219,3 +223,35 @@ class ClienteRecargarSaldoView(CRMBaseMixin, DetailView):
                 )
             messages.error(request, str(e))
             return redirect("crm:cliente_detail", pk=cliente.pk)
+
+
+class ClienteEstadoCuentaExcelView(CRMBaseMixin, View):
+    """
+    Exporta el Estado de Cuenta y Relación Financiera (Anticipos vs Ventas/Emisiones) en Excel (.xlsx).
+    """
+
+    def get(self, request, pk, *args, **kwargs):
+        from django.http import HttpResponse
+        from django.shortcuts import get_object_or_404
+        from django.utils import timezone
+
+        from apps.crm.services.account_statement_service import AccountStatementService
+
+        cliente = get_object_or_404(Cliente, pk=pk)
+        fecha_inicio = request.GET.get("fecha_inicio")
+        fecha_fin = request.GET.get("fecha_fin")
+
+        excel_file = AccountStatementService.generate_excel_statement(
+            cliente, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin
+        )
+
+        nombre_limpio = f"{cliente.nombres}_{cliente.apellidos}".replace(" ", "_")
+        fecha_str = timezone.now().strftime("%Y%m%d")
+        filename = f"Estado_Cuenta_{nombre_limpio}_{fecha_str}.xlsx"
+
+        response = HttpResponse(
+            excel_file.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response

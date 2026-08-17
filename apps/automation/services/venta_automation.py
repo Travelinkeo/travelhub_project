@@ -256,10 +256,17 @@ class VentaAutomationService:
             pax_names = []
             for p in venta.pasajeros.all():
                 pax_names.append(f"{p.apellidos}, {p.nombres}")
-            if pax_names:
-                venta.descripcion_general = f"Emisiones {aerolinea} - Pax: {'; '.join(pax_names)}"
-
             venta.save()
+
+            # I. Auto-Deducción de Saldo de Billetera (Titular o Dependientes)
+            try:
+                from apps.crm.services.wallet_service import WalletClienteService
+
+                WalletClienteService.aplicar_saldo_automatico_a_venta(venta, usuario=usuario)
+            except Exception as e_wallet:
+                logger.warning(
+                    f"No se pudo auto-descontar saldo de billetera para Venta #{venta.pk}: {e_wallet}"
+                )
 
         # H. Sales Intelligence (Audit Point 7) - FUERA de la transacción
         try:

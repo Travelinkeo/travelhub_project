@@ -4,7 +4,7 @@
 {% block title %}{{ cliente.get_nombre_completo }} - TravelHub Pro{% endblock %}
 
 {% block content %}
-<div class="space-y-4 sm:space-y-5 w-full" x-data="{ activeTab: 'info', showVincularModal: false }">
+<div class="space-y-4 sm:space-y-5 w-full" x-data="{ activeTab: '{{ request.GET.tab|default:'info' }}', showVincularModal: false }">
     <!-- Header Card -->
     <div class="glass-panel rounded-2xl p-4 sm:p-5">
         <div class="flex flex-col md:flex-row gap-4 sm:gap-6 items-start md:items-center justify-between">
@@ -352,33 +352,158 @@
         </div>
 
         <!-- Billetera & Saldo a Favor Tab -->
-        <div x-show="activeTab === 'billetera'" x-transition class="space-y-4">
-            <!-- Banner Saldo -->
-            <div class="glass-panel rounded-2xl p-5 border border-indigo-500/20 bg-gradient-to-r from-indigo-950/40 via-surface-1 to-surface-1 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div class="flex items-center gap-3.5">
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30 shrink-0">
-                        <span class="material-symbols-outlined text-2xl">account_balance_wallet</span>
+        <div x-show="activeTab === 'billetera'" x-transition class="space-y-5">
+            <!-- Barra de Filtros y Acciones -->
+            <div class="glass-panel rounded-2xl p-4 border border-border-color bg-surface-1 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                <form method="get" class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+                    <input type="hidden" name="tab" value="billetera">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-text-muted uppercase">Desde:</span>
+                        <input type="date" name="fecha_inicio" value="{{ fecha_inicio|default:'' }}"
+                            class="bg-surface-2 border border-border-color rounded-xl px-2.5 py-1.5 text-xs text-text-main font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary">
                     </div>
-                    <div>
-                        <p class="text-xs font-bold text-indigo-300 uppercase tracking-wider">Saldo a Favor Disponible</p>
-                        <p class="text-2xl sm:text-3xl font-black text-indigo-400 font-mono mt-0.5">${{ cliente.saldo_a_favor|floatformat:2 }} <span class="text-xs font-bold text-text-muted">USD</span></p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-text-muted uppercase">Hasta:</span>
+                        <input type="date" name="fecha_fin" value="{{ fecha_fin|default:'' }}"
+                            class="bg-surface-2 border border-border-color rounded-xl px-2.5 py-1.5 text-xs text-text-main font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary">
                     </div>
+                    <button type="submit"
+                        class="px-3 py-1.5 bg-surface-2 hover:bg-surface-3 text-text-main font-bold text-xs rounded-xl border border-border-color transition-all flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[15px]">filter_list</span>
+                        <span>Filtrar</span>
+                    </button>
+                    {% if fecha_inicio or fecha_fin %}
+                    <a href="?tab=billetera" class="text-xs text-text-muted hover:text-text-main underline ml-1">Limpiar</a>
+                    {% endif %}
+                </form>
+
+                <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                    <a href="{% url 'crm:cliente_estado_cuenta_excel' cliente.pk %}?fecha_inicio={{ fecha_inicio|default:'' }}&fecha_fin={{ fecha_fin|default:'' }}"
+                        class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 shadow-md shadow-emerald-900/30">
+                        <span class="material-symbols-outlined text-[16px]">table_view</span>
+                        <span>Exportar Excel (.xlsx)</span>
+                    </a>
+                    <button hx-get="{% url 'crm:cliente_recargar_saldo' cliente.pk %}"
+                        hx-target="#modal-container"
+                        hx-swap="innerHTML"
+                        class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 shadow-md shadow-indigo-900/30 cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px]">add_card</span>
+                        <span>Recargar Saldo</span>
+                    </button>
                 </div>
-                <button hx-get="{% url 'crm:cliente_recargar_saldo' cliente.pk %}"
-                    hx-target="#modal-container"
-                    hx-swap="innerHTML"
-                    class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-lg shadow-indigo-900/40 cursor-pointer">
-                    <span class="material-symbols-outlined text-[18px]">add_card</span>
-                    <span>Registrar Anticipo / Depósito</span>
-                </button>
             </div>
 
-            <!-- Tabla de Movimientos -->
+            <!-- Resumen Financiero Ejecutivo (KPI Cards) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="glass-panel rounded-2xl p-4 border border-indigo-500/20 bg-indigo-500/5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Anticipos Recibidos</span>
+                        <span class="material-symbols-outlined text-indigo-400 text-lg">savings</span>
+                    </div>
+                    <p class="text-2xl font-black text-indigo-400 font-mono mt-1">${{ total_anticipos|floatformat:2 }} <span class="text-xs text-text-muted">USD</span></p>
+                    <p class="text-[11px] text-text-muted mt-0.5">Total depositado / acreditado</p>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-4 border border-border-color bg-surface-1">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-text-secondary uppercase tracking-wider">Ventas & Emisiones</span>
+                        <span class="material-symbols-outlined text-primary text-lg">airplane_ticket</span>
+                    </div>
+                    <p class="text-2xl font-black text-text-main font-mono mt-1">${{ total_ventas_emitidas|floatformat:2 }} <span class="text-xs text-text-muted">USD</span></p>
+                    <p class="text-[11px] text-text-muted mt-0.5">{{ ventas|length }} venta(s) (Titular + Dependientes)</p>
+                </div>
+
+                {% if saldo_a_favor_actual > 0 %}
+                <div class="glass-panel rounded-2xl p-4 border border-emerald-500/20 bg-emerald-500/5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Saldo a Favor Disponible</span>
+                        <span class="material-symbols-outlined text-emerald-400 text-lg">account_balance_wallet</span>
+                    </div>
+                    <p class="text-2xl font-black text-emerald-400 font-mono mt-1">${{ saldo_a_favor_actual|floatformat:2 }} <span class="text-xs text-emerald-600">USD</span></p>
+                    <p class="text-[11px] text-emerald-400/80 mt-0.5">Crédito disponible para futuros viajes</p>
+                </div>
+                {% else %}
+                <div class="glass-panel rounded-2xl p-4 border border-amber-500/20 bg-amber-500/5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Saldo Deudor / Por Pagar</span>
+                        <span class="material-symbols-outlined text-amber-400 text-lg">warning</span>
+                    </div>
+                    <p class="text-2xl font-black text-amber-400 font-mono mt-1">${{ total_deuda_pendiente|floatformat:2 }} <span class="text-xs text-amber-600">USD</span></p>
+                    <p class="text-[11px] text-amber-400/80 mt-0.5">Saldo pendiente por liquidar</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Tabla 1: Relación de Ventas y Emisiones (Titular y Dependientes) -->
+            <div class="glass-panel rounded-2xl border border-border-color overflow-hidden">
+                <div class="p-4 border-b border-border-color flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-text-main uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base text-primary">airplane_ticket</span>
+                        <span>1. Ventas y Emisiones Generadas (Titular y Pasajeros Dependientes)</span>
+                    </h3>
+                    <span class="text-[11px] text-text-muted font-bold">{{ ventas|length }} registro(s)</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-surface-2 text-text-muted font-bold text-[11px] uppercase tracking-wider border-b border-border-color">
+                            <tr>
+                                <th class="px-5 py-3">Fecha</th>
+                                <th class="px-5 py-3">PNR / Localizador</th>
+                                <th class="px-5 py-3">Pasajero / Beneficiario</th>
+                                <th class="px-5 py-3">Descripción / Servicio</th>
+                                <th class="px-5 py-3 text-right">Total Venta</th>
+                                <th class="px-5 py-3 text-right">Pagado</th>
+                                <th class="px-5 py-3 text-right">Saldo Pendiente</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border-color bg-surface-1">
+                            {% for v in ventas %}
+                            <tr class="hover:bg-surface-2/50 transition-colors">
+                                <td class="px-5 py-3 text-text-muted whitespace-nowrap font-mono text-[11px]">{{ v.fecha_venta|date:"d/m/Y" }}</td>
+                                <td class="px-5 py-3 font-mono font-bold text-primary whitespace-nowrap">
+                                    <a href="{% url 'bookings:venta_detail' v.pk %}" class="hover:underline">
+                                        #{{ v.pk }} ({{ v.localizador|default:"S/L" }})
+                                    </a>
+                                </td>
+                                <td class="px-5 py-3">
+                                    {% for pax in v.pasajeros.all %}
+                                    <div class="flex items-center gap-1.5 mb-0.5">
+                                        <span class="text-text-main font-bold">{{ pax.get_nombre_completo }}</span>
+                                        {% if pax in pasajeros_dependientes %}
+                                        <span class="px-1.5 py-0.2 rounded text-[9px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-bold">Dependiente</span>
+                                        {% else %}
+                                        <span class="px-1.5 py-0.2 rounded text-[9px] bg-surface-3 text-text-muted font-bold">Titular</span>
+                                        {% endif %}
+                                    </div>
+                                    {% empty %}
+                                    <span class="text-text-main font-bold">{{ v.cliente.get_nombre_completo|default:"Titular" }}</span>
+                                    {% endfor %}
+                                </td>
+                                <td class="px-5 py-3 text-text-secondary">{{ v.descripcion_general|default:"Emisión de Boleto / Servicio" }}</td>
+                                <td class="px-5 py-3 text-right font-black font-mono text-text-main">${{ v.total_venta|floatformat:2 }}</td>
+                                <td class="px-5 py-3 text-right font-mono text-emerald-400 font-bold">${{ v.monto_pagado|floatformat:2 }}</td>
+                                <td class="px-5 py-3 text-right font-mono font-bold {% if v.saldo_pendiente > 0 %}text-red-400{% else %}text-text-muted{% endif %}">
+                                    ${{ v.saldo_pendiente|floatformat:2 }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="px-5 py-8 text-center text-text-muted italic">
+                                    No hay ventas registradas para este cliente o sus pasajeros dependientes en el período seleccionado.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tabla 2: Historial de Anticipos y Movimientos de Billetera -->
             <div class="glass-panel rounded-2xl border border-border-color overflow-hidden">
                 <div class="p-4 border-b border-border-color flex items-center justify-between">
                     <h3 class="text-xs font-bold text-text-main uppercase tracking-wider flex items-center gap-2">
                         <span class="material-symbols-outlined text-base text-primary">history</span>
-                        <span>Historial de Movimientos de Saldo</span>
+                        <span>2. Historial de Anticipos y Movimientos de Saldo</span>
                     </h3>
                     <span class="text-[11px] text-text-muted font-bold">{{ movimientos_saldo.count }} registro(s)</span>
                 </div>
@@ -435,7 +560,7 @@
                             {% empty %}
                             <tr>
                                 <td colspan="6" class="px-5 py-8 text-center text-text-muted italic">
-                                    No hay movimientos de saldo registrados para este cliente.
+                                    No hay movimientos de saldo registrados para este cliente en el período seleccionado.
                                 </td>
                             </tr>
                             {% endfor %}

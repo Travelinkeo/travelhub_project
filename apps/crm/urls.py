@@ -68,6 +68,11 @@ urlpatterns = [
         name="cliente_recargar_saldo",
     ),
     path(
+        "clientes/<int:pk>/estado-cuenta/excel/",
+        clientes_views.ClienteEstadoCuentaExcelView.as_view(),
+        name="cliente_estado_cuenta_excel",
+    ),
+    path(
         "clientes/<int:pk>/editar/",
         clientes_views.ClienteUpdateView.as_view(),
         name="cliente_update",

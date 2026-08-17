@@ -132,31 +132,31 @@ class CustomerService:
         pais_iso = None
 
         # 1. KIU en Dólares / Nacional / Internacional:
-        # IDVCI -> ID + V (Venezolana) + CI (Cédula de Identidad)
-        m_idvci = re.match(r"^IDVCI(\d+)$", doc_clean)
+        # IDVCI / VCI -> ID + V (Venezolana) + CI (Cédula de Identidad)
+        m_idvci = re.match(r"^(?:ID)?VCI(\d+)$", doc_clean)
         if m_idvci:
             tipo_doc = "DNI"
             cedula = f"V-{m_idvci.group(1)}"
             pais_iso = "VE"
             return doc_clean, doc_hash, cedula, pasaporte, tipo_doc, pais_iso
 
-        # IDECI -> ID + E (Extranjero) + CI (Cédula de Identidad)
-        m_ideci = re.match(r"^IDECI(\d+)$", doc_clean)
+        # IDECI / ECI -> ID + E (Extranjero) + CI (Cédula de Identidad)
+        m_ideci = re.match(r"^(?:ID)?ECI(\d+)$", doc_clean)
         if m_ideci:
             tipo_doc = "DNI"
             cedula = f"E-{m_ideci.group(1)}"
             return doc_clean, doc_hash, cedula, pasaporte, tipo_doc, pais_iso
 
-        # IDVP / IDVPP -> ID + V (Venezolana) + P (Pasaporte)
-        m_idvp = re.match(r"^IDVP+([A-Z0-9]+)$", doc_clean)
+        # IDVP / IDVPP / VP -> ID + V (Venezolana) + P (Pasaporte)
+        m_idvp = re.match(r"^(?:ID)?VP+([A-Z0-9]+)$", doc_clean)
         if m_idvp:
             tipo_doc = "PASS"
             pasaporte = m_idvp.group(1)
             pais_iso = "VE"
             return doc_clean, doc_hash, cedula, pasaporte, tipo_doc, pais_iso
 
-        # IDEP / IDEPP -> ID + E (Extranjero) + P (Pasaporte)
-        m_idep = re.match(r"^IDEP+([A-Z0-9]+)$", doc_clean)
+        # IDEP / IDEPP / EP -> ID + E (Extranjero) + P (Pasaporte)
+        m_idep = re.match(r"^(?:ID)?EP+([A-Z0-9]+)$", doc_clean)
         if m_idep:
             tipo_doc = "PASS"
             pasaporte = m_idep.group(1)

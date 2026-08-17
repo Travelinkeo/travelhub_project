@@ -45,6 +45,7 @@ class CatalogNormalizationService:
         "SANTO DOMINGO": "STD",  # Sto. Domingo, Táchira (STD) — Doméstico VE tiene prioridad
         "CARACAS": "CCS",
         "MARACAIBO": "MAR",
+        "MARACAY": "MYC",
         "PTO ORDAZ": "PZO",  # Puerto Ordaz
         "PUERTO ORDAZ": "PZO",
         "BARQUISIMETO": "BRM",
@@ -58,7 +59,9 @@ class CatalogNormalizationService:
         "GUANARE": "GUQ",
         "CORO": "CZE",
         "PUNTO FIJO": "LSP",
-        "EL VIGIA": "EJA",
+        "EL VIGIA": "VIG",
+        "EL VIGÍA": "VIG",
+        "VIGIA": "VIG",
         "TUMEREMO": "TMO",
         "SANTA ELENA DE UAIREN": "SFD",
         # Common Latin American domestic

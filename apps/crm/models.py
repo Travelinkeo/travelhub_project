@@ -1,5 +1,6 @@
 import logging
 import uuid
+from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
@@ -154,6 +155,28 @@ class Cliente(AgenciaMixin, SoftDeleteModel, models.Model):
         if not self.fecha_expiracion_pasaporte:
             return False
         return self.fecha_expiracion_pasaporte < timezone.now().date()
+
+    @property
+    def saldo_a_favor(self) -> Decimal:
+        """Calcula el saldo a favor disponible actual sumando depósitos/ajustes y restando consumos/reembolsos."""
+        from decimal import Decimal
+
+        from django.db.models import Sum
+
+        # Usar all_objects para garantizar consistencia dentro y fuera del ciclo de request HTTP
+        from apps.crm.models import MovimientoSaldoCliente
+
+        movs = MovimientoSaldoCliente.all_objects.filter(cliente=self, is_deleted=False)
+        ingresos = movs.filter(tipo_movimiento__in=["DEP", "AJU"]).aggregate(s=Sum("monto"))[
+            "s"
+        ] or Decimal("0.00")
+        egresos = movs.filter(tipo_movimiento__in=["CON", "REE"]).aggregate(s=Sum("monto"))[
+            "s"
+        ] or Decimal("0.00")
+        return max(Decimal("0.00"), ingresos - egresos)
+
+    def get_saldo_a_favor(self) -> Decimal:
+        return self.saldo_a_favor
 
 
 # ==========================================
@@ -575,3 +598,115 @@ class PasaporteEscaneado(AgenciaMixin, models.Model):
             "fecha_nacimiento": self.fecha_nacimiento,
             "fecha_expiracion_pasaporte": self.fecha_vencimiento,
         }
+
+
+# ==========================================
+# 10. MODELO BILLETERA / SALDO A FAVOR
+# ==========================================
+class MovimientoSaldoCliente(AgenciaMixin, SoftDeleteModel, models.Model):
+    """
+    Movimientos de la cuenta corriente / billetera de saldo a favor del cliente.
+    Permite registrar anticipos (Zelle, Swift, etc.) y deducciones automáticas por ventas.
+    """
+
+    id = models.AutoField(primary_key=True)
+    cliente = models.ForeignKey(
+        "Cliente",
+        on_delete=models.CASCADE,
+        related_name="movimientos_saldo",
+        verbose_name=_("Cliente"),
+    )
+
+    class TipoMovimiento(models.TextChoices):
+        DEPOSITO_ANTICIPO = "DEP", _("Depósito de Anticipo / Abono")
+        CONSUMO_VENTA = "CON", _("Consumo en Venta / Deducción")
+        REEMBOLSO = "REE", _("Reembolso / Devolución")
+        AJUSTE = "AJU", _("Ajuste Contable")
+
+    tipo_movimiento = models.CharField(
+        _("Tipo de Movimiento"),
+        max_length=3,
+        choices=TipoMovimiento.choices,
+        default=TipoMovimiento.DEPOSITO_ANTICIPO,
+    )
+
+    monto = models.DecimalField(
+        _("Monto"),
+        max_digits=12,
+        decimal_places=2,
+        help_text=_(
+            "Monto positivo para depósitos/abonos; positivo para el valor de la deducción."
+        ),
+    )
+    moneda = models.ForeignKey(
+        "common.Moneda",
+        on_delete=models.PROTECT,
+        verbose_name=_("Moneda"),
+        null=True,
+        blank=True,
+    )
+
+    saldo_resultante = models.DecimalField(
+        _("Saldo Resultante"),
+        max_digits=12,
+        decimal_places=2,
+        default=0.00,
+        help_text=_("Saldo a favor del cliente después de aplicar esta transacción."),
+    )
+
+    venta = models.ForeignKey(
+        "bookings.Venta",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="consumos_saldo_cliente",
+        verbose_name=_("Venta Asociada"),
+    )
+    pago_venta = models.ForeignKey(
+        "bookings.PagoVenta",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="movimientos_saldo_cliente",
+        verbose_name=_("Pago de Venta Asociado"),
+    )
+
+    metodo_pago_origen = models.CharField(
+        _("Método de Pago Origen"),
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text=_("Ej. Zelle, Transferencia, Efectivo"),
+    )
+    referencia_bancaria = models.CharField(
+        _("Referencia Bancaria"), max_length=150, blank=True, null=True
+    )
+    comprobante = models.FileField(
+        _("Comprobante"),
+        upload_to="clientes/comprobantes_saldo/%Y/%m/",
+        blank=True,
+        null=True,
+    )
+    descripcion = models.CharField(_("Descripción / Motivo"), max_length=255, blank=True, null=True)
+    registrado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("Registrado Por"),
+    )
+    creado = models.DateTimeField(_("Fecha"), default=timezone.now, db_index=True)
+
+    class Meta:
+        verbose_name = _("Movimiento de Saldo de Cliente")
+        verbose_name_plural = _("Movimientos de Saldo de Clientes")
+        ordering = ["-creado"]
+        indexes = [
+            models.Index(fields=["cliente", "-creado"], name="idx_mov_saldo_cli_fecha"),
+            models.Index(
+                fields=["agencia_id", "tipo_movimiento"], name="idx_mov_saldo_agencia_tipo"
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.get_tipo_movimiento_display()}: {self.monto} ({self.cliente})"

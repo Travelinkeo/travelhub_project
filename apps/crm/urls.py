@@ -63,6 +63,11 @@ urlpatterns = [
     path("clientes/nuevo/", clientes_views.ClienteCreateView.as_view(), name="cliente_create"),
     path("clientes/<int:pk>/", clientes_views.ClienteDetailView.as_view(), name="cliente_detail"),
     path(
+        "clientes/<int:pk>/recargar-saldo/",
+        clientes_views.ClienteRecargarSaldoView.as_view(),
+        name="cliente_recargar_saldo",
+    ),
+    path(
         "clientes/<int:pk>/editar/",
         clientes_views.ClienteUpdateView.as_view(),
         name="cliente_update",

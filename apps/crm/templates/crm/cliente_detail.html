@@ -56,6 +56,13 @@
 
             <!-- Botones de Acción -->
             <div class="flex items-center gap-2 self-stretch sm:self-auto justify-end">
+                <button hx-get="{% url 'crm:cliente_recargar_saldo' cliente.pk %}"
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML"
+                    class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 shadow-md shadow-indigo-900/30 cursor-pointer">
+                    <span class="material-symbols-outlined text-[16px]">add_card</span>
+                    <span>Recargar Saldo</span>
+                </button>
                 <a href="{% url 'crm:cliente_update' cliente.pk %}"
                     class="px-3.5 py-2 bg-surface-2 hover:bg-surface-3 border border-border-color rounded-xl text-text-main font-bold text-xs transition-all flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-[16px]">edit</span>
@@ -72,7 +79,11 @@
     </div>
 
     <!-- Stats Row -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
+        <div class="glass-panel rounded-xl p-3.5 border-l-4 border-indigo-500 bg-indigo-500/5">
+            <p class="text-indigo-400 text-[11px] font-semibold uppercase tracking-wider">Saldo a Favor</p>
+            <p class="text-xl font-black text-indigo-400 font-mono mt-0.5">${{ cliente.saldo_a_favor|floatformat:2 }} USD</p>
+        </div>
         <div class="glass-panel rounded-xl p-3.5 border-l-4 border-primary">
             <p class="text-text-muted text-[11px] font-semibold uppercase tracking-wider">Ventas Totales</p>
             <p class="text-xl font-black text-text-main mt-0.5">{{ cliente.ventas_asociadas.count|default:"0" }}</p>
@@ -81,7 +92,7 @@
             <p class="text-text-muted text-[11px] font-semibold uppercase tracking-wider">Puntos Fidelidad</p>
             <p class="text-xl font-black text-status-success mt-0.5">{{ cliente.puntos_fidelidad|default:"0" }}</p>
         </div>
-        <div class="glass-panel rounded-xl p-3.5 border-l-4 border-indigo-500">
+        <div class="glass-panel rounded-xl p-3.5 border-l-4 border-slate-500">
             <p class="text-text-muted text-[11px] font-semibold uppercase tracking-wider">Pasajeros</p>
             <p class="text-xl font-black text-text-main mt-0.5">{{ cliente.pasajeros.count|default:"0" }}</p>
         </div>
@@ -116,6 +127,15 @@
             class="pb-2.5 px-3 border-b-2 rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap">
             <span class="material-symbols-outlined text-[16px]">request_quote</span>
             <span>Cotizaciones</span>
+        </button>
+        <button @click="activeTab = 'billetera'"
+            :class="activeTab === 'billetera' ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5' : 'border-transparent text-text-muted hover:text-text-main'"
+            class="pb-2.5 px-3 border-b-2 rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap">
+            <span class="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+            <span>Billetera & Saldo a Favor</span>
+            {% if cliente.saldo_a_favor > 0 %}
+            <span class="px-1.5 py-0.5 text-[9px] bg-indigo-500/20 text-indigo-300 rounded-full font-mono font-bold">${{ cliente.saldo_a_favor|floatformat:2 }}</span>
+            {% endif %}
         </button>
     </div>
 
@@ -330,9 +350,104 @@
                 </table>
             </div>
         </div>
+
+        <!-- Billetera & Saldo a Favor Tab -->
+        <div x-show="activeTab === 'billetera'" x-transition class="space-y-4">
+            <!-- Banner Saldo -->
+            <div class="glass-panel rounded-2xl p-5 border border-indigo-500/20 bg-gradient-to-r from-indigo-950/40 via-surface-1 to-surface-1 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30 shrink-0">
+                        <span class="material-symbols-outlined text-2xl">account_balance_wallet</span>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-indigo-300 uppercase tracking-wider">Saldo a Favor Disponible</p>
+                        <p class="text-2xl sm:text-3xl font-black text-indigo-400 font-mono mt-0.5">${{ cliente.saldo_a_favor|floatformat:2 }} <span class="text-xs font-bold text-text-muted">USD</span></p>
+                    </div>
+                </div>
+                <button hx-get="{% url 'crm:cliente_recargar_saldo' cliente.pk %}"
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML"
+                    class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-lg shadow-indigo-900/40 cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">add_card</span>
+                    <span>Registrar Anticipo / Depósito</span>
+                </button>
+            </div>
+
+            <!-- Tabla de Movimientos -->
+            <div class="glass-panel rounded-2xl border border-border-color overflow-hidden">
+                <div class="p-4 border-b border-border-color flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-text-main uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base text-primary">history</span>
+                        <span>Historial de Movimientos de Saldo</span>
+                    </h3>
+                    <span class="text-[11px] text-text-muted font-bold">{{ movimientos_saldo.count }} registro(s)</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-surface-2 text-text-muted font-bold text-[11px] uppercase tracking-wider border-b border-border-color">
+                            <tr>
+                                <th class="px-5 py-3">Fecha</th>
+                                <th class="px-5 py-3">Tipo</th>
+                                <th class="px-5 py-3">Descripción / Motivo</th>
+                                <th class="px-5 py-3">Referencia</th>
+                                <th class="px-5 py-3 text-right">Monto</th>
+                                <th class="px-5 py-3 text-right">Saldo Resultante</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border-color bg-surface-1">
+                            {% for mov in movimientos_saldo %}
+                            <tr class="hover:bg-surface-2/50 transition-colors">
+                                <td class="px-5 py-3 text-text-muted whitespace-nowrap font-mono text-[11px]">{{ mov.creado|date:"d/m/Y H:i" }}</td>
+                                <td class="px-5 py-3 whitespace-nowrap">
+                                    {% if mov.tipo_movimiento == 'DEP' %}
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Depósito / Abono</span>
+                                    {% elif mov.tipo_movimiento == 'CON' %}
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Consumo Venta</span>
+                                    {% elif mov.tipo_movimiento == 'REE' %}
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">Reembolso</span>
+                                    {% else %}
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-surface-3 text-text-muted border border-border-color">Ajuste</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-5 py-3 text-text-main font-semibold">
+                                    {{ mov.descripcion }}
+                                    {% if mov.venta %}
+                                    <a href="{% url 'bookings:venta_detail' mov.venta.pk %}" class="text-primary hover:underline font-mono text-[11px] block mt-0.5">
+                                        Expediente Venta #{{ mov.venta.pk }} (PNR: {{ mov.venta.localizador }})
+                                    </a>
+                                    {% endif %}
+                                </td>
+                                <td class="px-5 py-3 text-text-muted font-mono text-[11px]">
+                                    {{ mov.referencia_bancaria|default:"---" }}
+                                    {% if mov.comprobante %}
+                                    <a href="{{ mov.comprobante.url }}" target="_blank" class="text-indigo-400 hover:underline inline-flex items-center gap-0.5 ml-1" title="Ver comprobante">
+                                        <span class="material-symbols-outlined text-[13px]">attach_file</span>
+                                    </a>
+                                    {% endif %}
+                                </td>
+                                <td class="px-5 py-3 text-right font-black font-mono whitespace-nowrap {% if mov.tipo_movimiento == 'DEP' or mov.tipo_movimiento == 'AJU' %}text-emerald-400{% else %}text-red-400{% endif %}">
+                                    {% if mov.tipo_movimiento == 'DEP' or mov.tipo_movimiento == 'AJU' %}+{% else %}-{% endif %}${{ mov.monto|floatformat:2 }}
+                                </td>
+                                <td class="px-5 py-3 text-right font-bold font-mono text-indigo-300 whitespace-nowrap">
+                                    ${{ mov.saldo_resultante|floatformat:2 }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="px-5 py-8 text-center text-text-muted italic">
+                                    No hay movimientos de saldo registrados para este cliente.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Modals & Containers -->
+    <div id="modal-container"></div>
     <template x-if="showVincularModal">
         {% include "crm/partials/vincular_pasajero_modal.html" with cliente_id=cliente.pk %}
     </template>

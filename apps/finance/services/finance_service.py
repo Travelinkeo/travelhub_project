@@ -18,7 +18,7 @@ class FinanceService:
         Esta lógica se extrae del modelo para evitar efectos secundarios en el .save()
         """
         try:
-            venta = Venta.objects.get(pk=venta_id)
+            venta = Venta.all_objects.get(pk=venta_id)
 
             # 1. Sumar items
             subtotal_items = Decimal("0.00")

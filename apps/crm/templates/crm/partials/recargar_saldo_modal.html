@@ -1,0 +1,83 @@
+<div class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+     x-data="{ show: true }" x-show="show" @keydown.escape.window="show = false">
+    <div class="glass-panel border border-border-color bg-surface-1 rounded-2xl w-full max-w-md p-5 sm:p-6 shadow-2xl space-y-4">
+
+        <div class="flex items-center justify-between border-b border-border-color pb-3">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                    <span class="material-symbols-outlined text-xl">account_balance_wallet</span>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-text-main">Registrar Depósito / Anticipo</h3>
+                    <p class="text-[11px] text-text-muted">Billetera de {{ cliente.get_nombre_completo }}</p>
+                </div>
+            </div>
+            <button type="button" @click="$el.closest('.fixed').remove()" class="text-text-muted hover:text-text-main p-1">
+                <span class="material-symbols-outlined text-lg">close</span>
+            </button>
+        </div>
+
+        {% if error %}
+        <div class="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs font-bold">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form hx-post="{% url 'crm:cliente_recargar_saldo' cliente.pk %}"
+              hx-encoding="multipart/form-data"
+              hx-target="this"
+              hx-swap="outerHTML"
+              class="space-y-3.5">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-1">Monto a Depositar (USD) *</label>
+                <input type="number" step="0.01" min="0.01" name="monto" required placeholder="Ej: 500.00"
+                    class="w-full bg-surface-2 border border-border-color rounded-xl px-3.5 py-2 text-xs font-bold text-text-main focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-mono">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-1">Método de Pago / Canal *</label>
+                <select name="metodo"
+                    class="w-full bg-surface-2 border border-border-color rounded-xl px-3.5 py-2 text-xs text-text-main focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                    <option value="ZEL">Zelle</option>
+                    <option value="TRF">Transferencia Bancaria (USD / VES)</option>
+                    <option value="EFE">Efectivo (Dólares / Euros)</option>
+                    <option value="PPL">PayPal / Tarjeta</option>
+                    <option value="PM">Pago Móvil</option>
+                    <option value="OTR">Otro Canal</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-1">Referencia Bancaria / Confirmación</label>
+                <input type="text" name="referencia" placeholder="Ej: Zelle Confirmation #123456"
+                    class="w-full bg-surface-2 border border-border-color rounded-xl px-3.5 py-2 text-xs text-text-main placeholder-text-muted focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-1">Motivo / Descripción</label>
+                <input type="text" name="descripcion" placeholder="Ej: Abono para próximos viajes de agosto"
+                    class="w-full bg-surface-2 border border-border-color rounded-xl px-3.5 py-2 text-xs text-text-main placeholder-text-muted focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-1">Comprobante de Pago (Opcional)</label>
+                <input type="file" name="comprobante" accept="image/*,.pdf"
+                    class="w-full text-xs text-text-muted file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-surface-3 file:text-text-main hover:file:bg-primary hover:file:text-white file:transition-all cursor-pointer">
+            </div>
+
+            <div class="flex justify-end gap-2.5 pt-3 border-t border-border-color mt-4">
+                <button type="button" @click="$el.closest('.fixed').remove()"
+                    class="px-4 py-2 rounded-xl text-xs font-bold text-text-muted hover:text-text-main bg-surface-2 hover:bg-surface-3 border border-border-color transition-all">
+                    Cancelar
+                </button>
+                <button type="submit"
+                    class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-900/30 transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">add_card</span>
+                    <span>Cargar a Billetera</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

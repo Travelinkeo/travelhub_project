@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -418,23 +419,45 @@ class PagoVentaCreateView(BookingBaseMixin, CreateView):
     def get_context_data(self, **kwargs):
         """get_context_data."""
         context = super().get_context_data(**kwargs)
-        context["venta_pk"] = self.kwargs["venta_pk"]
+        venta = get_object_or_404(Venta, pk=self.kwargs["venta_pk"])
+        context["venta_pk"] = venta.pk
+        context["venta"] = venta
+        context["cliente_saldo_a_favor"] = (
+            venta.cliente.saldo_a_favor if venta.cliente else Decimal("0.00")
+        )
         return context
 
     def form_valid(self, form):
         """form_valid."""
         venta = get_object_or_404(Venta, pk=self.kwargs["venta_pk"])
-        form.instance.venta = venta
-        form.instance.moneda = venta.moneda
-        from core.api import get_user_active_agency
+        metodo = form.cleaned_data.get("metodo")
+        monto = form.cleaned_data.get("monto")
 
-        agencia = get_user_active_agency(self.request.user)
-        if agencia:
-            form.instance.agencia = agencia
-        form.save()
-        from apps.bookings.services.venta_service import VentaService
+        if metodo == PagoVenta.MetodoPago.SALDO_A_FAVOR:
+            from apps.crm.services.wallet_service import WalletClienteService
 
-        VentaService.recalculate_finances(venta.pk)
+            try:
+                WalletClienteService.aplicar_saldo_a_venta(
+                    venta=venta,
+                    monto=monto,
+                    usuario=self.request.user,
+                    notas=form.cleaned_data.get("referencia") or "",
+                )
+            except Exception as e:
+                form.add_error(None, str(e))
+                return self.form_invalid(form)
+        else:
+            form.instance.venta = venta
+            form.instance.moneda = venta.moneda
+            from core.api import get_user_active_agency
+
+            agencia = get_user_active_agency(self.request.user)
+            if agencia:
+                form.instance.agencia = agencia
+            form.save()
+            from apps.bookings.services.venta_service import VentaService
+
+            VentaService.recalculate_finances(venta.pk)
 
         if self.request.headers.get("HX-Request"):
             from django.http import HttpResponse

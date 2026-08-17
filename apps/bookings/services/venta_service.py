@@ -23,7 +23,7 @@ class VentaService:
         try:
             # Para obtener el agencia_id, necesitamos la instancia de la venta.
             # Este es un trade-off aceptable para lograr el desacoplamiento.
-            venta = Venta.objects.get(pk=venta_id)
+            venta = Venta.all_objects.get(pk=venta_id)
 
             # Emitimos la señal. 'finance' u otros módulos escucharán este evento.
             sale_recalculation_requested.send(

@@ -583,6 +583,8 @@ class ItemFacturaConsolidada(AgenciaMixin, models.Model):
         on_delete=models.CASCADE,
         related_name="items_consolidados",
         verbose_name="Factura",
+        null=True,
+        blank=True,
     )
     descripcion = models.CharField(max_length=500, verbose_name="Descripción")
     tipo_servicio = models.CharField(
@@ -696,6 +698,7 @@ class RetencionISLR(AgenciaMixin, models.Model):
     base_imponible = models.DecimalField(
         max_digits=12,
         decimal_places=2,
+        default=Decimal("0.00"),
         verbose_name="Base Imponible (USD)",
     )
     porcentaje_retencion = models.DecimalField(

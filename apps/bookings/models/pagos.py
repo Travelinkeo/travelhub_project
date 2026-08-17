@@ -80,6 +80,7 @@ class PagoVenta(AgenciaMixin, models.Model):
         TRANSFERENCIA = "TRF", _("Transferencia")
         ZELLE = "ZEL", _("Zelle")
         PAYPAL = "PPL", _("PayPal")
+        SALDO_A_FAVOR = "SAF", _("Saldo a Favor / Billetera")
         OTRO = "OTR", _("Otro")
 
     metodo = models.CharField(

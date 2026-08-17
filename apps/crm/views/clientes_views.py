@@ -97,6 +97,12 @@ class ClienteDetailView(CRMBaseMixin, DetailView):
             .select_related("moneda", "consultor")
             .order_by("-fecha_emision")
         )
+        context["movimientos_saldo"] = (
+            self.object.movimientos_saldo.filter(is_deleted=False)
+            .select_related("moneda", "venta", "registrado_por")
+            .order_by("-creado")
+        )
+        context["saldo_a_favor"] = self.object.saldo_a_favor
         return context
 
 
@@ -161,3 +167,55 @@ class ClienteDeleteView(CRMBaseMixin, DeleteView):
     model = Cliente
     success_url = reverse_lazy("crm:cliente_list")
     template_name = "crm/cliente_confirm_delete.html"
+
+
+class ClienteRecargarSaldoView(CRMBaseMixin, DetailView):
+    """Vista HTMX para registrar un depósito / abono a la billetera del cliente."""
+
+    model = Cliente
+
+    def get(self, request, *args, **kwargs):
+        cliente = self.get_object()
+        from django.shortcuts import render
+
+        return render(request, "crm/partials/recargar_saldo_modal.html", {"cliente": cliente})
+
+    def post(self, request, *args, **kwargs):
+        cliente = self.get_object()
+        monto = request.POST.get("monto")
+        metodo = request.POST.get("metodo", "TRF")
+        referencia = request.POST.get("referencia", "")
+        descripcion = request.POST.get("descripcion", "")
+        comprobante = request.FILES.get("comprobante")
+
+        from django.shortcuts import redirect, render
+
+        from apps.crm.services.wallet_service import WalletClienteService
+
+        try:
+            WalletClienteService.recargar_saldo(
+                cliente=cliente,
+                monto=monto,
+                metodo_pago=metodo,
+                referencia=referencia,
+                descripcion=descripcion,
+                comprobante=comprobante,
+                usuario=request.user,
+            )
+            messages.success(request, f"Depósito de ${monto} USD registrado exitosamente.")
+            if request.headers.get("HX-Request"):
+                from django.http import HttpResponse
+
+                res = HttpResponse()
+                res["HX-Refresh"] = "true"
+                return res
+            return redirect("crm:cliente_detail", pk=cliente.pk)
+        except Exception as e:
+            if request.headers.get("HX-Request"):
+                return render(
+                    request,
+                    "crm/partials/recargar_saldo_modal.html",
+                    {"cliente": cliente, "error": str(e)},
+                )
+            messages.error(request, str(e))
+            return redirect("crm:cliente_detail", pk=cliente.pk)

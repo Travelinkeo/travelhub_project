@@ -76,7 +76,7 @@ class PasajeroSearchView(CRMBaseMixin, View):
             )
 
         if cliente_id:
-            qs = qs.exclude(clientes__id=cliente_id)
+            qs = qs.exclude(clientes_asociados__pk=cliente_id)
 
         pasajeros = qs.order_by("apellidos", "nombres")[:15]
 

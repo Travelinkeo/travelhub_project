@@ -448,8 +448,6 @@
 
     <!-- Modals & Containers -->
     <div id="modal-container"></div>
-    <template x-if="showVincularModal">
-        {% include "crm/partials/vincular_pasajero_modal.html" with cliente_id=cliente.pk %}
-    </template>
+    {% include "crm/partials/vincular_pasajero_modal.html" with cliente_id=cliente.pk %}
 </div>
 {% endblock %}

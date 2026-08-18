@@ -137,10 +137,10 @@
                                 </div>
                                 <p class="text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest">Extraction Errs</p>
                             </div>
-                            <span id="stat-errores" class="text-xl sm:text-2xl font-black text-text-main">--</span>
+                            <span id="stat-errores-engine" class="text-xl sm:text-2xl font-black text-text-main">--</span>
                         </div>
                         <div class="w-full bg-surface-base h-1.5 rounded-full overflow-hidden">
-                            <div class="bg-rose-500 h-full" style="width: 5%"></div>
+                            <div id="bar-errores-engine" class="bg-rose-500 h-full transition-all duration-700" style="width: 0%"></div>
                         </div>
                     </div>
 
@@ -155,7 +155,7 @@
                             <span id="stat-pendientes-2" class="text-xl sm:text-2xl font-black text-text-main">--</span>
                         </div>
                         <div class="w-full bg-surface-base h-1.5 rounded-full overflow-hidden">
-                            <div class="bg-amber-500 h-full" style="width: 15%"></div>
+                            <div id="bar-pendientes-engine" class="bg-amber-500 h-full transition-all duration-700" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
@@ -190,35 +190,56 @@
             const response = await fetch("{% url 'core:boletos_dashboard_stats' %}");
             const data = await response.json();
 
-            document.getElementById('stat-total').textContent = data.procesados.total;
-            document.getElementById('stat-revision').textContent = data.revision || 0;
-            document.getElementById('stat-all').textContent = data.total || 0;
-            document.getElementById('stat-errores').textContent = data.errores;
+            const total = data.total || 0;
+            const errores = data.errores || 0;
+            const pendientes = data.pendientes || 0;
+            const revision = data.revision || 0;
+            const procesadosTotal = data.procesados?.total || 0;
+
+            const elTotal = document.getElementById('stat-total');
+            if (elTotal) elTotal.textContent = procesadosTotal;
+            const elRev = document.getElementById('stat-revision');
+            if (elRev) elRev.textContent = revision;
+            const elAll = document.getElementById('stat-all');
+            if (elAll) elAll.textContent = total;
+            const elErr = document.getElementById('stat-errores');
+            if (elErr) elErr.textContent = errores;
+
+            const elErrEngine = document.getElementById('stat-errores-engine');
+            if (elErrEngine) elErrEngine.textContent = errores;
+            const elPendEngine = document.getElementById('stat-pendientes-2');
+            if (elPendEngine) elPendEngine.textContent = pendientes;
+
+            if (total > 0) {
+                const barErr = document.getElementById('bar-errores-engine');
+                if (barErr) barErr.style.width = Math.min(100, Math.max(3, (errores / total) * 100)) + '%';
+                const barPend = document.getElementById('bar-pendientes-engine');
+                if (barPend) barPend.style.width = Math.min(100, Math.max(3, (pendientes / total) * 100)) + '%';
+            }
 
             const list = document.getElementById('top-airlines-list');
             if (data.top_aerolineas && data.top_aerolineas.length > 0) {
-                const max = data.top_aerolineas[0].cantidad;
+                const max = data.top_aerolineas[0].cantidad || 1;
                 list.innerHTML = data.top_aerolineas.map((a, i) => {
-                    const pct = Math.max(5, (a.cantidad / max) * 100);
+                    const pct = Math.max(8, Math.round((a.cantidad / max) * 100));
                     return `
-                    <div class="space-y-4 group">
+                    <div class="space-y-2.5 group">
                         <div class="flex justify-between items-end">
-                            <div class="flex items-center gap-4">
-                                <span class="text-[10px] font-black text-text-muted w-4">${i+1}</span>
-                                <span class="text-sm font-black text-text-main uppercase tracking-tighter">${a.aerolinea_emisora || 'UNKNOWN'}</span>
+                            <div class="flex items-center gap-3">
+                                <span class="text-[11px] font-black text-text-muted w-5">${i+1}</span>
+                                <span class="text-xs sm:text-sm font-black text-text-main uppercase tracking-tight">${a.aerolinea_emisora || 'AEROLÍNEA DESCONOCIDA'}</span>
                             </div>
-                            <span class="text-[11px] font-black text-primary tabular-nums">${a.cantidad} UNITS</span>
+                            <span class="text-xs font-black text-indigo-400 font-mono tabular-nums">${a.cantidad} UNITS</span>
                         </div>
-                        <div class="h-3 w-full bg-surface-base rounded-full overflow-hidden p-0.5 border border-border-color">
-                            <div class="h-full bg-gradient-to-r from-primary/50 to-primary rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.3)]" style="width: ${pct}%"></div>
+                        <div class="h-3.5 w-full bg-surface-2 rounded-full overflow-hidden p-0.5 border border-border-color shadow-inner">
+                            <div class="h-full bg-gradient-to-r from-indigo-500 via-primary to-indigo-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(99,102,241,0.6)]" style="width: ${pct}%; min-width: 8px;"></div>
                         </div>
                     </div>`;
                 }).join('');
             } else {
-                list.innerHTML = `<div class="py-20 text-center opacity-20"><span class="material-symbols-outlined text-6xl">insights</span><p class="text-[10px] font-black uppercase mt-4">Analyzing Market Data...</p></div>`;
+                list.innerHTML = `<div class="py-20 text-center opacity-40"><span class="material-symbols-outlined text-6xl">insights</span><p class="text-xs font-black uppercase mt-4 text-text-muted">No hay boletos procesados aún para esta agencia.</p></div>`;
             }
-
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error('Error cargando métricas de boletos:', e); }
     }
 </script>
 {% endblock %}

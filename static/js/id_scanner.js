@@ -138,7 +138,6 @@ document.addEventListener('alpine:init', () => {
                 }));
                 this.message = '❌ Error al comunicar con el servidor de escaneo.';
                 setTimeout(() => this.message = '', 6000);
-            }
             } finally {
                 this.loading = false;
             }

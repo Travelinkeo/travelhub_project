@@ -37,6 +37,7 @@ from core.views.marketing_views import (
     public_landing,
     public_pricing,
 )
+from core.views.ocr_views import OCRPassportView
 from core.views.onboarding_views import OnboardingAgencyView, SaaSOnboardingView
 from core.views.pwa_views import manifest, offline, service_worker
 from core.views.status_views import status_api, status_page
@@ -123,6 +124,10 @@ urlpatterns = [
     path("api/lead-magnet/", lead_magnet_download, name="lead_magnet_download"),
     path("api/push/subscribe/", push_subscribe, name="push_subscribe"),
     path("api/push/unsubscribe/", push_unsubscribe, name="push_unsubscribe"),
+    # OCR & ID Scanner endpoints
+    path("api/crm/cedula-scanner/", OCRPassportView.as_view(), name="api_cedula_scanner"),
+    path("api/ocr/passport/", OCRPassportView.as_view(), name="ocr_passport"),
+    path("api/ocr/scan-id/", OCRPassportView.as_view(), name="api_scan_id"),
     # Public routes (no /api/ prefix) for external consumers
     path("schema/", _protect_docs(SpectacularAPIView.as_view()), name="schema_root"),
     path(

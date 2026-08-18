@@ -59,20 +59,22 @@ class PassportOCRService:
             img_bytes = buf.getvalue()
 
             prompt = """
-            Act as an expert OCR system for Travel Documents.
-            Analyze this passport image and extract the following information in strict JSON format.
+            Act as an expert OCR system for Travel and Identity Documents (Passports, National ID Cards, Cédulas de Identidad, Resident Cards, Driver Licenses).
+            Analyze this document image and extract the following information in strict JSON format.
             If a field is not visible or unclear, use null.
 
             Required fields:
-            - numero_pasaporte (string)
-            - apellidos (string)
-            - nombres (string)
-            - nacionalidad (ISO 3 country code, e.g., VEN, USA, ESP)
-            - fecha_nacimiento (YYYY-MM-DD)
-            - fecha_vencimiento (YYYY-MM-DD)
-            - sexo (M or F)
-            - pais_emision (ISO 3 country code)
-            - face_coordinates (array of 4 integers: [ymin, xmin, ymax, xmax] relative to 1000x1000 scale. e.g. [200, 100, 500, 400])
+            - tipo_documento: "PASS" for Passport, "DNI" for National ID / Cédula, "LIC" for Driver License
+            - numero_pasaporte: string or null
+            - cedula_identidad: string or null (e.g. V-12345678, E-12345678, or plain document number)
+            - apellidos: string (surnames)
+            - nombres: string (given names)
+            - nacionalidad: ISO 3 country code (e.g. VEN, USA, COL, ESP, CHL, PAN, MEX, ARG)
+            - fecha_nacimiento: YYYY-MM-DD
+            - fecha_vencimiento: YYYY-MM-DD (expiry date)
+            - sexo: "M" or "F"
+            - pais_emision: ISO 3 country code
+            - face_coordinates: array of 4 integers [ymin, xmin, ymax, xmax] relative to 1000x1000 scale framing the person's face photo, or null
 
             Output only the valid JSON.
             """
@@ -87,10 +89,12 @@ class PassportOCRService:
             text_response = response.text.strip()
             if text_response.startswith("```json"):
                 text_response = text_response[7:]
+            if text_response.startswith("```"):
+                text_response = text_response[3:]
             if text_response.endswith("```"):
                 text_response = text_response[:-3]
 
-            data = json.loads(text_response)
+            data = json.loads(text_response.strip())
 
             # Procesar Recorte de Cara
             face_coords = data.get("face_coordinates")
@@ -126,16 +130,26 @@ class PassportOCRService:
                     face_img.save(buffered, format="JPEG")
                     img_str = base64.b64encode(buffered.getvalue()).decode()
                     data["face_image_base64"] = f"data:image/jpeg;base64,{img_str}"
+                    data["foto_url"] = data["face_image_base64"]
 
                 except Exception as e:
                     logger.warning(f"Error recortando cara: {e}")
                     data["face_image_base64"] = None
+                    data["foto_url"] = None
 
-            # Validación básica
-            if not data.get("numero_pasaporte"):
+            # Aliases de compatibilidad para el frontend
+            data["cedula"] = data.get("cedula_identidad") or data.get("cedula")
+            data["fecha_vencimiento_documento"] = data.get("fecha_vencimiento")
+            data["fecha_vencimiento_pasaporte"] = data.get("fecha_vencimiento")
+
+            # Validación básica: al menos número de documento, nombres o apellidos detectados
+            doc_id = (
+                data.get("numero_pasaporte") or data.get("cedula_identidad") or data.get("cedula")
+            )
+            if not doc_id and not data.get("nombres") and not data.get("apellidos"):
                 return {
                     "success": False,
-                    "error": "No se pudo detectar el número de pasaporte",
+                    "error": "No se pudieron extraer datos legibles del documento. Asegúrate de que la foto esté nítida e iluminada.",
                     "data": data,
                 }
 
@@ -145,17 +159,31 @@ class PassportOCRService:
 
                 # Resolver Nacionalidad
                 nac_iso = data.get("nacionalidad")
-                if nac_iso and len(nac_iso) == 3:
-                    pais_nac = Pais.objects.filter(codigo_iso_3=nac_iso).first()
+                if nac_iso:
+                    pais_nac = Pais.objects.filter(
+                        codigo_iso_3__iexact=str(nac_iso).strip()
+                    ).first()
+                    if not pais_nac:
+                        pais_nac = Pais.objects.filter(
+                            codigo_iso_2__iexact=str(nac_iso).strip()
+                        ).first()
                     if pais_nac:
-                        data["nacionalidad"] = pais_nac.pk
+                        data["nacionalidad_id"] = pais_nac.pk
+                        data["nacionalidad_nombre"] = pais_nac.nombre
 
                 # Resolver País Emisión
                 pais_emision_iso = data.get("pais_emision")
-                if pais_emision_iso and len(pais_emision_iso) == 3:
-                    pais_em = Pais.objects.filter(codigo_iso_3=pais_emision_iso).first()
+                if pais_emision_iso:
+                    pais_em = Pais.objects.filter(
+                        codigo_iso_3__iexact=str(pais_emision_iso).strip()
+                    ).first()
+                    if not pais_em:
+                        pais_em = Pais.objects.filter(
+                            codigo_iso_2__iexact=str(pais_emision_iso).strip()
+                        ).first()
                     if pais_em:
-                        data["pais_emision"] = pais_em.pk
+                        data["pais_emision_id"] = pais_em.pk
+                        data["pais_emision_nombre"] = pais_em.nombre
 
             except Exception as db_err:
                 logger.warning(f"No se pudieron resolver los IDs de paises: {db_err}")
@@ -163,7 +191,7 @@ class PassportOCRService:
             return {
                 "success": True,
                 "data": data,
-                "confidence": "HIGH",  # Gemini suele ser muy preciso
+                "confidence": "HIGH",
             }
 
         except Exception as e:

@@ -17,8 +17,14 @@ class OCRPassportView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         """post."""
-        # Aceptamos tanto 'archivo' (Legacy/GDS) como 'archivo_identidad' (Nuevo Dashboard)
-        archivo = request.FILES.get("archivo") or request.FILES.get("archivo_identidad")
+        # Aceptamos 'image' (id_scanner.js), 'file', 'archivo', 'archivo_identidad' o 'foto'
+        archivo = (
+            request.FILES.get("image")
+            or request.FILES.get("file")
+            or request.FILES.get("archivo")
+            or request.FILES.get("archivo_identidad")
+            or request.FILES.get("foto")
+        )
 
         if not archivo:
             return JsonResponse(
@@ -51,3 +57,7 @@ class OCRPassportView(LoginRequiredMixin, View):
         except Exception as e:
             logger.error(f"Error interno OCR: {e}")
             return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+# Alias de compatibilidad
+CedulaScannerAPIView = OCRPassportView

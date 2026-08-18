@@ -31,11 +31,20 @@ document.addEventListener('alpine:init', () => {
                 if (result.status === 'success' || result.success === true) {
                     const d = result.data || {};
 
+                    const highlightField = (el) => {
+                        if (!el) return;
+                        el.classList.add('ring-2', 'ring-emerald-500', 'bg-emerald-500/10', 'transition-all');
+                        setTimeout(() => {
+                            el.classList.remove('ring-2', 'ring-emerald-500', 'bg-emerald-500/10');
+                        }, 2500);
+                    };
+
                     const setField = (name, val) => {
                         if (val !== null && val !== undefined && String(val).trim() !== '' && String(val) !== '0') {
                             const el = document.querySelector(`[name="${name}"]`);
                             if (el) {
                                 el.value = String(val).trim();
+                                highlightField(el);
                                 el.dispatchEvent(new Event('input', { bubbles: true }));
                                 el.dispatchEvent(new Event('change', { bubbles: true }));
                             }
@@ -48,6 +57,7 @@ document.addEventListener('alpine:init', () => {
                         if (valId) {
                             el.value = String(valId);
                             if (el.value === String(valId)) {
+                                highlightField(el);
                                 el.dispatchEvent(new Event('change', { bubbles: true }));
                                 return;
                             }
@@ -59,16 +69,19 @@ document.addEventListener('alpine:init', () => {
                             );
                             if (opt) {
                                 el.value = opt.value;
+                                highlightField(el);
                                 el.dispatchEvent(new Event('change', { bubbles: true }));
                             }
                         }
                     };
 
+                    // Actualizar campos principales
                     setField('nombres', d.nombres);
                     setField('apellidos', d.apellidos);
                     setField('cedula_identidad', d.cedula_identidad || d.cedula);
                     setField('numero_pasaporte', d.numero_pasaporte);
                     setField('fecha_nacimiento', d.fecha_nacimiento);
+                    setField('fecha_vencimiento_pasaporte', d.fecha_vencimiento_pasaporte || d.fecha_vencimiento || d.fecha_vencimiento_documento);
                     setField('fecha_vencimiento_documento', d.fecha_vencimiento_documento || d.fecha_vencimiento || d.fecha_vencimiento_pasaporte);
 
                     setSelectField('nacionalidad', d.nacionalidad_id || d.nacionalidad, d.nacionalidad_nombre || d.nacionalidad);
@@ -77,18 +90,38 @@ document.addEventListener('alpine:init', () => {
                         setSelectField('genero', d.sexo || d.genero, d.sexo || d.genero);
                     }
 
+                    // Foto recortada del pasajero
                     if (d.foto_url && !d.foto_url.includes('face_None')) {
                         const preview = document.getElementById('preview-image');
                         const placeholder = document.querySelector('.flex-col.items-center.text-text-muted');
                         if (preview) {
                             preview.src = d.foto_url;
                             preview.classList.remove('hidden');
+                            highlightField(preview.parentElement);
                         }
                         if (placeholder) placeholder.classList.add('hidden');
+
+                        // Sincronizar archivo recortado con el input de formulario
+                        try {
+                            const fileInput = document.querySelector('input[name="foto_perfil"]');
+                            if (fileInput && d.foto_url.startsWith('data:image')) {
+                                fetch(d.foto_url)
+                                    .then(res => res.blob())
+                                    .then(blob => {
+                                        const avatarFile = new File([blob], "avatar_recortado.jpg", { type: "image/jpeg" });
+                                        const dt = new DataTransfer();
+                                        dt.items.add(avatarFile);
+                                        fileInput.files = dt.files;
+                                        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+                                    });
+                            }
+                        } catch (ePhoto) {
+                            console.warn('No se pudo asignar File al input foto_perfil:', ePhoto);
+                        }
                     }
 
                     const filled = [d.nombres, d.apellidos, d.cedula_identidad || d.cedula, d.numero_pasaporte].filter(v => v && String(v).trim() !== '' && String(v) !== '0').length;
-                    this.message = filled > 0 ? `¡Documento escaneado: ${filled} campo(s) autocompletado(s)!` : '📷 Foto capturada. Completa los datos requeridos.';
+                    this.message = filled > 0 ? `¡Datos actualizados desde el pasaporte: ${filled} campo(s) sincronizados!` : '📷 Documento escaneado correctamente.';
                     setTimeout(() => this.message = '', 6000);
                 } else {
                     const errMsg = result.error || 'No se pudo procesar la imagen del documento.';

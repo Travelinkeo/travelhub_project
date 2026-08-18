@@ -20,7 +20,7 @@
             <p class="text-text-muted mt-3 text-lg">Gestiona la información detallada para emisión de boletos.</p>
         </div>
         <a href="{% url 'crm:pasajero_list' %}" class="btn-secondary !py-2.5 !px-5 group/back">
-            <span class="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span> 
+            <span class="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
             <span>Volver</span>
         </a>
     </div>
@@ -43,9 +43,9 @@
              data-scan-url="/api/crm/cedula-scanner/"
              data-csrf="{{ csrf_token }}"
              class="relative">
-            <div 
-                @dragover.prevent="droping = true" 
-                @dragleave.prevent="droping = false" 
+            <div
+                @dragover.prevent="droping = true"
+                @dragleave.prevent="droping = false"
                 @drop.prevent="handleDrop($event)"
                 :class="{'border-primary bg-primary/5 scale-[1.01]': droping || loading, 'border-border-color bg-surface-2': !droping && !loading}"
                 class="card-base p-6 border-2 border-dashed flex flex-col items-center justify-center gap-4 transition-all duration-300 relative overflow-hidden group/ocr"
@@ -70,7 +70,7 @@
                     </label>
                 </div>
             </div>
-            
+
             <!-- Toast Notification (Alpine) -->
             <div x-show="message" x-transition class="fixed bottom-10 right-10 z-[100] bg-surface-1 border border-border-color p-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-bounce-in">
                 <div class="size-10 rounded-full bg-green-500/10 text-green-500 flex items-center justify-center">
@@ -83,7 +83,7 @@
         <!-- Perfil y Datos Principales -->
         <section class="card-base p-8 relative overflow-hidden group">
             <div class="absolute -right-20 -top-20 size-60 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors"></div>
-            
+
             <div class="flex items-center gap-4 mb-8 pb-4 border-b border-border-color relative z-10">
                 <div class="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
                     <span class="material-symbols-outlined text-[28px]">person</span>
@@ -93,7 +93,7 @@
                     <p class="text-[11px] text-text-muted uppercase font-black tracking-widest mt-0.5">Datos obligatorios para GDS</p>
                 </div>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-12 gap-10 relative z-10">
                 <!-- Foto de Perfil -->
                 <div class="md:col-span-3 flex flex-col items-center gap-5">
@@ -175,7 +175,7 @@
                     </div>
                     <div class="space-y-2">
                         <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest ml-1">Vencimiento Pasaporte</label>
-                        {{ form.fecha_vencimiento_documento }}
+                        {{ form.fecha_vencimiento_pasaporte }}
                     </div>
                 </div>
             </section>

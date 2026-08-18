@@ -22,16 +22,24 @@
             </div>
             <h1 class="text-2xl font-black text-[var(--text-primary)]">Perfil del Pasajero</h1>
         </div>
-        {% if not pasajero.clientes.exists %}
         <form method="post" action="{% url 'crm:pasajero_convert' pasajero.pk %}">
             {% csrf_token %}
+            {% if pasajero.clientes_asociados.exists %}
             <button type="submit"
-                class="h-10 px-5 flex items-center gap-2 border border-transparent bg-indigo-600 text-white hover:bg-indigo-700 rounded text-sm font-bold transition-colors shadow-sm"
-                data-confirm="¿Está seguro que desea convertir a {{ pasajero.get_nombre_completo|escapejs }} en un nuevo Cliente? Se copiarán todos sus datos y su foto de perfil.">
-                <span class="material-symbols-outlined text-[18px]">person_add</span> Convertir en Cliente
+                class="h-10 px-5 flex items-center gap-2 border border-border-color bg-surface-2 hover:bg-surface-3 text-text-main rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+                title="Sincronizar nombres, pasaporte, fechas y foto de este pasajero hacia su ficha de Cliente">
+                <span class="material-symbols-outlined text-[18px] text-primary">sync</span>
+                <span>Sincronizar / Actualizar Cliente</span>
             </button>
+            {% else %}
+            <button type="submit"
+                class="h-10 px-5 flex items-center gap-2 border border-transparent bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+                title="Crear una ficha de Cliente a partir de este Pasajero">
+                <span class="material-symbols-outlined text-[18px]">person_add</span>
+                <span>Convertir en Cliente</span>
+            </button>
+            {% endif %}
         </form>
-        {% endif %}
     </div>
 
     <!-- Hero -->
@@ -47,8 +55,8 @@
             </div>
             <div>
                 <h2 class="text-xl font-black text-[var(--text-primary)]">{{ pasajero.get_nombre_completo }}</h2>
-                {% if pasajero.clientes.exists %}
-                {% with cliente=pasajero.clientes.first %}
+                {% if pasajero.clientes_asociados.exists %}
+                {% with cliente=pasajero.clientes_asociados.first %}
                 <p class="text-sm text-[var(--text-secondary)] flex items-center gap-1 mt-1">
                     <span class="material-symbols-outlined text-[14px]">person</span>
                     Cliente: <a href="{% url 'crm:cliente_detail' cliente.pk %}" class="text-[var(--primary)] hover:underline ml-1 font-bold">{{ cliente.get_nombre_completo }}</a>

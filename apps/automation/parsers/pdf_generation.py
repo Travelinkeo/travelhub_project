@@ -15,7 +15,9 @@ class PdfGenerationService:
     """
 
     @staticmethod
-    def generate_ticket(data: dict[str, Any], agencia_obj=None, **kwargs) -> tuple[bytes, str]:
+    def generate_ticket(
+        data: dict[str, Any], agencia_obj=None, boleto_obj=None, **kwargs
+    ) -> tuple[bytes, str]:
         """
         Genera el PDF del boleto usando la plantilla unificada y WeasyPrint.
         """
@@ -25,7 +27,9 @@ class PdfGenerationService:
             template_name = "core/tickets/golden_ticket_v2.html"
 
             # Inyección de contexto
-            context = PdfGenerationService._build_context(data, agencia_obj, source_system)
+            context = PdfGenerationService._build_context(
+                data, agencia_obj, source_system, boleto_obj=boleto_obj
+            )
 
             # Renderizado HTML
             html_out = render_to_string(template_name, context)
@@ -39,6 +43,7 @@ class PdfGenerationService:
                 data.get("NUMERO_DE_BOLETO")
                 or data.get("ticket_number")
                 or data.get("numero_boleto")
+                or (boleto_obj.numero_boleto if boleto_obj else None)
                 or "S-N"
             )
 
@@ -57,26 +62,24 @@ class PdfGenerationService:
             return b"", "error_generacion.pdf"
 
     @staticmethod
-    def _build_context(data: dict[str, Any], agencia_obj, source_system: str) -> dict:
-        """Construye el contexto para la plantilla."""
-
-        # Lógica de nombre para el saludo (Separar por /)
-        solo_nombre = (
-            data.get("solo_nombre_pasajero")
-            or data.get("first_name")
-            or data.get("SOLO_NOMBRE_PASAJERO")
-        )
-
+    def _build_context(
+        data: dict[str, Any], agencia_obj, source_system: str, boleto_obj=None
+    ) -> dict:
+        """
+        Construye el diccionario de contexto unificado para la plantilla HTML del boleto.
+        Extrae y normaliza todos los campos necesarios.
+        """
         from apps.common.utils import sanitize_passenger_name
 
+        # Sanitizar nombre de pasajero
         nombre_original = (
             data.get("NOMBRE_DEL_PASAJERO")
             or data.get("passenger_name")
-            or data.get("nombre_pasajero_completo")
-            or data.get("nombre_completo")
-            or "VIAJERO"
+            or data.get("nombre_pasajero")
+            or (boleto_obj.nombre_pasajero_completo if boleto_obj else None)
+            or "PASAJERO"
         )
-
+        solo_nombre = data.get("solo_nombre_pasajero")
         nombre_original = sanitize_passenger_name(nombre_original)
 
         # Mutar el diccionario de entrada para retrocompatibilidad con tests y pipelines
@@ -138,9 +141,17 @@ class PdfGenerationService:
             or data.get("pnr_aerolinea")
         )
         if not loc_aero:
-            vuelos = data.get("segmentos") or data.get("vuelos") or []
-            if vuelos and isinstance(vuelos, list) and len(vuelos) > 0:
-                loc_aero = vuelos[0].get("localizador_aerolinea") or vuelos[0].get("airline_pnr")
+            vuelos_data = data.get("segmentos") or data.get("vuelos") or data.get("flights") or []
+            if vuelos_data and isinstance(vuelos_data, list):
+                for v in vuelos_data:
+                    if isinstance(v, dict):
+                        loc_aero = (
+                            v.get("codigo_reserva_aerolinea")
+                            or v.get("airline_pnr")
+                            or v.get("pnr_aerolinea")
+                        )
+                        if loc_aero:
+                            break
 
         # Fallback para KIU: El localizador de la aerolínea es idéntico al localizador de reserva del sistema
         if not loc_aero and source_system.replace("AI_", "") == "KIU":
@@ -148,35 +159,38 @@ class PdfGenerationService:
 
         from apps.common.utils.images import get_agencia_logo_b64
 
+        # Colores de la agencia
         color_primario = (
-            agencia_obj.color_primario if agencia_obj and agencia_obj.color_primario else "#0D1E40"
+            getattr(agencia_obj, "color_primario", None)
+            or getattr(agencia_obj, "primary_color", None)
+            or "#0052cc"
         )
         is_dark = PdfGenerationService._is_dark_color(color_primario)
 
-        # Fallback para cuando no hay agencia_obj
         agencia_nombre = (
-            agencia_obj.nombre_comercial or agencia_obj.nombre if agencia_obj else "TRAVELHUB"
+            agencia_obj.nombre
+            if agencia_obj
+            else data.get("AGENTE_EMISOR", "GRUPO SOPORTE GLOBAL INC")
         )
-        agencia_nombre_comercial = agencia_obj.nombre_comercial if agencia_obj else "TRAVELHUB"
+        agencia_nombre_comercial = agencia_obj.nombre_comercial if agencia_obj else agencia_nombre
 
-        # 🛑 SAFE AGENCIA: Envuelve el objeto real o crea un proxy seguro que nunca arroja AttributeError
         class SafeAgencia:
-            """Proxy que garantiza que TODOS los atributos de agencia tengan un valor por defecto."""
+            """SafeAgencia."""
 
-            def __init__(self, obj=None, color_prim="#0D1E40"):
-                """__init__."""
+            def __init__(self, obj, color):
                 self._obj = obj
+                self.color_primario = color
 
             def __getattr__(self, name):
-                # Primero intenta el objeto real
                 if self._obj and hasattr(self._obj, name):
-                    return getattr(self._obj, name)
-                # Fallbacks sólidos para cada atributo que usa la plantilla
+                    val = getattr(self._obj, name)
+                    if val is not None:
+                        return val
                 defaults = {
                     "nombre": "TRAVELHUB",
                     "nombre_comercial": "TRAVELHUB",
-                    "color_primario": color_primario,
-                    "color_secundario": "#2173A6",
+                    "color_kiu": "#10b981",
+                    "color_sabre": "#E50914",
                     "color_amadeus": "#0C66E1",
                     "eslogan": "",
                     "pie_pagina": "",
@@ -192,6 +206,29 @@ class PdfGenerationService:
 
         safe_agencia = SafeAgencia(agencia_obj, color_primario)
 
+        # Documento / FOID del pasajero
+        foid_doc = (
+            data.get("CODIGO_IDENTIFICACION")
+            or data.get("FOID")
+            or data.get("foid")
+            or data.get("foid_pasajero")
+            or data.get("passenger_document")
+            or data.get("documento_pasajero")
+            or (boleto_obj.foid_pasajero if boleto_obj else None)
+        )
+        if (
+            not foid_doc
+            and boleto_obj
+            and getattr(boleto_obj, "venta_asociada", None)
+            and getattr(boleto_obj.venta_asociada, "cliente", None)
+        ):
+            cliente_obj = boleto_obj.venta_asociada.cliente
+            foid_doc = (
+                cliente_obj.cedula_identidad
+                or cliente_obj.numero_pasaporte
+                or getattr(cliente_obj, "numero_documento", None)
+            )
+
         return {
             "agencia": safe_agencia,
             "agencia_logo_b64": get_agencia_logo_b64(agencia_obj, is_dark_bg=is_dark)
@@ -201,13 +238,11 @@ class PdfGenerationService:
             "agencia_nombre_comercial": agencia_nombre_comercial,
             "is_dark_color": is_dark,
             "NOMBRE_DEL_PASAJERO": nombre_original,
-            "CODIGO_IDENTIFICACION": data.get("CODIGO_IDENTIFICACION")
-            or data.get("FOID")
-            or data.get("passenger_document")
-            or data.get("foid_pasajero"),
+            "CODIGO_IDENTIFICACION": foid_doc or "---",
             "NUMERO_DE_BOLETO": data.get("NUMERO_DE_BOLETO")
             or data.get("ticket_number")
-            or data.get("numero_boleto"),
+            or data.get("numero_boleto")
+            or (boleto_obj.numero_boleto if boleto_obj else None),
             "FECHA_DE_EMISION": f_emision,
             "CODIGO_RESERVA": data.get("CODIGO_RESERVA")
             or data.get("pnr")

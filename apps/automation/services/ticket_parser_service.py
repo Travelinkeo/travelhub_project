@@ -64,7 +64,7 @@ def _safe_concat_log(original_log, new_entry, max_len=4000) -> str:
     return f"{head}{marker}{tail}"
 
 
-def _generate_pdf_sync(boleto) -> None:
+def _generate_pdf_sync(boleto, force: bool = False) -> None:
     """
     Genera el PDF de un boleto de forma síncrona usando WeasyPrint.
     Siempre disponible — no depende de Celery, Redis ni Gotenberg.
@@ -73,7 +73,7 @@ def _generate_pdf_sync(boleto) -> None:
     from django.core.files.base import ContentFile
 
     try:
-        if boleto.archivo_pdf_generado:
+        if boleto.archivo_pdf_generado and not force:
             logger.info(f" [SYNC] PDF ya existe para boleto {boleto.pk}, omitiendo.")
             return
         if not boleto.datos_parseados:
@@ -93,6 +93,13 @@ def _generate_pdf_sync(boleto) -> None:
             datos_norm, agencia_obj=boleto.agencia, boleto_obj=boleto
         )
         if pdf_bytes and len(pdf_bytes) > 100:
+            if boleto.archivo_pdf_generado and force:
+                try:
+                    boleto.archivo_pdf_generado.delete(save=False)
+                except Exception as e_del:
+                    logger.warning(
+                        f"No se pudo eliminar PDF previo del boleto {boleto.pk}: {e_del}"
+                    )
             boleto.archivo_pdf_generado.save(fname, ContentFile(pdf_bytes), save=True)
             logger.info(f" [SYNC] PDF generado correctamente: {fname} ({len(pdf_bytes):,} bytes)")
         else:
@@ -261,7 +268,9 @@ class TicketParserService:
                         datos_para_procesar = {}
 
                 datos_norm = DataNormalizationService.normalize_ticket_data(datos_para_procesar)
-                return self._process_single_ticket(boleto, datos_norm, forced_client_id)
+                return self._process_single_ticket(
+                    boleto, datos_norm, forced_client_id, manual_only=True
+                )
 
             # 🧠 INTELIGENCIA DE REUTILIZACIÓN: Si ya tenemos datos y no se forzó el re-parseo, los usamos.
             if (
@@ -662,7 +671,7 @@ class TicketParserService:
             )
             return self._process_single_ticket(boleto, datos_norm, forced_client_id)
 
-    def _process_single_ticket(self, boleto, data, forced_client_id):
+    def _process_single_ticket(self, boleto, data, forced_client_id, manual_only: bool = False):
         """
         Versión Optimizada: Separa operaciones lentas (PDF, AI) de la transacción DB principal.
         """
@@ -692,7 +701,15 @@ class TicketParserService:
             try:
                 from apps.common.utils.celery_utils import _is_celery_available
 
-                if _is_celery_available():
+                if manual_only:
+                    logger.info(
+                        f"📄 Modo manual/revisión — generando PDF síncronamente con force=True para Boleto {boleto.pk}..."
+                    )
+                    _generate_pdf_sync(boleto, force=True)
+                    boleto.refresh_from_db()
+                    if not boleto.archivo_pdf_generado:
+                        pdf_sync_failed = True
+                elif _is_celery_available():
                     logger.info(
                         f"📄 Encolando generación de PDF (async) para Boleto {boleto.pk}..."
                     )
@@ -714,7 +731,7 @@ class TicketParserService:
                 pdf_sync_failed = True
                 # Último recurso: intentar generación síncrona
                 try:
-                    _generate_pdf_sync(boleto)
+                    _generate_pdf_sync(boleto, force=True)
                     boleto.refresh_from_db()
                     if boleto.archivo_pdf_generado:
                         pdf_sync_failed = False

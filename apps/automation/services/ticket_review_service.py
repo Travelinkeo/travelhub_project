@@ -190,11 +190,15 @@ class TicketReviewService:
         el nuevo esquema del VentaBuilder (UPPERCASE).
         """
         datos = boleto.datos_parseados or {}
+        foid_val = fd.foid or ""
         datos.update(
             {
                 # Esquema legacy (parsers Sabre/KIU)
                 "passenger_name": fd.nombre,
-                "passenger_document": fd.foid,
+                "passenger_document": foid_val,
+                "foid": foid_val,
+                "FOID": foid_val,
+                "foid_pasajero": foid_val,
                 "pnr": fd.pnr,
                 "pnr_aerolinea": fd.pnr_aerolinea,
                 "airline_pnr": fd.pnr_aerolinea,
@@ -205,9 +209,10 @@ class TicketReviewService:
                 "tax_details": fd.taxes,
                 "carrier": fd.carrier,
                 "issuing_airline": fd.carrier,
+                "fee_servicio": fd.fee,
                 # Esquema God Mode (VentaBuilder)
                 "NOMBRE_DEL_PASAJERO": fd.nombre,
-                "CODIGO_IDENTIFICACION": fd.foid,
+                "CODIGO_IDENTIFICACION": foid_val,
                 "CODIGO_RESERVA": fd.pnr,
                 "CODIGO_RESERVA_AEROLINEA": fd.pnr_aerolinea,
                 "NUMERO_DE_BOLETO": fd.ticket_no,
@@ -216,6 +221,7 @@ class TicketReviewService:
                 "IMPUESTOS": fd.taxes,
                 "TOTAL": fd.total,
                 "TOTAL_MONEDA": fd.total_currency,
+                "FEE_AGENCIA": fd.fee,
             }
         )
         if fd.segmentos:

@@ -20,7 +20,7 @@ crispy-bootstrap5==2026.3
 
 # OpenTelemetry (Trazabilidad distribuida)
 opentelemetry-api==1.27.0
-opentelemetry-sdk==1.27.0
+opentelemetry-sdk==1.44.0
 opentelemetry-exporter-otlp-proto-http==1.27.0
 opentelemetry-instrumentation-django==0.48b0
 

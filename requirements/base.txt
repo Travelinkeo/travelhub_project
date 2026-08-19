@@ -39,7 +39,7 @@ PyMuPDF==1.26.3
 markdown==3.10.2
 
 # Finance & Integrations
-stripe==13.0.1
+stripe==15.3.1
 twilio==9.8.3
 resend==2.27.0
 weasyprint==68.0

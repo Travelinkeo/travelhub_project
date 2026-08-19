@@ -33,14 +33,51 @@ class StudioFormData:
     pnr: str | None
     pnr_aerolinea: str | None
     ticket_no: str | None
+    carrier: str | None
+    issue_date: str | None
     fare: str
     taxes: str
+    fee: str
     total: str
     total_currency: str
+    segmentos: list[dict]
 
     @classmethod
     def from_post(cls, post_data) -> "StudioFormData":
         """Extrae y normaliza los datos del request.POST."""
+        segmentos = []
+        idx = 0
+        while True:
+            dep = post_data.get(f"segment_departure_{idx}")
+            arr = post_data.get(f"segment_arrival_{idx}")
+            flt = post_data.get(f"segment_flight_{idx}")
+            dt = post_data.get(f"segment_date_{idx}")
+            if dep is None and arr is None and flt is None and dt is None:
+                if idx > 20:  # safety break
+                    break
+                # Check if there might be higher index
+                idx += 1
+                if idx > 5 and not any(
+                    post_data.get(f"segment_departure_{k}") for k in range(idx, idx + 5)
+                ):
+                    break
+                continue
+
+            if dep or arr or flt:
+                segmentos.append(
+                    {
+                        "origen": (dep or "").strip().upper(),
+                        "destino": (arr or "").strip().upper(),
+                        "vuelo": (flt or "").strip().upper(),
+                        "fecha_salida": (dt or "").strip(),
+                        "departure": (dep or "").strip().upper(),
+                        "arrival": (arr or "").strip().upper(),
+                        "flight_number": (flt or "").strip().upper(),
+                        "date": (dt or "").strip(),
+                    }
+                )
+            idx += 1
+
         return cls(
             nombre=post_data.get("nombre_pasajero") or None,
             foid=post_data.get("foid_pasajero") or None,
@@ -48,10 +85,14 @@ class StudioFormData:
             pnr=post_data.get("localizador_pnr") or None,
             pnr_aerolinea=post_data.get("pnr_aerolinea") or None,
             ticket_no=post_data.get("ticket_number") or None,
+            carrier=post_data.get("carrier") or None,
+            issue_date=post_data.get("issue_date") or None,
             fare=post_data.get("fare_amount", "0"),
             taxes=post_data.get("taxes_amount", "0"),
+            fee=post_data.get("fee_amount", "0"),
             total=post_data.get("total_amount", "0"),
             total_currency=post_data.get("total_currency", "USD"),
+            segmentos=segmentos,
         )
 
 
@@ -118,6 +159,14 @@ class TicketReviewService:
             boleto.localizador_pnr = fd.pnr
         if fd.ticket_no:
             boleto.numero_boleto = fd.ticket_no
+        if fd.carrier:
+            boleto.aerolinea_emisora = fd.carrier
+        if fd.issue_date:
+            from django.utils.dateparse import parse_date
+
+            parsed_d = parse_date(fd.issue_date)
+            if parsed_d:
+                boleto.fecha_emision_boleto = parsed_d
 
         self._update_amounts(boleto, fd)
 
@@ -127,6 +176,8 @@ class TicketReviewService:
             boleto.tarifa_base = Decimal(fd.fare.replace(",", ""))
             boleto.otros_impuestos_monto = Decimal(fd.taxes.replace(",", ""))
             boleto.total_boleto = Decimal(fd.total.replace(",", ""))
+            if fd.fee:
+                boleto.fee_servicio = Decimal(fd.fee.replace(",", ""))
         except (InvalidOperation, AttributeError) as e:
             logger.warning(
                 f"Error parseando montos del boleto {boleto.pk} (ticket={fd.ticket_no}): {e}"
@@ -152,18 +203,25 @@ class TicketReviewService:
                 "total_currency": fd.total_currency,
                 "fare_amount": fd.fare,
                 "tax_details": fd.taxes,
+                "carrier": fd.carrier,
+                "issuing_airline": fd.carrier,
                 # Esquema God Mode (VentaBuilder)
                 "NOMBRE_DEL_PASAJERO": fd.nombre,
                 "CODIGO_IDENTIFICACION": fd.foid,
                 "CODIGO_RESERVA": fd.pnr,
                 "CODIGO_RESERVA_AEROLINEA": fd.pnr_aerolinea,
                 "NUMERO_DE_BOLETO": fd.ticket_no,
+                "AEROLINEA": fd.carrier,
                 "TARIFA": fd.fare,
                 "IMPUESTOS": fd.taxes,
                 "TOTAL": fd.total,
                 "TOTAL_MONEDA": fd.total_currency,
             }
         )
+        if fd.segmentos:
+            datos["segmentos"] = fd.segmentos
+            datos["FLIGHTS"] = fd.segmentos
+
         boleto.datos_parseados = datos
 
     def _append_audit_log(self, boleto: BoletoImportado) -> None:

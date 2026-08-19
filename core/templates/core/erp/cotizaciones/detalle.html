@@ -4,45 +4,39 @@
 {% block title %}Cotización #{{ cotizacion.numero_cotizacion }} - TravelHub{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8 lg:p-10">
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
             <div class="flex items-center gap-3 mb-1">
-                <a href="{% url 'bookings:cotizacion_dashboard' %}"
-                    class="text-text-muted hover:text-white transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
+                <a href="{% url 'core:cotizacion_dashboard' %}"
+                    class="p-2 bg-surface-2 hover:bg-primary/10 text-text-muted hover:text-primary rounded-lg transition-colors border border-border-color flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[20px]">arrow_back</span>
                 </a>
-                <h1 class="text-2xl font-bold text-text-main">Cotización #{{ cotizacion.numero_cotizacion }}</h1>
-                <span class="px-3 py-1 text-xs font-medium rounded-full 
-                    {% if cotizacion.estado == 'ACE' or cotizacion.estado == 'CNV' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
-                    {% elif cotizacion.estado == 'BOR' %}bg-yellow-500/10 text-yellow-400 border border-yellow-500/20
-                    {% elif cotizacion.estado == 'ENV' %}bg-blue-500/10 text-blue-400 border border-blue-500/20
-                    {% elif cotizacion.estado == 'REC' or cotizacion.estado == 'VEN' %}bg-red-500/10 text-red-400 border border-red-500/20
-                    {% else %}bg-gray-500/10 text-text-muted border border-gray-500/20{% endif %}">{{
-                    cotizacion.get_estado_display }}</span>
+                <h1 class="text-2xl font-black text-text-main uppercase tracking-tight">Cotización #{{ cotizacion.numero_cotizacion }}</h1>
+                <span class="px-3 py-1 text-xs font-bold rounded-full
+                    {% if cotizacion.estado == 'ACE' or cotizacion.estado == 'CNV' %}badge-success
+                    {% elif cotizacion.estado == 'BOR' %}badge-warning
+                    {% elif cotizacion.estado == 'ENV' %}badge-primary
+                    {% elif cotizacion.estado == 'REC' or cotizacion.estado == 'VEN' %}badge-danger
+                    {% else %}bg-surface-2 text-text-muted border border-border-color{% endif %}">
+                    {{ cotizacion.get_estado_display }}
+                </span>
             </div>
-            <p class="text-text-muted ml-9">Emitida el {{ cotizacion.fecha_emision|date:"d F, Y" }}</p>
+            <p class="text-text-muted text-xs font-medium ml-11">Emitida el {{ cotizacion.fecha_emision|date:"d F, Y" }}</p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex flex-wrap gap-2 sm:gap-3 items-center">
             {% if cotizacion.estado == 'BOR' %}
             <a href="{% url 'core:cotizacion_editar' cotizacion.pk %}"
-                class="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg font-medium transition-colors flex items-center gap-2 border border-border-color">
-                Editar
+                class="btn-secondary !h-10 !px-4 text-xs">
+                <span class="material-symbols-outlined text-[16px]">edit</span> Editar
             </a>
             <form action="{% url 'core:cotizacion_cambiar_estado' cotizacion.pk %}" method="POST" class="inline">
                 {% csrf_token %}
                 <input type="hidden" name="nuevo_estado" value="ENV">
                 <button type="submit"
-                    class="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg font-medium transition-colors flex items-center gap-2 border border-blue-500/20">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                    </svg>
-                    Marcar como Enviada
+                    class="btn-primary !h-10 !px-4 text-xs">
+                    <span class="material-symbols-outlined text-[16px]">send</span> Marcar Enviada
                 </button>
             </form>
             {% endif %}
@@ -52,23 +46,16 @@
                 {% csrf_token %}
                 <input type="hidden" name="nuevo_estado" value="ACE">
                 <button type="submit"
-                    class="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg font-medium transition-colors flex items-center gap-2 border border-emerald-500/20">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Aceptar
+                    class="btn-primary !h-10 !px-4 text-xs !bg-emerald-600 hover:!bg-emerald-700">
+                    <span class="material-symbols-outlined text-[16px]">check_circle</span> Aceptar
                 </button>
             </form>
             <form action="{% url 'core:cotizacion_cambiar_estado' cotizacion.pk %}" method="POST" class="inline">
                 {% csrf_token %}
                 <input type="hidden" name="nuevo_estado" value="REC">
                 <button type="submit"
-                    class="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg font-medium transition-colors flex items-center gap-2 border border-red-500/20">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                        </path>
-                    </svg>
-                    Rechazar
+                    class="btn-secondary !h-10 !px-4 text-xs text-rose-500 hover:text-rose-600">
+                    <span class="material-symbols-outlined text-[16px]">cancel</span> Rechazar
                 </button>
             </form>
             {% endif %}
@@ -77,36 +64,23 @@
             <form action="{% url 'core:cotizacion_convertir' cotizacion.pk %}" method="POST" class="inline">
                 {% csrf_token %}
                 <button type="submit"
-                    class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+                    class="btn-primary !h-10 !px-5 text-xs shadow-lg shadow-primary/20"
                     data-confirm="¿Seguro que deseas convertir esta cotización en una Venta?">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Convertir a Venta
+                    <span class="material-symbols-outlined text-[16px]">shopping_cart_checkout</span> Convertir a Venta
                 </button>
             </form>
             {% endif %}
 
             {% if cotizacion.get_whatsapp_link %}
             <a href="{{ cotizacion.get_whatsapp_link }}" target="_blank"
-                class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg shadow-green-500/20">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                </svg>
-                WhatsApp
+                class="btn-secondary !h-10 !px-4 text-xs text-emerald-500 hover:text-emerald-600 border-emerald-500/20 bg-emerald-500/10">
+                <span class="material-symbols-outlined text-[16px]">chat</span> WhatsApp
             </a>
             {% endif %}
 
-
-            <a href="{% url 'core:cotizacion_pdf' cotizacion.pk %}"
-                class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg shadow-purple-500/20">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                PDF
+            <a href="{% url 'core:cotizacion_pdf' cotizacion.pk %}" target="_blank"
+                class="btn-secondary !h-10 !px-4 text-xs text-purple-500 hover:text-purple-600 border-purple-500/20 bg-purple-500/10">
+                <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span> PDF
             </a>
         </div>
     </div>
@@ -114,68 +88,65 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Content: Items -->
         <div class="lg:col-span-2 space-y-6">
-            <div class="glass-panel rounded-2xl overflow-hidden">
-                <div class="p-6 border-b border-border-color bg-white/5">
-                    <h2 class="text-lg font-semibold text-text-main">Detalle de la Propuesta</h2>
+            <div class="card-base overflow-hidden">
+                <div class="p-6 border-b border-border-color bg-surface-2/30">
+                    <h2 class="text-base font-black text-text-main uppercase tracking-tight">Detalle de la Propuesta</h2>
                 </div>
 
                 {% if cotizacion.descripcion_general %}
                 <div class="p-6 border-b border-border-color">
-                    <h3 class="text-sm font-medium text-text-muted mb-2">Descripción General</h3>
-                    <p class="text-gray-300">{{ cotizacion.descripcion_general|linebreaks }}</p>
+                    <h3 class="text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Descripción General</h3>
+                    <p class="text-text-main text-sm leading-relaxed">{{ cotizacion.descripcion_general|linebreaks }}</p>
                 </div>
                 {% endif %}
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left">
+                    <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="border-b border-border-color bg-white/5">
-                                <th class="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                            <tr class="border-b border-border-color bg-surface-2">
+                                <th class="px-6 py-4 text-[10px] font-black text-text-muted uppercase tracking-wider">
                                     Servicio / Producto</th>
-                                <th
-                                    class="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider text-right">
+                                <th class="px-6 py-4 text-[10px] font-black text-text-muted uppercase tracking-wider text-right">
                                     Cant.</th>
-                                <th
-                                    class="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider text-right">
+                                <th class="px-6 py-4 text-[10px] font-black text-text-muted uppercase tracking-wider text-right">
                                     Precio Unit.</th>
-                                <th
-                                    class="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider text-right">
+                                <th class="px-6 py-4 text-[10px] font-black text-text-muted uppercase tracking-wider text-right">
                                     Total</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-700">
+                        <tbody class="divide-y divide-border-color">
                             {% for item in items %}
-                            <tr class="hover:bg-white/5 transition-colors">
+                            <tr class="hover:bg-primary/5 transition-colors">
                                 <td class="px-6 py-4">
-                                    <p class="text-text-main font-medium">{{ item.producto_servicio.nombre }}</p>
+                                    <p class="text-text-main font-bold text-sm">{{ item.descripcion|default:item.producto_servicio.nombre|default:"Servicio Turístico" }}</p>
                                     {% if item.descripcion_personalizada %}
-                                    <p class="text-xs text-text-muted">{{ item.descripcion_personalizada }}</p>
+                                    <p class="text-xs text-text-muted mt-0.5">{{ item.descripcion_personalizada }}</p>
                                     {% endif %}
                                 </td>
-                                <td class="px-6 py-4 text-right text-gray-300">{{ item.cantidad }}</td>
-                                <td class="px-6 py-4 text-right text-gray-300">{{
-                                    item.precio_unitario|floatformat:2|intcomma }}</td>
-                                <td class="px-6 py-4 text-right text-text-main font-medium">{{
-                                    item.total_item|floatformat:2|intcomma }}</td>
+                                <td class="px-6 py-4 text-right text-text-main text-sm font-semibold">{{ item.cantidad }}</td>
+                                <td class="px-6 py-4 text-right text-text-main text-sm font-mono">{{ item.precio_unitario|floatformat:2|intcomma }}</td>
+                                <td class="px-6 py-4 text-right text-text-main font-bold text-sm font-mono">{{ item.total_item|floatformat:2|intcomma }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-text-muted text-xs font-semibold">
+                                    No hay items registrados en esta cotización.
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
-                        <tfoot class="bg-white/5 border-t border-border-color">
+                        <tfoot class="bg-surface-2/50 border-t border-border-color">
                             <tr>
-                                <td colspan="3" class="px-6 py-4 text-right text-text-muted">Subtotal</td>
-                                <td class="px-6 py-4 text-right text-text-main">{{
-                                    cotizacion.subtotal|floatformat:2|intcomma }}</td>
+                                <td colspan="3" class="px-6 py-3 text-right text-xs font-bold text-text-muted uppercase tracking-wider">Subtotal</td>
+                                <td class="px-6 py-3 text-right text-sm font-mono font-bold text-text-main">{{ cotizacion.subtotal|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
-                                <td colspan="3" class="px-6 py-4 text-right text-text-muted">Impuestos</td>
-                                <td class="px-6 py-4 text-right text-text-main">{{
-                                    cotizacion.impuestos|floatformat:2|intcomma }}</td>
+                                <td colspan="3" class="px-6 py-3 text-right text-xs font-bold text-text-muted uppercase tracking-wider">Impuestos</td>
+                                <td class="px-6 py-3 text-right text-sm font-mono font-bold text-text-main">{{ cotizacion.impuestos|floatformat:2|intcomma }}</td>
                             </tr>
-                            <tr class="text-lg font-bold">
-                                <td colspan="3" class="px-6 py-4 text-right text-text-main">Total</td>
-                                <td class="px-6 py-4 text-right text-emerald-400">{{
-                                    cotizacion.total_cotizado|floatformat:2|intcomma }} {{ cotizacion.moneda.codigo_iso
-                                    }}</td>
+                            <tr class="text-lg font-black border-t border-border-color bg-surface-2">
+                                <td colspan="3" class="px-6 py-4 text-right text-text-main uppercase tracking-tight">Total</td>
+                                <td class="px-6 py-4 text-right text-emerald-500 font-mono tabular-nums">{{ cotizacion.total_cotizado|floatformat:2|intcomma }} {{ cotizacion.moneda.codigo_iso|default:"USD" }}</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -183,9 +154,9 @@
             </div>
 
             {% if cotizacion.condiciones_comerciales %}
-            <div class="glass-panel p-6 rounded-2xl">
-                <h3 class="text-sm font-medium text-text-muted mb-2">Condiciones Comerciales</h3>
-                <div class="text-gray-300 text-sm prose prose-invert max-w-none">
+            <div class="card-base p-6">
+                <h3 class="text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Condiciones Comerciales</h3>
+                <div class="text-text-main text-sm leading-relaxed">
                     {{ cotizacion.condiciones_comerciales|linebreaks }}
                 </div>
             </div>
@@ -194,38 +165,47 @@
 
         <!-- Sidebar: Client Info & Meta -->
         <div class="space-y-6">
-            <div class="glass-panel p-6 rounded-2xl">
-                <h2 class="text-lg font-semibold text-text-main mb-4">Cliente</h2>
+            <div class="card-base p-6">
+                <h2 class="text-base font-black text-text-main uppercase tracking-tight mb-4 border-b border-border-color pb-3">Cliente</h2>
                 <div class="flex items-center mb-4">
-                    <div
-                        class="w-12 h-12 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg font-bold mr-4">
+                    <div class="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-base font-black mr-4 border border-primary/20">
+                        {% if cotizacion.cliente %}
                         {{ cotizacion.cliente.nombres|slice:":1" }}{{ cotizacion.cliente.apellidos|slice:":1" }}
+                        {% else %}
+                        {{ cotizacion.nombre_cliente_manual|slice:":2"|upper }}
+                        {% endif %}
                     </div>
                     <div>
-                        <p class="text-text-main font-medium">{{ cotizacion.cliente.nombres }} {{
-                            cotizacion.cliente.apellidos }}</p>
-                        <p class="text-sm text-text-muted">{{ cotizacion.cliente.email }}</p>
+                        <p class="text-text-main font-bold text-sm">
+                            {% if cotizacion.cliente %}
+                            {{ cotizacion.cliente.nombres }} {{ cotizacion.cliente.apellidos }}
+                            {% else %}
+                            {{ cotizacion.nombre_cliente_manual }} <span class="bg-amber-500/10 text-amber-500 font-bold px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider ml-1">Prospecto</span>
+                            {% endif %}
+                        </p>
+                        <p class="text-xs text-text-muted">{{ cotizacion.cliente.email|default:"Cotización rápida" }}</p>
                     </div>
                 </div>
-                <div class="space-y-3 text-sm">
+                <div class="space-y-3 text-xs">
                     <div>
-                        <span class="text-text-muted block">Documento</span>
-                        <span class="text-gray-300">{{ cotizacion.cliente.tipo_documento }} {{
-                            cotizacion.cliente.numero_documento }}</span>
+                        <span class="text-text-muted uppercase font-bold block mb-0.5">Destino</span>
+                        <span class="text-text-main font-semibold">{{ cotizacion.destino|default:"No especificado" }}</span>
                     </div>
+                    {% if cotizacion.cliente.telefono_principal %}
                     <div>
-                        <span class="text-text-muted block">Teléfono</span>
-                        <span class="text-gray-300">{{ cotizacion.cliente.telefono_principal|default:"--" }}</span>
+                        <span class="text-text-muted uppercase font-bold block mb-0.5">Teléfono</span>
+                        <span class="text-text-main font-semibold">{{ cotizacion.cliente.telefono_principal }}</span>
                     </div>
+                    {% endif %}
                 </div>
             </div>
 
-            <div class="glass-panel p-6 rounded-2xl">
-                <h2 class="text-lg font-semibold text-text-main mb-4">Información Adicional</h2>
-                <div class="space-y-3 text-sm">
+            <div class="card-base p-6">
+                <h2 class="text-base font-black text-text-main uppercase tracking-tight mb-4 border-b border-border-color pb-3">Información Adicional</h2>
+                <div class="space-y-3 text-xs">
                     <div>
-                        <span class="text-text-muted block">Válida Hasta</span>
-                        <span class="text-gray-300">
+                        <span class="text-text-muted uppercase font-bold block mb-0.5">Válida Hasta</span>
+                        <span class="text-text-main font-semibold">
                             {% if cotizacion.fecha_validez %}
                             {{ cotizacion.fecha_validez|date:"d F, Y" }}
                             {% else %}
@@ -235,13 +215,13 @@
                     </div>
                     {% if cotizacion.notas_internas %}
                     <div class="pt-3 border-t border-border-color">
-                        <span class="text-text-muted block mb-1">Notas Internas</span>
-                        <p class="text-text-muted italic">{{ cotizacion.notas_internas }}</p>
+                        <span class="text-text-muted uppercase font-bold block mb-1">Notas Internas</span>
+                        <p class="text-text-muted italic text-xs">{{ cotizacion.notas_internas }}</p>
                     </div>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
-</div>
+</main>
 {% endblock %}

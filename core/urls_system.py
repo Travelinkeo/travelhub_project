@@ -12,6 +12,7 @@ from apps.bookings.views.dashboard_views import DashboardView
 from apps.cotizaciones.views import (
     CotizacionConvertirView,
     CotizacionCreateView,
+    CotizacionDashboardView,
     CotizacionDetailView,
     CotizacionPDFView,
     CotizacionStatusView,
@@ -20,7 +21,6 @@ from apps.cotizaciones.views import (
 from apps.finance.views.facturacion_views import (
     FacturaDetailView,
     descargar_pdf_factura,
-    emitir_factura_definitiva,
     generar_factura_desde_venta,
 )
 from apps.marketing.views.marketing_views import MarketingHubView
@@ -372,7 +372,12 @@ urlpatterns = [
     path("ventas/<int:pk>/facturar/", generar_factura_desde_venta, name="venta_facturar"),
     path("facturacion/<int:pk>/", FacturaDetailView.as_view(), name="factura_detalle"),
     path("facturacion/<int:pk>/pdf/", descargar_pdf_factura, name="factura_pdf"),
-    path("facturacion/<int:pk>/emitir/", emitir_factura_definitiva, name="factura_emitir"),
+    path("cotizaciones/", CotizacionDashboardView.as_view(), name="cotizacion_dashboard"),
+    path(
+        "cotizaciones/dashboard/",
+        CotizacionDashboardView.as_view(),
+        name="cotizaciones_dashboard",
+    ),
     path("cotizaciones/nueva/", CotizacionCreateView.as_view(), name="cotizacion_nueva"),
     path("cotizaciones/<int:pk>/", CotizacionDetailView.as_view(), name="cotizacion_detalle"),
     path("cotizaciones/<int:pk>/editar/", CotizacionUpdateView.as_view(), name="cotizacion_editar"),

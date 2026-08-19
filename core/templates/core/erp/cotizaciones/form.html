@@ -1,26 +1,25 @@
 {% extends 'base_modern.html' %}
 {% load static %}
 
-{% block title %}{% if form.instance.pk %}Editar Cotización #{{ form.instance.numero_cotizacion }}{% else %}Nueva
-Cotización{% endif %} - TravelHub{% endblock %}
+{% block title %}{% if form.instance.pk %}Editar Cotización #{{ form.instance.numero_cotizacion }}{% else %}Nueva Cotización{% endif %} - TravelHub{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-8">
+<main class="flex-1 w-full max-w-[1400px] mx-auto p-6 md:p-8 lg:p-10">
+    <div class="flex items-center justify-between mb-8 pb-4 border-b border-border-color">
         <div class="flex items-center gap-4">
-            <a href="{% url 'bookings:cotizacion_dashboard' %}" class="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
+            <a href="{% url 'core:cotizacion_dashboard' %}" class="p-2 bg-surface-2 hover:bg-primary/10 text-text-muted hover:text-primary rounded-lg transition-colors border border-border-color flex items-center justify-center">
+                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
             </a>
-            <h1 class="text-2xl font-bold text-[var(--text-primary)]">
-                {% if form.instance.pk %}
-                Editar Cotización <span class="text-[var(--primary)]">#{{ form.instance.numero_cotizacion }}</span>
-                {% else %}
-                Nueva Cotización
-                {% endif %}
-            </h1>
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-black text-text-main uppercase tracking-tight">
+                    {% if form.instance.pk %}
+                    Editar Cotización <span class="text-primary font-mono">#{{ form.instance.numero_cotizacion }}</span>
+                    {% else %}
+                    Nueva Cotización
+                    {% endif %}
+                </h1>
+                <p class="text-text-muted text-xs mt-1">Configura los servicios, condiciones y valores para el cliente.</p>
+            </div>
         </div>
     </div>
 
@@ -32,68 +31,71 @@ Cotización{% endif %} - TravelHub{% endblock %}
                 {% csrf_token %}
 
                 <!-- Main Info -->
-                <div class="glass-panel p-6 rounded-2xl">
-                    <h2 class="text-lg font-semibold text-[var(--text-primary)] mb-4 border-b border-[var(--border)] pb-2">Información General
+                <div class="card-base p-6">
+                    <h2 class="text-sm font-black text-text-main uppercase tracking-wider mb-6 border-b border-border-color pb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[18px]">info</span>
+                        Información General
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--text-secondary)] mb-1">Cliente (Registrado)</label>
+                            <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Cliente Registrado</label>
                             {{ form.cliente }}
                             {% if form.cliente.errors %}
-                            <p class="text-red-400 text-xs mt-1">{{ form.cliente.errors.0 }}</p>
+                            <p class="text-rose-500 text-xs mt-1 font-bold">{{ form.cliente.errors.0 }}</p>
                             {% endif %}
 
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-1">O Cliente Manual
-                                    (Prospecto)</label>
+                            <div class="mt-5">
+                                <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">O Cliente Manual (Prospecto)</label>
                                 {{ form.nombre_cliente_manual }}
                                 {% if form.nombre_cliente_manual.errors %}
-                                <p class="text-red-400 text-xs mt-1">{{ form.nombre_cliente_manual.errors.0 }}</p>
+                                <p class="text-rose-500 text-xs mt-1 font-bold">{{ form.nombre_cliente_manual.errors.0 }}</p>
                                 {% endif %}
-                                <p class="text-xs text-[var(--text-muted)] mt-1">Llene solo uno de los dos.</p>
+                                <p class="text-[11px] text-text-muted mt-1.5 font-medium">Llene solo uno de los dos campos.</p>
                             </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-[var(--text-secondary)] mb-1">Moneda</label>
-                            {{ form.moneda }}
-                            {% if form.moneda.errors %}
-                            <p class="text-red-400 text-xs mt-1">{{ form.moneda.errors.0 }}</p>
-                            {% endif %}
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-[var(--text-secondary)] mb-1">Válida Hasta</label>
-                            {{ form.fecha_validez }}
-                            {% if form.fecha_validez.errors %}
-                            <p class="text-red-400 text-xs mt-1">{{ form.fecha_validez.errors.0 }}</p>
-                            {% endif %}
+                        <div class="space-y-5">
+                            <div>
+                                <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Moneda</label>
+                                {{ form.moneda }}
+                                {% if form.moneda.errors %}
+                                <p class="text-rose-500 text-xs mt-1 font-bold">{{ form.moneda.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Válida Hasta</label>
+                                {{ form.fecha_validez }}
+                                {% if form.fecha_validez.errors %}
+                                <p class="text-rose-500 text-xs mt-1 font-bold">{{ form.fecha_validez.errors.0 }}</p>
+                                {% endif %}
+                            </div>
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-[var(--text-secondary)] mb-1">Destino Principal</label>
+                            <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Destino Principal</label>
                             {{ form.destino }}
                             {% if form.destino.errors %}
-                            <p class="text-red-400 text-xs mt-1">{{ form.destino.errors.0 }}</p>
+                            <p class="text-rose-500 text-xs mt-1 font-bold">{{ form.destino.errors.0 }}</p>
                             {% endif %}
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-[var(--text-secondary)] mb-1">Descripción General</label>
+                            <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Descripción General</label>
                             {{ form.descripcion_general }}
                             {% if form.descripcion_general.errors %}
-                            <p class="text-red-400 text-xs mt-1">{{ form.descripcion_general.errors.0 }}</p>
+                            <p class="text-rose-500 text-xs mt-1 font-bold">{{ form.descripcion_general.errors.0 }}</p>
                             {% endif %}
                         </div>
                     </div>
                 </div>
 
                 <!-- Items -->
-                <div class="glass-panel p-6 rounded-2xl">
-                    <div class="flex justify-between items-center mb-4 border-b border-[var(--border)] pb-2">
-                        <h2 class="text-lg font-semibold text-[var(--text-primary)]">Servicios / Productos</h2>
+                <div class="card-base p-6">
+                    <div class="flex justify-between items-center mb-6 border-b border-border-color pb-3">
+                        <h2 class="text-sm font-black text-text-main uppercase tracking-wider flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[18px]">inventory_2</span>
+                            Servicios / Productos
+                        </h2>
                         <button type="button" id="add-item"
-                            class="text-sm bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white px-3 py-1 rounded-lg transition-colors flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4"></path>
-                            </svg>
+                            class="btn-secondary !h-9 !px-3 text-xs">
+                            <span class="material-symbols-outlined text-[16px]">add</span>
                             Agregar Item
                         </button>
                     </div>
@@ -103,50 +105,45 @@ Cotización{% endif %} - TravelHub{% endblock %}
                     <div id="items-container" class="space-y-4">
                         {% for item_form in items_formset %}
                         <div
-                            class="item-row grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-[var(--surface-2)] rounded-xl border border-[var(--border)] relative group">
+                            class="item-row grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-surface-2/40 rounded-xl border border-border-color relative group">
                             {% for hidden in item_form.hidden_fields %}
                             {{ hidden }}
                             {% endfor %}
 
                             <div class="md:col-span-3">
-                                <label class="block text-xs font-medium text-[var(--text-secondary)] mb-1">Servicio</label>
+                                <label class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">Servicio</label>
                                 {{ item_form.producto_servicio }}
                             </div>
                             <div class="md:col-span-3">
-                                <label class="block text-xs font-medium text-[var(--text-secondary)] mb-1">Descripción
-                                    (Opcional)</label>
+                                <label class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">Descripción</label>
                                 {{ item_form.descripcion_personalizada }}
                             </div>
                             <div class="md:col-span-1">
-                                <label class="block text-xs font-medium text-[var(--text-secondary)] mb-1">Cant.</label>
+                                <label class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">Cant.</label>
                                 {{ item_form.cantidad }}
                             </div>
                             <div class="md:col-span-2">
-                                <label class="block text-xs font-medium text-[var(--text-secondary)] mb-1">Precio Unit.</label>
+                                <label class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">Precio Unit.</label>
                                 {{ item_form.precio_unitario }}
                             </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-xs font-medium text-[var(--text-secondary)] mb-1">Impuestos</label>
+                            <div class="md:col-span-1">
+                                <label class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">Impuestos</label>
                                 {{ item_form.impuestos_item }}
                             </div>
                             <div class="md:col-span-2">
-                                <label class="block text-xs font-medium text-[var(--text-secondary)] mb-1">Total</label>
+                                <label class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1 text-right">Total</label>
                                 <input type="text" readonly
-                                    class="bg-[var(--surface-1)] border border-[var(--border)] text-emerald-500 font-bold rounded-xl px-3 py-1 w-full focus:ring-0 cursor-not-allowed text-right total-display"
+                                    class="input-base text-emerald-500 font-mono font-bold text-right cursor-not-allowed total-display"
                                     value="0.00">
                             </div>
 
                             {% if items_formset.can_delete %}
-                            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="absolute top-2 right-2">
                                 <div class="flex items-center">
                                     {{ item_form.DELETE }}
                                     <label for="{{ item_form.DELETE.id_for_label }}"
-                                        class="text-red-400 hover:text-red-300 cursor-pointer ml-1">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                            </path>
-                                        </svg>
+                                        class="text-rose-500 hover:text-rose-600 cursor-pointer ml-1 text-xs font-bold" title="Eliminar Item">
+                                        <span class="material-symbols-outlined text-[16px]">delete</span>
                                     </label>
                                 </div>
                             </div>
@@ -158,45 +155,40 @@ Cotización{% endif %} - TravelHub{% endblock %}
                     <!-- Empty form template for JS -->
                     <div id="empty-form" class="hidden">
                         <div
-                            class="item-row grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-[var(--surface-2)] rounded-xl border border-[var(--border)] relative group">
+                            class="item-row grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-surface-2/40 rounded-xl border border-border-color relative group">
                             <div class="md:col-span-3">
-                                <label class="block text-xs font-medium text-[var(--text-secondary)] mb-1">Servicio</label>
+                                <label class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">Servicio</label>
                                 {{ items_formset.empty_form.producto_servicio }}
                             </div>
                             <div class="md:col-span-3">
-                                <label class="block text-xs font-medium text-[var(--text-secondary)] mb-1">Descripción
-                                    (Opcional)</label>
+                                <label class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">Descripción</label>
                                 {{ items_formset.empty_form.descripcion_personalizada }}
                             </div>
                             <div class="md:col-span-1">
-                                <label class="block text-xs font-medium text-[var(--text-secondary)] mb-1">Cant.</label>
+                                <label class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">Cant.</label>
                                 {{ items_formset.empty_form.cantidad }}
                             </div>
-                            <div class="md:col-span-1">
-                                <label class="block text-xs font-medium text-[var(--text-secondary)] mb-1">Precio Unit.</label>
+                            <div class="md:col-span-2">
+                                <label class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">Precio Unit.</label>
                                 {{ items_formset.empty_form.precio_unitario }}
                             </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-xs font-medium text-[var(--text-secondary)] mb-1">Impuestos</label>
+                            <div class="md:col-span-1">
+                                <label class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1">Impuestos</label>
                                 {{ items_formset.empty_form.impuestos_item }}
                             </div>
                             <div class="md:col-span-2">
-                                <label class="block text-xs font-medium text-[var(--text-secondary)] mb-1">Total</label>
+                                <label class="block text-[10px] font-bold text-text-muted uppercase tracking-wider mb-1 text-right">Total</label>
                                 <input type="text" readonly
-                                    class="bg-[var(--surface-1)] border border-[var(--border)] text-emerald-500 font-bold rounded-xl px-3 py-1 w-full focus:ring-0 cursor-not-allowed text-right total-display"
+                                    class="input-base text-emerald-500 font-mono font-bold text-right cursor-not-allowed total-display"
                                     value="0.00">
                             </div>
 
                             {% if items_formset.can_delete %}
-                            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="absolute top-2 right-2">
                                 <div class="flex items-center">
                                     {{ items_formset.empty_form.DELETE }}
-                                    <label class="text-red-400 hover:text-red-300 cursor-pointer ml-1 delete-btn">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                            </path>
-                                        </svg>
+                                    <label class="text-rose-500 hover:text-rose-600 cursor-pointer ml-1 delete-btn text-xs font-bold" title="Eliminar Item">
+                                        <span class="material-symbols-outlined text-[16px]">delete</span>
                                     </label>
                                 </div>
                             </div>
@@ -206,151 +198,111 @@ Cotización{% endif %} - TravelHub{% endblock %}
                 </div>
 
                 <!-- Additional Info -->
-                <div class="glass-panel p-6 rounded-2xl">
-                    <h2 class="text-lg font-semibold text-[var(--text-primary)] mb-4 border-b border-[var(--border)] pb-2">Condiciones y Notas
+                <div class="card-base p-6">
+                    <h2 class="text-sm font-black text-text-main uppercase tracking-wider mb-6 border-b border-border-color pb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[18px]">gavel</span>
+                        Condiciones y Notas
                     </h2>
                     <div class="grid grid-cols-1 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--text-secondary)] mb-1">Condiciones Comerciales</label>
+                            <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Condiciones Comerciales</label>
                             {{ form.condiciones_comerciales }}
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-[var(--text-secondary)] mb-1">Notas Internas</label>
+                            <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Notas Internas</label>
                             {{ form.notas_internas }}
                         </div>
                     </div>
                 </div>
 
                 <!-- Actions -->
-                <div class="flex justify-end gap-4">
-                    <a href="{% url 'bookings:cotizacion_dashboard' %}"
-                        class="px-6 py-2 border border-[var(--border)] text-[var(--text-secondary)] rounded-xl hover:bg-[var(--surface-2)] transition-colors">
+                <div class="flex justify-end gap-4 pt-4">
+                    <a href="{% url 'core:cotizacion_dashboard' %}"
+                        class="btn-secondary !h-11 !px-6 text-xs">
                         Cancelar
                     </a>
                     <button type="submit"
-                        class="px-6 py-2 bg-gradient-to-r from-[var(--primary)] to-blue-500 text-white font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5">
+                        class="btn-primary !h-11 !px-8 text-xs shadow-lg shadow-primary/20">
+                        <span class="material-symbols-outlined text-[18px]">save</span>
                         Guardar Cotización
                     </button>
                 </div>
             </form>
         </div>
 
-        <!-- Sidebar Wiki Assistant -->
+        <!-- Sidebar Assistant -->
         <div class="lg:col-span-1">
             <div class="sticky top-24 space-y-4">
-                <!-- Wiki Widget -->
-                <div
-                    class="glass-panel p-4 rounded-2xl bg-[var(--surface-1)] border border-[var(--border)] backdrop-blur-md shadow-xl">
-                    <div class="flex items-center gap-2 mb-3 border-b border-[var(--border)] pb-2">
-                        <span class="text-xl">🧠</span>
+                <div class="card-base p-5 border-l-4 border-l-primary">
+                    <div class="flex items-center gap-2 mb-3 border-b border-border-color pb-2">
+                        <span class="material-symbols-outlined text-primary text-[20px]">psychology</span>
                         <div>
-                            <h3 class="font-bold text-[var(--text-primary)] text-sm">TravelHub Assist</h3>
-                            <p class="text-[10px] text-[var(--text-muted)]">Contexto Inteligente</p>
+                            <h3 class="font-bold text-text-main text-xs uppercase tracking-wider">TravelHub Assist</h3>
+                            <p class="text-[10px] text-text-muted font-bold">Consejos Rápidos</p>
                         </div>
                     </div>
 
-                    <!-- Result Container -->
-                    <div id="wiki-results" class="min-h-[150px] space-y-2" hx-get="{% url 'core:wiki_search' %}"
-                        hx-trigger="searchContext from:body" hx-swap="innerHTML">
-
-                        <div class="text-center text-[var(--text-muted)] text-xs py-8 flex flex-col items-center">
-                            <span class="material-symbols-outlined w-6 h-6 mb-2 opacity-50">auto_awesome</span>
-                            <span>Escribe para ver tips...</span>
-                        </div>
+                    <div class="text-text-muted text-xs leading-relaxed space-y-3">
+                        <p>💡 <strong>Tip Comercial:</strong> Puedes seleccionar un cliente existente o escribir un nombre de prospecto para enviar la cotización vía WhatsApp.</p>
+                        <p>📄 <strong>Generación PDF:</strong> Una vez guardada, el sistema generará automáticamente la propuesta en formato PDF listo para descargar o compartir.</p>
                     </div>
                 </div>
-
-                <!-- Quick Prompts (Optional) -->
-                <!-- <div class="glass-panel p-3 ...">Tags Populares: VISA, EQUIPAJE</div> -->
             </div>
         </div>
     </div>
-</div>
-
-<script nonce="{{ request.csp_nonce }}">
-    document.addEventListener('DOMContentLoaded', function () {
-        // ... (Existing JS) ...
-    });
-
-    // Wiki Context Trigger
-    let wikiTimeout;
-    document.body.addEventListener('input', function (e) {
-        // Listen to relevant inputs
-        if (e.target.matches('#id_destino, textarea, input[type="text"]')) {
-            const val = e.target.value;
-            if (val.length < 3) return;
-
-            clearTimeout(wikiTimeout);
-            wikiTimeout = setTimeout(() => {
-                const resultsDiv = document.getElementById('wiki-results');
-                // Pass the query to hx-vals dynamically or via URL
-                // Easier: set hx-vals attribute or recreate the get request
-                // Using htmx.ajax or activating the trigger with a parameter
-
-                // HTMX way to pass parameters dynamically via trigger is tricky without hx-vals
-                // Let's rely on event detail or just set hx-vals attribute
-                resultsDiv.setAttribute('hx-vals', JSON.stringify({ "q": val }));
-                htmx.trigger(resultsDiv, 'searchContext');
-            }, 800);
-        }
-    });
-</script>
+</main>
 
 <script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', function () {
         const addItemBtn = document.getElementById('add-item');
         const itemsContainer = document.getElementById('items-container');
-        const emptyFormTemplate = document.getElementById('empty-form').innerHTML;
-        const totalFormsInput = document.getElementById('id_items_cotizacion-TOTAL_FORMS');
+        const emptyFormTemplate = document.getElementById('empty-form') ? document.getElementById('empty-form').innerHTML : '';
+        const totalFormsInput = document.querySelector('[name$="-TOTAL_FORMS"]');
 
-        // Function to calculate totals
         function calculateRowTotal(row) {
             const qtyInput = row.querySelector('input[name$="-cantidad"]');
             const priceInput = row.querySelector('input[name$="-precio_unitario"]');
             const taxInput = row.querySelector('input[name$="-impuestos_item"]');
             const totalDisplay = row.querySelector('.total-display');
 
-            if (qtyInput && priceInput && taxInput && totalDisplay) {
+            if (qtyInput && priceInput && totalDisplay) {
                 const qty = parseFloat(qtyInput.value) || 0;
                 const price = parseFloat(priceInput.value) || 0;
-                const tax = parseFloat(taxInput.value) || 0;
+                const tax = taxInput ? (parseFloat(taxInput.value) || 0) : 0;
 
                 const subtotal = qty * price;
-                const total = subtotal + (tax * qty); // Assuming tax is per unit? Or total tax?
-                // Checking model: total_item = subtotal_item + (impuestos_item * cantidad)
-                // Model says: impuestos_item is "Impuestos por Item". So yes, tax * qty.
+                const total = subtotal + (tax * qty);
 
                 totalDisplay.value = total.toFixed(2);
             }
         }
 
-        // Attach listeners to a row
         function attachListeners(row) {
             const inputs = row.querySelectorAll('input');
             inputs.forEach(input => {
                 input.addEventListener('input', () => calculateRowTotal(row));
             });
-            // Initial calculation
             calculateRowTotal(row);
         }
 
-        // Initialize existing rows
         document.querySelectorAll('.item-row').forEach(row => {
             attachListeners(row);
         });
 
-        addItemBtn.addEventListener('click', function () {
-            const formIdx = totalFormsInput.value;
-            const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, formIdx);
+        if (addItemBtn && totalFormsInput && emptyFormTemplate) {
+            addItemBtn.addEventListener('click', function () {
+                const formIdx = totalFormsInput.value;
+                const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, formIdx);
 
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = newFormHtml;
-            const newRow = tempDiv.firstElementChild;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = newFormHtml;
+                const newRow = tempDiv.firstElementChild;
 
-            itemsContainer.appendChild(newRow);
-            attachListeners(newRow);
-            totalFormsInput.value = parseInt(formIdx) + 1;
-        });
+                itemsContainer.appendChild(newRow);
+                attachListeners(newRow);
+                totalFormsInput.value = parseInt(formIdx) + 1;
+            });
+        }
     });
 </script>
 {% endblock %}

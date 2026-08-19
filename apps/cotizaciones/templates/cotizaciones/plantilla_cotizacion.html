@@ -274,7 +274,7 @@
                 </div>
             </div>
 
-            {%for item in cotizacion.items_cotizacion.all%}
+            {%for item in cotizacion.items.all%}
             <div class="info-section service-item">
                 <div class="section-header">
                     <div class="info-icon">
@@ -347,7 +347,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {%for item in cotizacion.items_cotizacion.all%}
+                            {%for item in cotizacion.items.all%}
                             <tr>
                                 <td>{{item.producto_servicio.nombre }} {%if item.cantidad > 1 %}(x{{ item.cantidad}}){% endif%}</td>
                                 <td class="amount">$ {{item.total_item|floatformat:2}}</td>

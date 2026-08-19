@@ -187,9 +187,7 @@ class CotizacionDetailView(SaaSMixin, LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         """get_context_data."""
         context = super().get_context_data(**kwargs)
-        context["items"] = self.object.items_cotizacion.select_related(
-            "producto_servicio", "moneda"
-        ).all()
+        context["items"] = self.object.items.select_related("producto_servicio").all()
         return context
 
 
@@ -198,8 +196,8 @@ class CotizacionCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
 
     model = Cotizacion
     form_class = CotizacionForm
-    template_name = "core/erp/cotizaciones/crear_cotizacion_swiss.html"
-    success_url = reverse_lazy("bookings:cotizacion_dashboard")
+    template_name = "core/erp/cotizaciones/form.html"
+    success_url = reverse_lazy("core:cotizaciones_dashboard")
 
     def get_context_data(self, **kwargs):
         """get_context_data."""
@@ -215,7 +213,14 @@ class CotizacionCreateView(SaaSMixin, LoginRequiredMixin, CreateView):
         context = self.get_context_data()
         items_formset = context["items_formset"]
         with transaction.atomic():
-            self.object = form.save()
+            self.object = form.save(commit=False)
+            agencia = getattr(self.request, "agencia", None)
+            if not agencia and hasattr(self.request.user, "agencia"):
+                agencia = self.request.user.agencia
+            if agencia:
+                self.object.agencia = agencia
+            self.object.save()
+
             if items_formset.is_valid():
                 items_formset.instance = self.object
                 items_formset.save()
@@ -233,11 +238,11 @@ class CotizacionUpdateView(SaaSMixin, LoginRequiredMixin, UpdateView):
 
     model = Cotizacion
     form_class = CotizacionForm
-    template_name = "core/erp/cotizaciones/crear_cotizacion_swiss.html"
+    template_name = "core/erp/cotizaciones/form.html"
 
     def get_success_url(self):
         """get_success_url."""
-        return reverse_lazy("bookings:cotizacion_detalle", kwargs={"pk": self.object.pk})
+        return reverse_lazy("core:cotizacion_detalle", kwargs={"pk": self.object.pk})
 
     def get_context_data(self, **kwargs):
         """get_context_data."""
@@ -273,7 +278,12 @@ class CotizacionStatusView(SaaSMixin, LoginRequiredMixin, View):
 
     def post(self, request, pk):
         """post."""
-        cotizacion = get_object_or_404(Cotizacion, pk=pk, agencia=request.agencia)
+        agencia = getattr(request, "agencia", None)
+        if agencia:
+            cotizacion = get_object_or_404(Cotizacion, pk=pk, agencia=agencia)
+        else:
+            cotizacion = get_object_or_404(Cotizacion, pk=pk)
+
         nuevo_estado = request.POST.get("nuevo_estado")
         estado_anterior = cotizacion.estado
         cotizacion.estado = nuevo_estado
@@ -292,7 +302,7 @@ class CotizacionStatusView(SaaSMixin, LoginRequiredMixin, View):
             _notificar_cotizacion_rechazada(cotizacion, estado_anterior)
 
         messages.success(request, f"Estado actualizado a {cotizacion.get_estado_display()}.")
-        return redirect("bookings:cotizacion_detalle", pk=pk)
+        return redirect("core:cotizacion_detalle", pk=pk)
 
 
 class CotizacionPDFView(SaaSMixin, LoginRequiredMixin, View):
@@ -300,7 +310,11 @@ class CotizacionPDFView(SaaSMixin, LoginRequiredMixin, View):
 
     def get(self, request, pk):
         """get."""
-        cotizacion = get_object_or_404(Cotizacion, pk=pk, agencia=request.agencia)
+        agencia = getattr(request, "agencia", None)
+        if agencia:
+            cotizacion = get_object_or_404(Cotizacion, pk=pk, agencia=agencia)
+        else:
+            cotizacion = get_object_or_404(Cotizacion, pk=pk)
         try:
             pdf_bytes = generar_pdf_cotizacion(cotizacion)
             response = HttpResponse(pdf_bytes, content_type="application/pdf")
@@ -309,7 +323,7 @@ class CotizacionPDFView(SaaSMixin, LoginRequiredMixin, View):
             return response
         except Exception as e:
             messages.error(request, f"Error generando PDF: {str(e)}")
-            return redirect("bookings:cotizacion_detalle", pk=pk)
+            return redirect("core:cotizacion_detalle", pk=pk)
 
 
 class CotizacionConvertirView(SaaSMixin, LoginRequiredMixin, View):
@@ -317,7 +331,11 @@ class CotizacionConvertirView(SaaSMixin, LoginRequiredMixin, View):
 
     def post(self, request, pk):
         """post."""
-        cotizacion = get_object_or_404(Cotizacion, pk=pk, agencia=request.agencia)
+        agencia = getattr(request, "agencia", None)
+        if agencia:
+            cotizacion = get_object_or_404(Cotizacion, pk=pk, agencia=agencia)
+        else:
+            cotizacion = get_object_or_404(Cotizacion, pk=pk)
         try:
             with transaction.atomic():
                 venta = cotizacion.convertir_a_venta()

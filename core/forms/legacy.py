@@ -152,49 +152,41 @@ class CotizacionForm(forms.ModelForm):
             "fecha_validez": forms.DateInput(
                 attrs={
                     "type": "date",
-                    "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-4 py-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent",
+                    "class": "input-base",
                 }
             ),
             "destino": forms.TextInput(
                 attrs={
-                    "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-4 py-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent",
+                    "class": "input-base",
                     "placeholder": "Ej. Madrid, España",
                 }
             ),
             "descripcion_general": forms.Textarea(
                 attrs={
                     "rows": 3,
-                    "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-4 py-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent",
+                    "class": "input-base",
                 }
             ),
             "notas_internas": forms.Textarea(
                 attrs={
                     "rows": 2,
-                    "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-4 py-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent",
+                    "class": "input-base",
                 }
             ),
             "condiciones_comerciales": forms.Textarea(
                 attrs={
                     "rows": 3,
-                    "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-4 py-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent",
+                    "class": "input-base",
                 }
             ),
-            "cliente": forms.Select(
-                attrs={
-                    "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-4 py-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
-                }
-            ),
+            "cliente": forms.Select(attrs={"class": "input-base"}),
             "nombre_cliente_manual": forms.TextInput(
                 attrs={
-                    "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-4 py-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent",
+                    "class": "input-base",
                     "placeholder": "Nombre del prospecto o empresa",
                 }
             ),
-            "moneda": forms.Select(
-                attrs={
-                    "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-4 py-2 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
-                }
-            ),
+            "moneda": forms.Select(attrs={"class": "input-base"}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -234,20 +226,18 @@ ItemCotizacionFormSet = inlineformset_factory(
     extra=1,
     can_delete=True,
     widgets={
-        "producto_servicio": forms.Select(
-            attrs={
-                "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-3 py-1 w-full focus:ring-2 focus:ring-primary focus:border-transparent"
-            }
-        ),
+        "producto_servicio": forms.Select(attrs={"class": "input-base"}),
         "descripcion_personalizada": forms.TextInput(
             attrs={
-                "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-3 py-1 w-full focus:ring-2 focus:ring-primary focus:border-transparent",
-                "placeholder": "Opcional",
+                "class": "input-base",
+                "placeholder": "Detalles adicionales",
             }
         ),
         "cantidad": forms.NumberInput(
             attrs={
-                "class": "bg-gray-800/50 border border-gray-700 text-white rounded-xl px-3 py-1 w-20 focus:ring-2 focus:ring-primary focus:border-transparent"
+                "class": "input-base text-right",
+                "step": "1",
+                "min": "1",
             }
         ),
         "precio_unitario": forms.NumberInput(

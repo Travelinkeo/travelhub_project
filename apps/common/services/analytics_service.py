@@ -148,9 +148,11 @@ class AnalyticsService:
         from django.apps import apps
 
         BoletoImportado = apps.get_model("bookings", "BoletoImportado")
+        qs = BoletoImportado.all_objects.filter(is_deleted=False)
+        if agencia is not None:
+            qs = qs.filter(agencia=agencia)
         return (
-            BoletoImportado.objects.filter(agencia=agencia)
-            .exclude(aerolinea_emisora__isnull=True)
+            qs.exclude(aerolinea_emisora__isnull=True)
             .exclude(aerolinea_emisora="")
             .values_list("aerolinea_emisora", flat=True)
             .distinct()
@@ -165,9 +167,11 @@ class AnalyticsService:
         from django.apps import apps
 
         BoletoImportado = apps.get_model("bookings", "BoletoImportado")
-        qs = BoletoImportado.objects.filter(
-            agencia=agencia, estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO
+        qs = BoletoImportado.all_objects.filter(is_deleted=False).exclude(
+            estado_parseo=BoletoImportado.EstadoParseo.ERROR_PARSEO
         )
+        if agencia is not None:
+            qs = qs.filter(agencia=agencia)
 
         if fecha_inicio:
             qs = qs.filter(fecha_emision_boleto__gte=fecha_inicio)
@@ -240,7 +244,7 @@ class AnalyticsService:
                     "numero_boleto": b.numero_boleto,
                     "pnr": b.localizador_pnr,
                     "pasajero_nombre": b.nombre_pasajero_procesado or b.nombre_pasajero_completo,
-                    "aerolinea_nombre": b.aerolinea_emisora,
+                    "aerolinea_nombre": b.aerolinea_emisora or "Sin Aerolínea",
                     "aerolinea_codigo": aero_codigo or "XX",
                     "monto_neto": float(b.tarifa_base or 0),
                     "comision": float(b.comision_agencia or 0),
@@ -304,20 +308,17 @@ class AnalyticsService:
 
             # 2. Por Aerolínea
             if reporte["por_aerolinea"]:
-                df_aerolinea = pd.DataFrame(reporte["por_aerolinea"])
-                df_aerolinea.columns = [
-                    "Aerolínea",
-                    "Cant. Boletos",
-                    "Total Ventas",
-                    "Total Comisiones",
-                ]
-                df_aerolinea.to_excel(writer, sheet_name="Por Aerolinea", index=False)
+                pd.DataFrame(reporte["por_aerolinea"]).to_excel(
+                    writer, sheet_name="Por Aerolínea", index=False
+                )
 
             # 3. Listado Detallado (Aquí exportamos todos, no solo los últimos 100)
             # Re-calculamos el QS para tener todos los datos sin el slice de 100
-            qs = BoletoImportado.objects.filter(
-                agencia=agencia, estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO
+            qs = BoletoImportado.all_objects.filter(is_deleted=False).exclude(
+                estado_parseo=BoletoImportado.EstadoParseo.ERROR_PARSEO
             )
+            if agencia is not None:
+                qs = qs.filter(agencia=agencia)
             if fecha_inicio:
                 qs = qs.filter(fecha_emision_boleto__gte=fecha_inicio)
             if fecha_fin:
@@ -333,7 +334,7 @@ class AnalyticsService:
                         "Número Boleto": b.numero_boleto,
                         "PNR": b.localizador_pnr,
                         "Pasajero": b.nombre_pasajero_procesado or b.nombre_pasajero_completo,
-                        "Aerolínea": b.aerolinea_emisora,
+                        "Aerolínea": b.aerolinea_emisora or "Sin Aerolínea",
                         "Monto Neto": float(b.tarifa_base or 0),
                         "Comisión": float(b.comision_agencia or 0),
                         "Total": float(b.total_boleto or 0),
@@ -357,9 +358,11 @@ class AnalyticsService:
         from django.apps import apps
 
         BoletoImportado = apps.get_model("bookings", "BoletoImportado")
-        qs = BoletoImportado.objects.filter(
-            agencia=agencia, estado_parseo=BoletoImportado.EstadoParseo.COMPLETADO
+        qs = BoletoImportado.all_objects.filter(is_deleted=False).exclude(
+            estado_parseo=BoletoImportado.EstadoParseo.ERROR_PARSEO
         )
+        if agencia is not None:
+            qs = qs.filter(agencia=agencia)
 
         if fecha_inicio:
             qs = qs.filter(fecha_emision_boleto__gte=fecha_inicio)

@@ -191,7 +191,12 @@ class BoletosReportesView(SaaSMixin, LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context["active_tab"] = "boletos_reportes"
 
-        agencia = get_agencia_from_request(self.request)
+        agencia = getattr(self.request, "agencia", None)
+        if not agencia:
+            from core.security import get_user_active_agency
+
+            agencia = get_user_active_agency(self.request.user)
+
         fecha_inicio = self.request.GET.get("fecha_inicio")
         fecha_fin = self.request.GET.get("fecha_fin")
         aerolinea = self.request.GET.get("aerolinea")
@@ -302,7 +307,12 @@ class ExportarBoletosExcelView(SaaSMixin, LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         """get."""
-        agencia = get_agencia_from_request(request)
+        agencia = getattr(request, "agencia", None)
+        if not agencia:
+            from core.security import get_user_active_agency
+
+            agencia = get_user_active_agency(request.user)
+
         fecha_inicio = request.GET.get("fecha_inicio")
         fecha_fin = request.GET.get("fecha_fin")
         aerolinea = request.GET.get("aerolinea")

@@ -167,7 +167,11 @@
                         <td class="py-4 px-6">
                             <div class="flex items-center gap-2.5">
                                 <div class="size-7 rounded-lg bg-surface-2 border border-border-color flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm p-0.5">
-                                    {% if boleto.aerolinea_codigo and boleto.aerolinea_codigo != "XX" %}
+                                    {% if boleto.aerolinea_codigo == "WW" or boleto.aerolinea_codigo == "RAV" or "VENEZOLANA" in boleto.aerolinea_nombre|upper or "RUTAS AEREAS DE VENEZUELA" in boleto.aerolinea_nombre|upper %}
+                                    <img src="/static/images/airlines/WW.png"
+                                         alt="Venezolana"
+                                         class="max-h-full max-w-full object-contain rounded-full">
+                                    {% elif boleto.aerolinea_codigo and boleto.aerolinea_codigo != "XX" %}
                                     <img src="https://images.kiwi.com/airlines/64/{{ boleto.aerolinea_codigo }}.png"
                                          alt="{{ boleto.aerolinea_codigo }}"
                                          class="max-h-full max-w-full object-contain"

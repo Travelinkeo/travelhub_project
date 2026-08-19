@@ -209,6 +209,9 @@ class AnalyticsService:
                 prefijos = {
                     "782": "QL",
                     "067": "ES",
+                    "052": "ES",
+                    "742": "9V",
+                    "765": "WW",
                     "134": "AV",
                     "230": "CM",
                     "045": "LA",
@@ -218,28 +221,39 @@ class AnalyticsService:
                     "239": "AT",
                     "075": "IB",
                     "996": "UX",
+                    "967": "UX",
                     "235": "TK",
                     "020": "LH",
                     "080": "TP",
                     "850": "V0",
                     "880": "T9",
-                    "840": "VN",
-                    "920": "RUT",
-                    "921": "RUT",
+                    "840": "WW",
+                    "920": "5R",
+                    "921": "5R",
+                    "482": "DM",
                 }
                 aero_codigo = prefijos.get(str(b.numero_boleto)[:3])
 
             if not aero_codigo and b.aerolinea_emisora:
                 name_upper = b.aerolinea_emisora.upper()
-                if "LASER" in name_upper:
+                if "AVIOR" in name_upper or "AVIONES DE ORIENTE" in name_upper:
+                    aero_codigo = "9V"
+                elif (
+                    "RUTAS AEREAS DE VENEZUELA" in name_upper
+                    or "VENEZOLANA" in name_upper
+                    or "RAVSA" in name_upper
+                    or "RAV" in name_upper
+                ):
+                    aero_codigo = "WW"
+                elif "RUTACA" in name_upper or "RUTAS AEREAS C.A" in name_upper:
+                    aero_codigo = "5R"
+                elif "LASER" in name_upper:
                     aero_codigo = "QL"
                 elif "ESTELAR" in name_upper:
                     aero_codigo = "ES"
-                elif "RUTAS" in name_upper or "RUTACA" in name_upper:
-                    aero_codigo = "RUT"
                 elif "TURPIAL" in name_upper:
                     aero_codigo = "T9"
-                elif "AVIANCA" in name_upper:
+                elif "AVIANCA" in name_upper or "AEROVIAS DEL CONTINENTE" in name_upper:
                     aero_codigo = "AV"
                 elif "COPA" in name_upper:
                     aero_codigo = "CM"
@@ -255,6 +269,8 @@ class AnalyticsService:
                     aero_codigo = "TK"
                 elif "CONVIASA" in name_upper:
                     aero_codigo = "V0"
+                elif "GLOBAL AIR" in name_upper:
+                    aero_codigo = "DM"
 
             if not aero_codigo and b.datos_parseados:
                 try:

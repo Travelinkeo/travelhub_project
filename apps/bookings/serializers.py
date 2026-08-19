@@ -233,6 +233,7 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
     estado_parseo_display = serializers.CharField(
         source="get_estado_parseo_display", read_only=True
     )
+    ruta_vuelo_display = serializers.CharField(source="ruta_resumida", read_only=True)
     archivo_pdf_generado = serializers.SerializerMethodField()
 
     class Meta:
@@ -252,6 +253,7 @@ class BoletoImportadoSerializer(serializers.ModelSerializer):
             "nombre_pasajero_completo",
             "nombre_pasajero_procesado",
             "ruta_vuelo",
+            "ruta_vuelo_display",
             "fecha_emision_boleto",
             "aerolinea_emisora",
             "direccion_aerolinea",

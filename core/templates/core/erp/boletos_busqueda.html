@@ -176,6 +176,37 @@
         return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase();
     }
 
+    function formatRuta(raw) {
+        if (!raw) return '--';
+        if (typeof raw === 'string' && (raw.startsWith('[') || raw.startsWith('{'))) {
+            try {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    const legs = [];
+                    parsed.forEach(seg => {
+                        const orig = seg.codigo_iata_origen || seg.origen || '';
+                        const dest = seg.codigo_iata_destino || seg.destino || '';
+                        if (orig && (legs.length === 0 || legs[legs.length - 1] !== orig)) {
+                            legs.push(orig);
+                        }
+                        if (dest) {
+                            legs.push(dest);
+                        }
+                    });
+                    if (legs.length > 0) {
+                        return legs.join(' ➔ ');
+                    }
+                }
+            } catch (e) {
+                // Fallback below
+            }
+        }
+        if (typeof raw === 'string') {
+            return raw.replace(/[-–—>]/g, ' ➔ ').trim();
+        }
+        return String(raw);
+    }
+
     function filterGDS(btn, gds) {
         gdsFilter = gds;
         document.querySelectorAll('.gds-chip').forEach(b => {
@@ -222,6 +253,8 @@
             const pasajero = b.nombre_pasajero_procesado || 'Sin Nombre';
             const iniciales = getInitials(pasajero);
             const gds = (b.formato_detectado || 'N/A').toUpperCase();
+            const boletoId = b.id_boleto_importado || b.id;
+            const rutaFormateada = formatRuta(b.ruta_vuelo_display || b.ruta_vuelo);
 
             let statusHTML = '';
             if (b.estado_parseo === 'PEN' || b.estado_parseo === 'PENDIENTE') {
@@ -234,7 +267,7 @@
                 statusHTML = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Completado</span>`;
             }
 
-            return `<tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer" data-href="/system/upload/boleto/${b.id}/revisar/">
+            return `<tr class="group hover:bg-nav-active-bg/10 transition-all cursor-pointer" data-href="/system/upload/boleto/${boletoId}/revisar/">
                 <td class="px-6 py-5 text-center" data-stop-propagation>
                     <input type="checkbox" class="boleto-checkbox-search size-4 rounded border-border-color bg-surface-1 text-primary">
                 </td>
@@ -251,8 +284,11 @@
                     </div>
                 </td>
                 <td class="px-6 py-5 text-center">
-                    <div class="flex flex-col gap-1">
-                        <p class="text-xs font-black text-text-main font-mono uppercase">${b.ruta_vuelo || '--'}</p>
+                    <div class="flex flex-col gap-1.5 items-center">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-black text-text-main bg-surface-2 border border-border-color font-mono uppercase tracking-wider shadow-sm">
+                            <span class="material-symbols-outlined text-[14px] text-primary">flight_takeoff</span>
+                            ${rutaFormateada}
+                        </span>
                         <p class="text-[9px] text-text-muted font-bold tracking-widest uppercase">${gds}</p>
                     </div>
                 </td>
@@ -264,7 +300,7 @@
                     <div class="flex flex-col items-end gap-1">
                         <p class="text-sm font-black text-text-main font-mono">$${total}</p>
                         <div class="flex items-center gap-1 opacity-20 group-hover:opacity-100 transition-all" data-stop-propagation>
-                            <a href="/boletos/${b.id_boleto_importado}/review/" class="size-7 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-all border border-transparent hover:border-primary/20">
+                            <a href="/system/upload/boleto/${boletoId}/revisar/" class="size-7 flex items-center justify-center text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-all border border-transparent hover:border-primary/20" title="Ver / Revisar Boleto">
                                 <span class="material-symbols-outlined text-[18px]">visibility</span>
                             </a>
                         </div>

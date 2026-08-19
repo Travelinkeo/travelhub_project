@@ -323,6 +323,13 @@ class BoletoImportado(AgenciaMixin, SoftDeleteModel, models.Model):
         """id_boleto."""
         self.id_boleto_importado = value
 
+    @property
+    def ruta_resumida(self) -> str:
+        """Devuelve la ruta en formato legible (ej. MAR - MYC)."""
+        from apps.finance.services.facturacion_service import obtener_itinerario_limpio
+
+        return obtener_itinerario_limpio(self.ruta_vuelo) or "--"
+
     def save(self, *args, **kwargs):
         if self.log_parseo and len(self.log_parseo) > MAX_LOG_LENGTH:
             logger.warning(

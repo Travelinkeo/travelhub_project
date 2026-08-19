@@ -16,7 +16,7 @@
                     </svg>
                 </a>
                 <h1 class="text-2xl font-bold text-text-main">Venta #{{ venta.id_venta }}</h1>
-                <span class="px-3 py-1 text-xs font-medium rounded-full 
+                <span class="px-3 py-1 text-xs font-medium rounded-full
                     {% if venta.estado == 'PAG' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
                     {% elif venta.estado == 'PEN' %}bg-yellow-500/10 text-yellow-400 border border-yellow-500/20
                     {% elif venta.estado == 'ANU' %}bg-red-500/10 text-red-400 border border-red-500/20
@@ -217,7 +217,7 @@
                             </div>
                         </div>
                         <div class="text-sm text-text-muted">
-                            <p>{{ boleto.aerolinea_emisora }} - {{ boleto.ruta_vuelo }}</p>
+                            <p>{{ boleto.aerolinea_emisora }} - {{ boleto.ruta_resumida }}</p>
                         </div>
                     </div>
                     {% endfor %}

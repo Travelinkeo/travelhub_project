@@ -4,7 +4,7 @@ from decimal import Decimal
 from django.db.models import Sum
 from django.utils import timezone
 
-from apps.bookings.models import BoletoImportado, ItemVenta, ProductoServicio, Venta
+from apps.bookings.models import BoletoImportado, FeeVenta, ItemVenta, ProductoServicio, Venta
 from apps.common.models import Moneda
 from apps.crm.models import Cliente
 
@@ -162,13 +162,37 @@ class VentaBuilderService:
             },
         )
 
+        # 4. Manejo y registro del Fee de Agencia
+        fee_monto = Decimal(
+            str(
+                datos.get("fee_servicio")
+                or datos.get("FEE_AGENCIA")
+                or (boleto.fee_servicio if boleto else 0)
+                or 0
+            )
+        )
+        if fee_monto > 0:
+            FeeVenta.objects.update_or_create(
+                venta=venta,
+                descripcion=f"Fee de Emisión / Servicio - Boleto {num_boleto}",
+                defaults={
+                    "monto": fee_monto,
+                    "moneda": venta.moneda,
+                    "tipo_fee": "EMI",
+                    "agencia": venta.agencia,
+                },
+            )
+
     @staticmethod
     def _recalcular_total_venta(venta: Venta):
-        """Recalcula el total de la venta basado en sus items."""
-        total_real = ItemVenta.objects.filter(venta=venta).aggregate(Sum("total_item_venta"))[
+        """Recalcula el total de la venta basado en sus items y fees."""
+        total_items = ItemVenta.objects.filter(venta=venta).aggregate(Sum("total_item_venta"))[
             "total_item_venta__sum"
         ] or Decimal("0.00")
-        venta.total_venta = total_real
+        total_fees = FeeVenta.objects.filter(venta=venta, is_deleted=False).aggregate(Sum("monto"))[
+            "monto__sum"
+        ] or Decimal("0.00")
+        venta.total_venta = total_items + total_fees
         venta.save(update_fields=["total_venta"])
 
     @staticmethod

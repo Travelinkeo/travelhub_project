@@ -206,8 +206,9 @@ class AnalyticsService:
             # Intentar extraer código de aerolínea para el logo
             aero_codigo = None
             if b.numero_boleto and len(b.numero_boleto) >= 3:
-                # Opcional: Mapeo de prefijos numéricos a IATA (simplificado)
                 prefijos = {
+                    "782": "QL",
+                    "067": "ES",
                     "134": "AV",
                     "230": "CM",
                     "045": "LA",
@@ -215,11 +216,47 @@ class AnalyticsService:
                     "057": "AF",
                     "074": "KL",
                     "239": "AT",
+                    "075": "IB",
+                    "996": "UX",
+                    "235": "TK",
+                    "020": "LH",
+                    "080": "TP",
+                    "850": "V0",
+                    "880": "T9",
+                    "840": "VN",
+                    "920": "RUT",
+                    "921": "RUT",
                 }
-                aero_codigo = prefijos.get(b.numero_boleto[:3])
+                aero_codigo = prefijos.get(str(b.numero_boleto)[:3])
+
+            if not aero_codigo and b.aerolinea_emisora:
+                name_upper = b.aerolinea_emisora.upper()
+                if "LASER" in name_upper:
+                    aero_codigo = "QL"
+                elif "ESTELAR" in name_upper:
+                    aero_codigo = "ES"
+                elif "RUTAS" in name_upper or "RUTACA" in name_upper:
+                    aero_codigo = "RUT"
+                elif "TURPIAL" in name_upper:
+                    aero_codigo = "T9"
+                elif "AVIANCA" in name_upper:
+                    aero_codigo = "AV"
+                elif "COPA" in name_upper:
+                    aero_codigo = "CM"
+                elif "IBERIA" in name_upper:
+                    aero_codigo = "IB"
+                elif "EUROPA" in name_upper:
+                    aero_codigo = "UX"
+                elif "AMERICAN" in name_upper:
+                    aero_codigo = "AA"
+                elif "LATAM" in name_upper or "LAN" in name_upper:
+                    aero_codigo = "LA"
+                elif "TURKISH" in name_upper:
+                    aero_codigo = "TK"
+                elif "CONVIASA" in name_upper:
+                    aero_codigo = "V0"
 
             if not aero_codigo and b.datos_parseados:
-                # Intentar desde los segmentos
                 try:
                     import json
 
@@ -227,14 +264,14 @@ class AnalyticsService:
                     if isinstance(datos, str):
                         datos = json.loads(datos)
                     segmentos = datos.get("segmentos", [])
-                    if segmentos and "vuelo" in segmentos[0]:
+                    if segmentos and isinstance(segmentos, list) and "vuelo" in segmentos[0]:
                         import re
 
                         match = re.match(r"^([A-Z0-9]{2,3})", str(segmentos[0]["vuelo"]))
                         if match:
                             aero_codigo = match.group(1)
                 except Exception as e:
-                    logger.warning(
+                    logger.debug(
                         f"No se pudo extraer codigo IATA desde segmentos para boleto {b.pk}: {e}"
                     )
 

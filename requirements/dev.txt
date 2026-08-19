@@ -18,7 +18,7 @@ ruff==0.11.2
 black==24.4.2
 isort==5.13.2
 flake8==7.0.0
-pre-commit==4.2.0
+pre-commit==4.6.1
 
 # --- Type Checking ---
 mypy==1.11.0

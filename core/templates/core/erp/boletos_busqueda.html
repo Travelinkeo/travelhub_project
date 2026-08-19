@@ -176,6 +176,18 @@
         return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase();
     }
 
+    function extractPlaceName(val) {
+        if (!val) return '';
+        if (typeof val === 'object') {
+            val = val.ciudad || val.CIUDAD || val.codigo_iata || val.iata || val.name || '';
+        }
+        let str = String(val).trim();
+        if (str.includes(',')) {
+            str = str.split(',')[0].trim();
+        }
+        return str.toUpperCase();
+    }
+
     function formatRuta(raw) {
         if (!raw) return '--';
         if (typeof raw === 'string' && (raw.startsWith('[') || raw.startsWith('{'))) {
@@ -184,12 +196,16 @@
                 if (Array.isArray(parsed) && parsed.length > 0) {
                     const legs = [];
                     parsed.forEach(seg => {
-                        const orig = seg.codigo_iata_origen || seg.origen || '';
-                        const dest = seg.codigo_iata_destino || seg.destino || '';
+                        if (!seg || typeof seg !== 'object') return;
+                        const aero = String(seg.aerolinea || '').toLowerCase();
+                        if (aero.includes('equipaje') || aero.includes('baggage')) return;
+
+                        const orig = seg.codigo_iata_origen || seg.iata_origen || extractPlaceName(seg.origen || seg.ORIGEN);
+                        const dest = seg.codigo_iata_destino || seg.iata_destino || extractPlaceName(seg.destino || seg.DESTINO);
                         if (orig && (legs.length === 0 || legs[legs.length - 1] !== orig)) {
                             legs.push(orig);
                         }
-                        if (dest) {
+                        if (dest && (legs.length === 0 || legs[legs.length - 1] !== dest)) {
                             legs.push(dest);
                         }
                     });
@@ -202,7 +218,20 @@
             }
         }
         if (typeof raw === 'string') {
-            return raw.replace(/[-–—>]/g, ' ➔ ').trim();
+            if (raw.toUpperCase().includes('CIUDAD')) {
+                const matches = [...raw.matchAll(/['"](?:ciudad|CIUDAD)['"]\s*:\s*['"]([^,'"]+)/gi)];
+                if (matches.length > 0) {
+                    const legs = [];
+                    matches.forEach(m => {
+                        const name = m[1].trim().toUpperCase();
+                        if (name && (legs.length === 0 || legs[legs.length - 1] !== name)) {
+                            legs.push(name);
+                        }
+                    });
+                    if (legs.length > 0) return legs.join(' ➔ ');
+                }
+            }
+            return raw.replace(/[-–—>]+/g, ' ➔ ').trim();
         }
         return String(raw);
     }

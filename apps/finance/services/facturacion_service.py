@@ -14,30 +14,86 @@ from apps.finance.services.bcv_service import obtener_tasa_bcv_resiliente
 logger = logging.getLogger(__name__)
 
 
-def obtener_itinerario_limpio(ruta_vuelo):
-    """obtener_itinerario_limpio."""
-    if not ruta_vuelo:
+def _extract_clean_city_name(val):
+    """Extrae el nombre limpio de ciudad o código IATA de un valor/objeto."""
+    if not val:
         return ""
+    if isinstance(val, dict):
+        val = (
+            val.get("ciudad")
+            or val.get("CIUDAD")
+            or val.get("codigo_iata")
+            or val.get("iata")
+            or val.get("name")
+            or ""
+        )
+    val_str = str(val).strip()
+    if "," in val_str:
+        val_str = val_str.split(",")[0].strip()
+    return val_str.upper()
+
+
+def obtener_itinerario_limpio(ruta_vuelo):
+    """
+    Normaliza y formatea cualquier itinerario de vuelos (JSON, Dicts Sabre, KIU o texto plano)
+    a una representación limpia tipo 'ORIGEN ➔ DESTINO'.
+    """
+    if not ruta_vuelo:
+        return "--"
+    import json
+    import re
+
     ruta_vuelo_str = str(ruta_vuelo).strip()
     if ruta_vuelo_str.startswith("[") or ruta_vuelo_str.startswith("{"):
-        import json
-
         try:
             segments = json.loads(ruta_vuelo_str)
             if isinstance(segments, list):
                 route_parts = []
                 for seg in segments:
-                    orig = seg.get("codigo_iata_origen") or seg.get("origen")
-                    dest = seg.get("codigo_iata_destino") or seg.get("destino")
-                    if orig and (not route_parts or route_parts[-1] != orig):
-                        route_parts.append(str(orig))
-                    if dest:
-                        route_parts.append(str(dest))
+                    if not isinstance(seg, dict):
+                        continue
+                    aero = str(seg.get("aerolinea") or "").lower()
+                    if "equipaje" in aero or "baggage" in aero:
+                        continue
+
+                    orig = (
+                        seg.get("codigo_iata_origen")
+                        or seg.get("iata_origen")
+                        or _extract_clean_city_name(seg.get("origen") or seg.get("ORIGEN"))
+                    )
+                    dest = (
+                        seg.get("codigo_iata_destino")
+                        or seg.get("iata_destino")
+                        or _extract_clean_city_name(seg.get("destino") or seg.get("DESTINO"))
+                    )
+
+                    orig_clean = str(orig).strip().upper() if orig else ""
+                    dest_clean = str(dest).strip().upper() if dest else ""
+
+                    if orig_clean and (not route_parts or route_parts[-1] != orig_clean):
+                        route_parts.append(orig_clean)
+                    if dest_clean and (not route_parts or route_parts[-1] != dest_clean):
+                        route_parts.append(dest_clean)
                 if route_parts:
-                    return "-".join(route_parts)
-        except (AttributeError, TypeError, KeyError):
-            pass
-    return ruta_vuelo_str
+                    return " ➔ ".join(route_parts)
+        except Exception as e_json:
+            logger.debug(f"No se pudo parsear ruta_vuelo como JSON: {e_json}")
+
+    if "CIUDAD" in ruta_vuelo_str.upper():
+        ciudades = re.findall(
+            r"['\"](?:ciudad|CIUDAD)['\"]\s*:\s*['\"]([^,'\"]+)", ruta_vuelo_str, re.IGNORECASE
+        )
+        if ciudades:
+            cleaned = []
+            for c in ciudades:
+                c_clean = c.strip().upper()
+                if c_clean and (not cleaned or cleaned[-1] != c_clean):
+                    cleaned.append(c_clean)
+            if cleaned:
+                return " ➔ ".join(cleaned)
+
+    clean_str = re.sub(r"\s*[-–—>]+\s*", " ➔ ", ruta_vuelo_str).strip()
+    return clean_str or "--"
 
 
 class FacturacionService:

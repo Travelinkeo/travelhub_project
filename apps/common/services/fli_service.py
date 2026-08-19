@@ -111,77 +111,144 @@ class FliFlightService:
             except Exception as e:
                 logger.warning(f"Error al pre-cargar tasa BCV: {e}")
 
-            # 5. Mapear resultados
+            # 5. Mapear resultados con estructura profesional de trayectos
             vuelos_procesados = []
             for res in results:
-                # fli retorna una tupla de vuelos para ROUND_TRIP o MULTI_CITY
                 itinerario = list(res) if isinstance(res, tuple | list) else [res]
-
                 if not itinerario:
                     continue
 
-                # El precio suele estar en el primer objeto del itinerario o ser común
                 first_f = itinerario[0]
                 total_price = getattr(first_f, "price", 0)
                 currency = getattr(first_f, "currency", "USD")
 
-                # Filtro por aerolínea basado en el primer tramo
-                leg_principal = first_f.legs[0]
+                # Primer tramo para información general de aerolínea
+                first_leg_overall = first_f.legs[0] if first_f.legs else None
+                if not first_leg_overall:
+                    continue
+
                 airline_name = (
-                    leg_principal.airline.name
-                    if hasattr(leg_principal.airline, "name")
-                    else "Desconocida"
+                    first_leg_overall.airline.name
+                    if hasattr(first_leg_overall.airline, "name")
+                    else "Aerolínea"
+                )
+                airline_code = (
+                    first_leg_overall.airline.value
+                    if hasattr(first_leg_overall.airline, "value")
+                    else "YY"
                 )
 
                 if (
                     airline_filter
                     and airline_filter.lower() not in airline_name.lower()
-                    and airline_filter.upper()
-                    not in (
-                        leg_principal.airline.value
-                        if hasattr(leg_principal.airline, "value")
-                        else ""
-                    )
+                    and airline_filter.upper() not in airline_code
                 ):
                     continue
 
-                # Conversión de moneda optimizada
-                display_price = f"{total_price} {currency}"
-                if currency == "VES" and tasa_ves_usd > 0:
-                    precio_usd = round(float(Decimal(str(total_price)) / tasa_ves_usd), 2)
-                    display_price = f"{precio_usd} USD"
-                elif currency == "USD":
-                    display_price = f"{total_price} USD"
+                # Conversión de moneda
+                display_price = f"{total_price:,.2f} {currency}"
+                precio_ves_str = None
+                if currency == "USD" and tasa_ves_usd > 0:
+                    try:
+                        monto_ves = Decimal(str(total_price)) * tasa_ves_usd
+                        precio_ves_str = f"Bs. {monto_ves:,.2f}"
+                    except Exception as err:
+                        logger.debug(f"Error al calcular monto VES: {err}")
+                elif currency == "VES" and tasa_ves_usd > 0:
+                    try:
+                        monto_usd = Decimal(str(total_price)) / tasa_ves_usd
+                        display_price = f"{monto_usd:,.2f} USD"
+                        precio_ves_str = f"Bs. {total_price:,.2f}"
+                    except Exception as err:
+                        logger.debug(f"Error al calcular monto USD: {err}")
 
-                # Extraer TODOS los tramos de TODOS los vuelos del itinerario
-                tramos_data = []
-                for f_obj in itinerario:
-                    for leg in f_obj.legs:
-                        tramos_data.append(
-                            {
-                                "vuelo": leg.flight_number,
-                                "aerolinea": leg.airline.name
-                                if hasattr(leg.airline, "name")
-                                else "YY",
-                                "origen": leg.departure_airport.name,
-                                "destino": leg.arrival_airport.name,
-                                "salida": leg.departure_datetime.strftime("%d/%m/%Y %H:%M"),
-                                "aerolinea_codigo": leg.airline.value
-                                if hasattr(leg.airline, "value")
-                                else "YY",
-                            }
-                        )
+                # Procesar cada trayecto (Ida / Vuelta / Multidestino)
+                trayectos_list = []
+                for idx, f_obj in enumerate(itinerario):
+                    if not f_obj.legs:
+                        continue
+
+                    first_l = f_obj.legs[0]
+                    last_l = f_obj.legs[-1]
+
+                    # Tipo de trayecto
+                    if len(itinerario) == 2:
+                        trayecto_tipo = "Ida" if idx == 0 else "Vuelta"
+                    elif len(itinerario) > 2:
+                        trayecto_tipo = f"Tramo {idx + 1}"
+                    else:
+                        trayecto_tipo = "Vuelo"
+
+                    # Duración total calculada
+                    duracion_mins = sum(getattr(leg, "duration", 0) or 0 for leg in f_obj.legs)
+                    horas = duracion_mins // 60
+                    mins = duracion_mins % 60
+                    duracion_str = f"{horas}h {mins:02d}m" if horas > 0 else f"{mins}m"
+
+                    # Escalas
+                    num_escalas = len(f_obj.legs) - 1
+                    if num_escalas == 0:
+                        escalas_label = "Directo"
+                        escalas_badge_class = "badge-success"
+                    elif num_escalas == 1:
+                        escalas_label = "1 Escala"
+                        escalas_badge_class = "badge-warning"
+                    else:
+                        escalas_label = f"{num_escalas} Escalas"
+                        escalas_badge_class = "badge-danger"
+
+                    # Códigos IATA y Nombres
+                    orig_code = (
+                        first_l.departure_airport.name
+                        if hasattr(first_l.departure_airport, "name")
+                        else origin_code
+                    )
+                    dest_code = (
+                        last_l.arrival_airport.name
+                        if hasattr(last_l.arrival_airport, "name")
+                        else destination_code
+                    )
+
+                    trayecto_info = {
+                        "tipo": trayecto_tipo,
+                        "origen_codigo": orig_code,
+                        "origen_nombre": getattr(first_l, "departure_airport_name", "")
+                        or orig_code,
+                        "destino_codigo": dest_code,
+                        "destino_nombre": getattr(last_l, "arrival_airport_name", "") or dest_code,
+                        "salida_hora": first_l.departure_datetime.strftime("%H:%M")
+                        if hasattr(first_l, "departure_datetime") and first_l.departure_datetime
+                        else "--:--",
+                        "salida_fecha": first_l.departure_datetime.strftime("%d %b %Y")
+                        if hasattr(first_l, "departure_datetime") and first_l.departure_datetime
+                        else "",
+                        "llegada_hora": last_l.arrival_datetime.strftime("%H:%M")
+                        if hasattr(last_l, "arrival_datetime") and last_l.arrival_datetime
+                        else "--:--",
+                        "llegada_fecha": last_l.arrival_datetime.strftime("%d %b %Y")
+                        if hasattr(last_l, "arrival_datetime") and last_l.arrival_datetime
+                        else "",
+                        "duracion": duracion_str,
+                        "escalas_label": escalas_label,
+                        "escalas_badge_class": escalas_badge_class,
+                        "aerolinea_nombre": first_l.airline.name
+                        if hasattr(first_l.airline, "name")
+                        else airline_name,
+                        "aerolinea_codigo": first_l.airline.value
+                        if hasattr(first_l.airline, "value")
+                        else airline_code,
+                        "vuelo_numero": first_l.flight_number or "",
+                        "avion": getattr(first_l, "aircraft", "") or "",
+                    }
+                    trayectos_list.append(trayecto_info)
 
                 vuelos_procesados.append(
                     {
                         "precio": display_price,
-                        "aerolinea": leg_principal.airline.value
-                        if hasattr(leg_principal.airline, "value")
-                        else "YY",
+                        "precio_ves": precio_ves_str,
+                        "aerolinea": airline_code,
                         "aerolinea_nombre": airline_name,
-                        "tramos": tramos_data,
-                        "ruta": f"{tramos_data[0]['origen']} -> {tramos_data[-1]['destino']}",
-                        "fecha": tramos_data[0]["salida"].split(" ")[0],
+                        "trayectos": trayectos_list,
                         "real": True,
                         "is_round_trip": trip_type == TripType.ROUND_TRIP,
                         "is_multi_city": trip_type == TripType.MULTI_CITY,

@@ -1,95 +1,152 @@
 {% if error %}
-<div class="bg-red-900/50 border border-red-700 text-red-200 p-4 rounded-xl flex items-center gap-3">
-    <svg class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
+<div class="card-base p-6 border-l-4 border-l-rose-500 flex items-center gap-4">
+    <div class="w-12 h-12 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-[24px]">error</span>
+    </div>
     <div>
-        <p class="font-bold">Error en la búsqueda</p>
-        <p class="text-sm">{{ error }}</p>
+        <h3 class="text-sm font-black text-text-main uppercase tracking-wider">Error en la búsqueda</h3>
+        <p class="text-xs text-text-muted mt-1">{{ error }}</p>
     </div>
 </div>
 {% elif results %}
-<div class="flex justify-between items-center mb-6">
-    <h2 class="text-xl font-bold text-white flex items-center gap-3">
-        <span class="p-1 px-2 bg-primary/20 text-primary rounded text-xs uppercase">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 pb-4 border-b border-border-color">
+    <div class="flex items-center gap-3">
+        <span class="px-2.5 py-1 bg-primary/15 text-primary border border-primary/20 rounded-md text-xs font-black uppercase tracking-wider">
             {% if search_params.trip_type == 'ROUND_TRIP' %}Ida y Vuelta
             {% elif search_params.trip_type == 'MULTI_CITY' %}Multidestino
             {% else %}Solo Ida{% endif %}
         </span>
-        {{ search_params.origin }} 
-        <span class="material-symbols-outlined text-gray-500">trending_flat</span>
-        {{ search_params.destination }}
-    </h2>
-    <span class="text-sm text-gray-400 font-mono">{{ results|length }} opciones encontradas</span>
+        <h2 class="text-xl sm:text-2xl font-black text-text-main uppercase tracking-tight flex items-center gap-2">
+            <span>{{ search_params.origin }}</span>
+            <span class="material-symbols-outlined text-text-muted text-[20px]">trending_flat</span>
+            <span>{{ search_params.destination }}</span>
+        </h2>
+    </div>
+    <span class="text-xs font-bold text-text-muted bg-surface-2 px-3 py-1.5 rounded-lg border border-border-color">
+        {{ results|length }} opciones encontradas
+    </span>
 </div>
 
-<div class="grid grid-cols-1 gap-5">
+<div class="space-y-4">
     {% for flight in results %}
-    <div class="bg-surface-2 border border-border-color hover:border-primary/50 rounded-xl p-6 transition-all hover:shadow-xl group relative overflow-hidden">
-        
-        <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
-            <!-- Aerolínea y Ruta -->
-            <div class="flex-1 w-full">
-                <div class="flex items-center gap-3 mb-3">
-                    <span class="bg-surface-3 px-2 py-1 rounded text-[11px] font-bold text-text-main border border-border-color">
-                        {{ flight.aerolinea }}
-                    </span>
-                    <span class="text-xs text-text-secondary font-semibold">{{ flight.aerolinea_nombre }}</span>
-                    {% if flight.real %}
-                    <span class="ml-auto md:ml-0 bg-status-success-bg text-status-success px-2 py-0.5 rounded text-[9px] font-black border border-status-success border-opacity-20 uppercase tracking-widest">
-                        LIVE DATA
-                    </span>
-                    {% endif %}
+    <div class="card-base p-5 transition-all hover:border-primary/50 hover:shadow-lg group">
+        <!-- Card Header -->
+        <div class="flex items-center justify-between border-b border-border-color pb-3 mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary font-black text-xs flex items-center justify-center border border-primary/20">
+                    {{ flight.aerolinea|default:"FL" }}
                 </div>
-                
-                <div class="space-y-3">
-                    {% for tramo in flight.tramos %}
-                    <div class="flex items-center gap-4 p-3 bg-surface-base/50 rounded-xl border border-border-color/30 hover:border-primary/30 transition-colors">
-                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-primary text-xl">
-                                {% if forloop.first %}flight_takeoff{% elif forloop.last and flight.is_round_trip %}flight_land{% else %}sync_alt{% endif %}
-                            </span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-start">
-                                <span class="text-sm font-black text-text-main tracking-tight uppercase">{{ tramo.origen }} <span class="text-primary mx-1">→</span> {{ tramo.destino }}</span>
-                                <span class="bg-surface-3 px-1.5 py-0.5 rounded text-[9px] font-bold text-text-muted border border-border-color">{{ tramo.vuelo }}</span>
-                            </div>
-                            <div class="flex justify-between items-center mt-1">
-                                <span class="text-[10px] text-text-secondary font-medium truncate italic">{{ tramo.aerolinea }}</span>
-                                <span class="text-[10px] text-primary font-black font-mono">{{ tramo.salida }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
+                <div>
+                    <h4 class="text-sm font-black text-text-main leading-tight">{{ flight.aerolinea_nombre }}</h4>
+                    <p class="text-[11px] text-text-muted">Tarifa confirmada en vivo</p>
                 </div>
             </div>
+            <div class="flex items-center gap-2">
+                <span class="badge-success text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Google Flights Live
+                </span>
+                <span class="bg-surface-2 text-text-muted px-2.5 py-1 rounded-md text-[10px] font-bold border border-border-color hidden sm:inline-block">
+                    Clase Turista
+                </span>
+            </div>
+        </div>
 
-            <!-- Divisor móvil -->
-            <div class="w-full h-px bg-border-color md:hidden"></div>
+        <!-- Main Content: Trayectos (left) + Price & Action (right) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <!-- Trayectos Column -->
+            <div class="lg:col-span-8 space-y-3">
+                {% for t in flight.trayectos %}
+                <div class="p-3.5 bg-surface-2/40 rounded-xl border border-border-color hover:border-primary/20 transition-colors">
+                    <div class="flex items-center justify-between text-[11px] mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider
+                                {% if t.tipo == 'Ida' %}bg-primary/15 text-primary border border-primary/20
+                                {% elif t.tipo == 'Vuelta' %}bg-blue-500/15 text-blue-500 border border-blue-500/20
+                                {% else %}bg-purple-500/15 text-purple-500 border border-purple-500/20{% endif %}">
+                                {{ t.tipo }}
+                            </span>
+                            <span class="text-text-muted font-bold">{{ t.salida_fecha }}</span>
+                            {% if t.vuelo_numero %}
+                            <span class="text-text-muted font-mono font-semibold">• Vuelo {{ t.aerolinea_codigo }} {{ t.vuelo_numero }}</span>
+                            {% endif %}
+                        </div>
+                        {% if t.avion %}
+                        <span class="text-text-muted text-[10px] font-medium hidden sm:inline-block">{{ t.avion }}</span>
+                        {% endif %}
+                    </div>
 
-            <!-- Precio y Acción -->
-            <div class="text-right flex flex-col items-center md:items-end w-full md:w-auto">
-                <span class="text-[10px] text-text-muted font-bold uppercase tracking-widest mb-1">Total por pasajero</span>
-                <span class="text-3xl font-black text-primary font-display">{{ flight.precio }}</span>
+                    <!-- Timeline -->
+                    <div class="grid grid-cols-7 items-center gap-2">
+                        <!-- Departure -->
+                        <div class="col-span-2 text-left">
+                            <p class="text-lg sm:text-xl font-black text-text-main tracking-tight font-mono">{{ t.salida_hora }}</p>
+                            <p class="text-xs font-bold text-text-main uppercase">{{ t.origen_codigo }}</p>
+                            <p class="text-[10px] text-text-muted truncate" title="{{ t.origen_nombre }}">{{ t.origen_nombre }}</p>
+                        </div>
 
-                <button class="mt-4 w-full md:w-auto btn-primary px-8 text-xs">
-                    Seleccionar Oferta
-                </button>
+                        <!-- Visual Route Center -->
+                        <div class="col-span-3 flex flex-col items-center justify-center px-1">
+                            <span class="text-[10px] text-text-muted font-bold mb-1">{{ t.duracion }}</span>
+                            <div class="w-full flex items-center relative my-0.5">
+                                <div class="w-2 h-2 rounded-full bg-primary/40"></div>
+                                <div class="flex-1 h-0.5 bg-border-color relative">
+                                    <span class="material-symbols-outlined text-primary text-[14px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-90">flight</span>
+                                </div>
+                                <div class="w-2 h-2 rounded-full bg-primary"></div>
+                            </div>
+                            <span class="text-[10px] font-bold mt-1 text-emerald-600 dark:text-emerald-400">
+                                {{ t.escalas_label }}
+                            </span>
+                        </div>
+
+                        <!-- Arrival -->
+                        <div class="col-span-2 text-right">
+                            <p class="text-lg sm:text-xl font-black text-text-main tracking-tight font-mono">{{ t.llegada_hora }}</p>
+                            <p class="text-xs font-bold text-text-main uppercase">{{ t.destino_codigo }}</p>
+                            <p class="text-[10px] text-text-muted truncate" title="{{ t.destino_nombre }}">{{ t.destino_nombre }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                {% for tramo in flight.tramos %}
+                <div class="p-3 bg-surface-2/40 rounded-xl border border-border-color">
+                    <p class="text-sm font-bold text-text-main">{{ tramo.origen }} → {{ tramo.destino }} • {{ tramo.salida }}</p>
+                </div>
+                {% endfor %}
+                {% endfor %}
+            </div>
+
+            <!-- Price & CTA Column -->
+            <div class="lg:col-span-4 border-t lg:border-t-0 lg:border-l border-border-color pt-4 lg:pt-0 lg:pl-6 flex flex-col items-center lg:items-end justify-center text-center lg:text-right">
+                <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-0.5">Total por pasajero</p>
+                <p class="text-2xl sm:text-3xl font-black text-text-main font-mono tracking-tight">{{ flight.precio }}</p>
+                {% if flight.precio_ves %}
+                <p class="text-xs font-bold text-primary mt-0.5 font-mono">{{ flight.precio_ves }}</p>
+                {% endif %}
+                <p class="text-[10px] text-text-muted mt-1 font-medium">Tasas e impuestos incluidos</p>
+
+                <a href="{% url 'core:cotizacion_nueva' %}?destino={{ search_params.destination }}&descripcion=Vuelo+{{ flight.aerolinea_nombre|urlencode }}+{{ search_params.origin }}+a+{{ search_params.destination }}"
+                   class="btn-primary !h-10 !px-6 text-xs uppercase tracking-wider shadow-lg shadow-primary/20 w-full sm:w-auto mt-4 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[16px]">add_shopping_cart</span>
+                    Cotizar Oferta
+                </a>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
 
-<p class="text-xs text-center text-gray-500 mt-6">
-    * Precios referenciales sujetos a disponibilidad en tiempo real.
+<p class="text-xs text-center text-text-muted mt-6 font-medium">
+    * Tarifas y disponibilidad sujetas a confirmación en el momento de la emisión.
 </p>
 
 {% else %}
-<div class="text-center py-12 bg-slate-800/30 rounded-xl border border-dashed border-slate-700">
-    <p class="text-gray-400 text-lg">No se encontraron vuelos para esta ruta/fecha.</p>
-    <p class="text-gray-500 text-sm mt-2">Intenta con otra fecha o destino.</p>
+<div class="card-base text-center py-16">
+    <div class="w-16 h-16 bg-surface-2 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-border-color">
+        <span class="material-symbols-outlined text-[32px] text-text-muted">flight_takeoff</span>
+    </div>
+    <h3 class="text-lg font-black text-text-main uppercase tracking-tight mb-2">No se encontraron vuelos</h3>
+    <p class="text-sm text-text-muted max-w-sm mx-auto">No hay combinaciones directas o con escalas disponibles para las fechas o ruta seleccionada. Intenta con otra fecha o aeropuerto.</p>
 </div>
 {% endif %}

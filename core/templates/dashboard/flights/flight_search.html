@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="min-h-screen bg-surface-base text-text-main p-6 font-sans">
-    
+
     <!-- Header -->
     <div class="mb-8 p-6 border-b border-border-color">
         <h1 class="text-3xl font-black text-text-main tracking-tight flex items-center gap-3">
@@ -16,18 +16,18 @@
     </div>
 
     <!-- Buscador -->
-    <div class="card-base p-8 mb-10 relative overflow-hidden" x-data="{ 
+    <div class="card-base p-8 mb-10 relative overflow-hidden" x-data="{
         tripType: 'ONE_WAY',
         segments: [{id: 1, origin: '', destination: '', date: ''}]
     }">
         <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-        
-        <form hx-post="{% url 'core:flight_search' %}" 
-              hx-target="#flight-results" 
+
+        <form hx-post="{% url 'core:flight_search' %}"
+              hx-target="#flight-results"
               hx-indicator="#loading-indicator"
               class="relative z-10 space-y-6">
             {% csrf_token %}
-            
+
             <!-- Trip Type & Filters -->
             <div class="flex flex-wrap gap-4 mb-4 items-center">
                 <div class="flex gap-2">
@@ -69,7 +69,7 @@
                 <!-- Aerolínea (Busca por texto) -->
                 <div class="relative">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-sm">flight</span>
-                    <input type="text" name="airline_filter" placeholder="Aerolínea (opcional)" 
+                    <input type="text" name="airline_filter" placeholder="Aerolínea (opcional)"
                            class="bg-surface-2 border border-border-color rounded-lg pl-9 pr-3 py-2 text-xs text-text-main focus:ring-1 focus:ring-primary outline-none w-48">
                 </div>
             </div>
@@ -77,49 +77,52 @@
             <!-- Segments Container -->
             <div class="space-y-4">
                 <!-- Segment 1 (Always visible) -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-                    <div class="flex flex-col gap-2">
-                        <label class="text-xs font-bold text-text-muted uppercase tracking-widest">Origen</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+                    <!-- Origen -->
+                    <div :class="tripType === 'ROUND_TRIP' ? 'lg:col-span-3' : 'lg:col-span-3'">
+                        <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Origen (IATA)</label>
                         <div class="relative">
-                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">location_on</span>
+                            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">flight_takeoff</span>
                             <input type="text" name="origin" placeholder="Ej: CCS" required maxlength="3"
-                                   class="input-base pl-12 uppercase font-mono">
+                                   class="input-base !pl-10 uppercase font-mono font-bold">
                         </div>
                     </div>
 
-                    <div class="flex flex-col gap-2">
-                        <label class="text-xs font-bold text-text-muted uppercase tracking-widest">Destino</label>
+                    <!-- Destino -->
+                    <div :class="tripType === 'ROUND_TRIP' ? 'lg:col-span-3' : 'lg:col-span-3'">
+                        <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Destino (IATA)</label>
                         <div class="relative">
-                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">flight_land</span>
+                            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">flight_land</span>
                             <input type="text" name="destination" placeholder="Ej: MAD" required maxlength="3"
-                                   class="input-base pl-12 uppercase font-mono">
+                                   class="input-base !pl-10 uppercase font-mono font-bold">
                         </div>
                     </div>
 
-                    <div class="flex flex-col gap-2">
-                        <label class="text-xs font-bold text-text-muted uppercase tracking-widest">Fecha Ida</label>
+                    <!-- Fecha Ida -->
+                    <div :class="tripType === 'ROUND_TRIP' ? 'lg:col-span-2' : 'lg:col-span-3'">
+                        <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Fecha Ida</label>
                         <div class="relative">
-                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">calendar_today</span>
+                            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">calendar_today</span>
                             <input type="date" name="date" required
-                                   class="input-base pl-12">
+                                   class="input-base !pl-10">
                         </div>
                     </div>
 
-                    <!-- Return Date (Only for ROUND_TRIP) -->
-                    <div class="flex flex-col gap-2" x-show="tripType === 'ROUND_TRIP'" x-transition>
-                        <label class="text-xs font-bold text-text-muted uppercase tracking-widest">Fecha Regreso</label>
+                    <!-- Fecha Regreso (Only for ROUND_TRIP) -->
+                    <div class="lg:col-span-2" x-show="tripType === 'ROUND_TRIP'" x-transition>
+                        <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Fecha Regreso</label>
                         <div class="relative">
-                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">event_repeat</span>
+                            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">event_repeat</span>
                             <input type="date" name="return_date" :required="tripType === 'ROUND_TRIP'"
-                                   class="input-base pl-12">
+                                   class="input-base !pl-10">
                         </div>
                     </div>
 
                     <!-- Search Button (For Single Segment/Round Trip) -->
-                    <div x-show="tripType !== 'MULTI_CITY'">
-                        <button type="submit" 
-                                class="w-full btn-primary h-[40px] text-[13px]">
-                            <span class="material-symbols-outlined text-base">search</span>
+                    <div :class="tripType === 'ROUND_TRIP' ? 'lg:col-span-2' : 'lg:col-span-3'" x-show="tripType !== 'MULTI_CITY'">
+                        <button type="submit"
+                                class="w-full btn-primary !h-[42px] text-xs font-bold uppercase tracking-wider shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]">search</span>
                             Buscar Vuelos
                         </button>
                     </div>
@@ -160,7 +163,7 @@
                                 <span class="material-symbols-outlined text-base">add</span>
                                 Agregar Tramo
                             </button>
-                            <button type="submit" 
+                            <button type="submit"
                                     class="btn-primary h-[40px] text-[13px] px-8">
                                 <span class="material-symbols-outlined text-base">search</span>
                                 Buscar Ruta Completa

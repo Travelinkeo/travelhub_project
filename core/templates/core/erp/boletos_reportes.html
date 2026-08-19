@@ -209,11 +209,29 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js" nonce="{{ request.csp_nonce }}"></script>
 <script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', function() {
-        const stats = JSON.parse(document.getElementById('stats-data').textContent);
+        let stats = null;
+        try {
+            const el = document.getElementById('stats-data');
+            if (el) {
+                stats = JSON.parse(el.textContent);
+                if (typeof stats === 'string') {
+                    stats = JSON.parse(stats);
+                }
+            }
+        } catch (e) {
+            console.warn("No se pudieron parsear datos de gráficas:", e);
+        }
+
+        if (!stats) {
+            stats = {
+                aerolineas: { labels: [], data: [] },
+                evolucion: { labels: [], comisiones: [], ventas: [] }
+            };
+        }
 
         // 1. Gráfica de Aerolíneas (Doughnut)
         const ctxAero = document.getElementById('chartAerolineas');
-        if (ctxAero) {
+        if (ctxAero && stats.aerolineas && stats.aerolineas.labels && stats.aerolineas.labels.length > 0) {
             new Chart(ctxAero, {
                 type: 'doughnut',
                 data: {
@@ -234,7 +252,7 @@
                         legend: {
                             position: 'bottom',
                             labels: {
-                                padding: 20,
+                                padding: 16,
                                 usePointStyle: true,
                                 font: { size: 10, weight: 'bold', family: 'Inter' },
                                 color: '#6B7280'
@@ -248,24 +266,24 @@
 
         // 2. Gráfica de Evolución (Line)
         const ctxEvo = document.getElementById('chartEvolucion');
-        if (ctxEvo) {
+        if (ctxEvo && stats.evolucion && stats.evolucion.labels && stats.evolucion.labels.length > 0) {
             new Chart(ctxEvo, {
                 type: 'line',
                 data: {
                     labels: stats.evolucion.labels,
                     datasets: [
                         {
-                            label: 'Ventas Totales',
+                            label: 'Ventas Totales ($)',
                             data: stats.evolucion.ventas,
                             borderColor: '#4F46E5',
-                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            backgroundColor: 'rgba(79, 70, 229, 0.08)',
                             fill: true,
                             tension: 0.4,
-                            pointRadius: 4,
+                            pointRadius: 5,
                             pointBackgroundColor: '#4F46E5'
                         },
                         {
-                            label: 'Comisiones',
+                            label: 'Comisiones ($)',
                             data: stats.evolucion.comisiones,
                             borderColor: '#10B981',
                             backgroundColor: 'transparent',

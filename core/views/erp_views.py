@@ -1,5 +1,3 @@
-import json
-
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Q
 from django.http import HttpResponse
@@ -219,10 +217,8 @@ class BoletosReportesView(SaaSMixin, LoginRequiredMixin, TemplateView):
                 "boletos": reporte["boletos"],
                 "por_aerolinea": reporte["por_aerolinea"],
                 "filtro_aerolinea": aerolinea,
-                "stats_graficas": json.dumps(
-                    AnalyticsService.get_stats_graficas_boletos(
-                        agencia=agencia, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin
-                    )
+                "stats_graficas": AnalyticsService.get_stats_graficas_boletos(
+                    agencia=agencia, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin
                 ),
             }
         )

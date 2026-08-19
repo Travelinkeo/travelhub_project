@@ -371,22 +371,25 @@ class AnalyticsService:
 
         # 1. Top 5 Aerolíneas (Pie/Doughnut Chart)
         top_aero = (
-            qs.values("aerolinea_emisora")
+            qs.exclude(aerolinea_emisora__isnull=True)
+            .exclude(aerolinea_emisora="")
+            .values("aerolinea_emisora")
             .annotate(total=Sum("total_boleto"))
             .order_by("-total")[:5]
         )
 
-        labels_aero = [item["aerolinea_emisora"] or "Desconocida" for item in top_aero]
+        labels_aero = [item["aerolinea_emisora"] for item in top_aero]
         data_aero = [float(item["total"] or 0) for item in top_aero]
 
         # 2. Evolución Mensual de Comisiones (Line/Bar Chart)
-        # Procesamos en Python para evitar problemas con TruncMonth en PostgreSQL
         from collections import OrderedDict
 
         mensual = OrderedDict()
 
-        boletos = qs.filter(fecha_emision_boleto__isnull=False).values(
-            "fecha_emision_boleto", "comision_agencia", "total_boleto"
+        boletos = (
+            qs.filter(fecha_emision_boleto__isnull=False)
+            .order_by("fecha_emision_boleto")
+            .values("fecha_emision_boleto", "comision_agencia", "total_boleto")
         )
 
         for b in boletos:
